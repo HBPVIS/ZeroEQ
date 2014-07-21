@@ -1,0 +1,13 @@
+
+namespace zerobuf;
+
+table Content {
+  name:string;
+  buffer:[ubyte];
+}
+
+table Data {
+  contents:[Content];
+}
+
+root_type Data;

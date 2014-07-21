@@ -1,0 +1,7 @@
+
+namespace zerobuf;
+
+table Exit {
+}
+
+root_type Exit;

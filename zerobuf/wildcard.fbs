@@ -1,0 +1,13 @@
+
+namespace zerobuf;
+
+table Path {
+  name:string;
+}
+
+table Wildcard {
+  paths:[Path];
+}
+
+
+root_type Wildcard;
