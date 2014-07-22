@@ -1,8 +1,8 @@
 
 /* Copyright (c) 2014, BBP/EPFL
- *                     Stefan.Eilemann@epfl.ch
+ *                     Daniel.Nachbaur@epfl.ch
  *
- * This file is part of Hello (https://github.com/BlueBrain/Hello)
+ * This file is part of VisEDA (https://github.com/HBPVIS/VisEDA)
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -34,7 +34,7 @@
 #include <zerobuf/exit_generated.h>
 #include <zerobuf/expand_generated.h>
 #include <zerobuf/wildcard_generated.h>
-#include <zerobuf/version.h>
+#include <viseda/version.h>
 
 #include <lunchbox/file.h>
 #include <lunchbox/memoryMap.h>
@@ -255,7 +255,7 @@ int main( int argc, char *argv[] )
 
     if( vm.count( "version" ))
     {
-        std::cout << "HelloRunner version " << zerobuf::Version::getString()
+        std::cout << "HelloRunner version " << viseda::Version::getString()
                   << std::endl
                   << "Copyright (c) BBP/EPFL 2014." << std::endl;
         return EXIT_SUCCESS;

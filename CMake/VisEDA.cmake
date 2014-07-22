@@ -1,7 +1,7 @@
 
 set(VISEDA_VERSION 0.1)
 set(VISEDA_REPO_URL https://github.com/HBPVIS/VisEDA.git)
-set(VISEDA_DEPENDS REQUIRED libzmq flatbuffers Boost Lunchbox)
+set(VISEDA_DEPENDS REQUIRED libzmq capnproto flatbuffers Boost Lunchbox)
 set(VISEDA_OPTIONAL ON)
 set(VISEDA_BOOST_COMPONENTS "unit_test_framework program_options")
 set(VISEDA_DEB_DEPENDS libboost-test-dev libboost-program-options-dev)

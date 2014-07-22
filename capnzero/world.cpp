@@ -4,16 +4,16 @@
  * All rights reserved. Do not distribute without further notice.
  */
 
-#include <zerobuf/world.h>
+#include <capnzero/world.h>
 #include <viseda/version.h>
 
 #include <iostream>
 
-namespace zerobuf
+namespace capnzero
 {
 void World::greet()
 {
-    std::cout << "Zerobuf world version " << viseda::Version::getRevString()
+    std::cout << "Capnzero world version " << viseda::Version::getRevString()
               << std::endl;
 }
 

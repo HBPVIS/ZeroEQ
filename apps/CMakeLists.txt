@@ -2,4 +2,5 @@
 #                        Stefan.Eilemann@epfl.ch
 # All rights reserved. Do not distribute without further notice.
 
-add_subdirectory(bubble)
+add_subdirectory(capnzero)
+add_subdirectory(zerobuf)
