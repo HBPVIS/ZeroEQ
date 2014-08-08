@@ -56,8 +56,7 @@ BOOST_AUTO_TEST_CASE(wildcard_message_flatbuffers)
     message.Finish( wildcard.Finish( ));
 
     // send
-    uint8_t* data = message.GetBufferPointer();
-    uint64_t size = message.GetSize();
+    const uint8_t* data = message.GetBufferPointer();
 
     // receive
     auto recvWildcard = zerobuf::GetWildcard( data );
@@ -96,4 +95,3 @@ BOOST_AUTO_TEST_CASE(wildcard_message_capnp)
     BOOST_CHECK_EQUAL( std::string(recvWildcard.getPaths()[1]),
                        "world");
 }
-
