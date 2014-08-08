@@ -36,6 +36,7 @@ before_install:
  - sudo apt-get install -qq libboost-test-dev || /bin/true
  - sudo apt-get install -qq libhwloc-dev || /bin/true
  - sudo apt-get install -qq libjpeg-turbo8-dev || /bin/true
+ - sudo apt-get install -qq libleveldb-dev || /bin/true
  - sudo apt-get install -qq libturbojpeg || /bin/true
  - sudo apt-get install -qq ninja-build || /bin/true
  - sudo apt-get install -qq pkg-config || /bin/true

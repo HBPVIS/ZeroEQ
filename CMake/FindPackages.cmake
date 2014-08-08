@@ -150,7 +150,7 @@ if(Lunchbox_name)
   endif()
 endif()
 
-set(VISEDA_BUILD_DEBS autoconf;automake;cmake;doxygen;git;git-review;libavahi-compat-libdnssd-dev;libboost-filesystem-dev;libboost-program-options-dev;libboost-regex-dev;libboost-serialization-dev;libboost-system-dev;libboost-test-dev;libhwloc-dev;libjpeg-turbo8-dev;libturbojpeg;pkg-config;subversion)
+set(VISEDA_BUILD_DEBS autoconf;automake;cmake;doxygen;git;git-review;libavahi-compat-libdnssd-dev;libboost-filesystem-dev;libboost-program-options-dev;libboost-regex-dev;libboost-serialization-dev;libboost-system-dev;libboost-test-dev;libhwloc-dev;libjpeg-turbo8-dev;libleveldb-dev;libturbojpeg;pkg-config;subversion)
 
 set(VISEDA_DEPENDS libzmq;capnproto;flatbuffers;Boost;Lunchbox)
 
