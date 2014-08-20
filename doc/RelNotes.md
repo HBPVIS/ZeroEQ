@@ -1,37 +1,39 @@
-Hello API Documentation {#mainpage}
+ZeroEQ API Documentation {#mainpage}
 ============
 
 [TOC]
 
 # Introduction {#Introduction}
 
-Welcome to Hello, a C++ library and application to rule the world. In
-its spare time it serves as a template for new C++ projects, as detailed
-in the @ref documentation.
+Welcome to ZeroEQ, a cross-platform C++ library to publish and subscribe for
+events.
 
-Hello 1.0 is the first complete release. It can be retrieved by cloning
-the [source code](https://github.com/BlueBrain/Hello).
+ZeroEQ 0.1 is a prototype version. It can be retrieved by cloning the
+[source code](https://github.com/HBPVIS/VisEDA).
 
 ## Features {#Features}
 
-Hello provides the following major features:
+ZeroEQ provides the following major features:
 
-* Rule the world
-* Provide a template for C++ projects
+* Publish events using zeq::Broker
+* Subscribe to events using zeq::Broker
+* Asynchronous, reliable transport using ZMQ
+* Discovery using Zeroconf
+* Serialization of events using flatbuffers
 
 - - -
 
 # New in this release {#New}
 
-Hello 1.0 provides the following features:
+ZeroEQ 0.1 provides the following features:
 
 ## New Features {#NewFeatures}
 
-* @ref documentation
+* Prototype API
 
 ## Enhancements {#Enhancements}
 
-* Integrated CMake subtree using git_external
+* No enhancements
 
 ## Optimizations {#Optimizations}
 
@@ -43,7 +45,7 @@ Hello 1.0 provides the following features:
 
 ## Bug Fixes {#Fixes}
 
-Hello 1.0 includes various bugfixes over the last release, including the
+ZeroEQ 0.1 includes various bugfixes over the last release, including the
 following:
 
 * No bugs
@@ -51,7 +53,7 @@ following:
 ## Known Bugs {#Bugs}
 
 The following bugs were known at release time. Please file a
-[Bug Report](https://github.com/BlueBrain/Hello/issues) if you find any
+[Bug Report](https://github.com/HBPVis/VisEDA/issues) if you find any
 other issue with this release.
 
 * No known bugs
@@ -60,19 +62,13 @@ other issue with this release.
 
 # About {#About}
 
-Hello is a cross-platform toolkit, designed to run on any modern
-operating system, including all Unix variants. Hello uses CMake to
-create a platform-specific build environment. The following platforms
-and build environments are tested:
+ZeroEQ is a cross-platform toolkit, designed to run on any modern operating
+system, including all Unix variants. ZeroEQ uses CMake to create a
+platform-specific build environment. The following platforms and build
+environments are tested:
 
-* Linux: Ubuntu 12.10, 13.04, 13.10 RHEL 6 (Makefile, i386, x64)
-* Mac OS X: 10.8 (Makefile, XCode, i386, x64)
-
-The [API documentation](https://bluebrain.github.io/Hello-1.0/index.html)
-can be found on [bluebrain.github.io] (http://bluebrain.github.io/)
+* Linux: Ubuntu 14.04
 
 - - -
 
 # Errata {#Errata}
-
-* Post-release hot fixes go here

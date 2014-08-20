@@ -29,7 +29,6 @@ before_install:
  - sudo apt-get install -qq lcov || /bin/true
  - sudo apt-get install -qq libavahi-compat-libdnssd-dev || /bin/true
  - sudo apt-get install -qq libboost-filesystem-dev || /bin/true
- - sudo apt-get install -qq libboost-program-options-dev || /bin/true
  - sudo apt-get install -qq libboost-regex-dev || /bin/true
  - sudo apt-get install -qq libboost-serialization-dev || /bin/true
  - sudo apt-get install -qq libboost-system-dev || /bin/true
