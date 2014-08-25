@@ -18,7 +18,7 @@ namespace detail { class Broker; class Event; }
  * Events are published and received via the zeq::Broker. The format of the
  * serialized data is specific to the serialization backend.
  */
-class Event
+class Event : public boost::noncopyable
 {
 public:
     /**
@@ -27,11 +27,8 @@ public:
      */
     explicit Event( const uint64_t type );
 
-    /** @internal */
-    Event( const Event& rhs );
-
-    /** 'move' ctor @internal */
-    Event( Event& rhs );
+    /** Move ctor @internal */
+    Event( Event&& rhs );
 
     ~Event();
 
@@ -51,9 +48,9 @@ private:
     friend class detail::Broker;
     void setData( const void* data, const size_t size );
 
-    const uint64_t _type;
+    Event& operator=( Event&& rhs );
+
     detail::Event* _impl;
-    std::vector< uint8_t > _data;
 };
 
 }

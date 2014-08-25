@@ -10,24 +10,13 @@ namespace zeq
 {
 
 Event::Event( const uint64_t type )
-    : _type( type )
-    , _impl( new detail::Event )
+    : _impl( new detail::Event( type ))
 {}
 
-Event::Event( const Event& rhs )
-    : _type( rhs._type )
-    , _impl( new detail::Event( *rhs._impl))
-    , _data( rhs._data )
-{
-}
-
-Event::Event( Event& rhs )
-    : _type( rhs._type )
-    , _impl( rhs._impl )
-    , _data( rhs._data )
+Event::Event( Event&& rhs )
+    : _impl( rhs._impl )
 {
     rhs._impl = 0;
-    rhs._data.clear();
 }
 
 Event::~Event()
@@ -37,29 +26,22 @@ Event::~Event()
 
 uint64_t Event::getType() const
 {
-    return _type;
+    return _impl->type;
 }
 
 size_t Event::getSize() const
 {
-    if( _impl )
-        return _impl->getSize();
-    return _data.size();
+    return _impl->getSize();
 }
 
 const void* Event::getData() const
 {
-    if( _impl )
-        return _impl->getData();
-    return _data.data();
+    return _impl->getData();
 }
 
 void Event::setData( const void* data, const size_t size )
 {
-    delete _impl;
-    _impl = 0;
-    _data.resize( size );
-    memcpy( _data.data(), data, size );
+    _impl->setData( data, size );
 }
 
 detail::Event* Event::getImpl()

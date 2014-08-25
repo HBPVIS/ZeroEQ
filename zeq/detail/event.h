@@ -19,20 +19,45 @@ namespace detail
 class Event
 {
 public:
-    Event()
+    Event( const uint64_t type_ )
+        : type( type_ )
+    {}
+
+
+    Event( const Event& rhs )
+        : type( rhs.type )
+        , fbb( rhs.fbb )
+        , data( rhs.data )
     {}
 
     size_t getSize() const
     {
+        if( !data.empty( ))
+            return data.size();
         return fbb.GetSize();
     }
 
     const void* getData() const
     {
+        if( !data.empty( ))
+            return data.data();
         return fbb.GetBufferPointer();
     }
 
+    void setData( const void* data_, const size_t size )
+    {
+        fbb.Clear();
+        data.resize( size );
+        memcpy( data.data(), data_, size );
+    }
+
+    const uint64_t type;
+
+    /** store the serialized data in here */
     flatbuffers::FlatBufferBuilder fbb;
+
+    /** setData() uses this instead of fbb during deserialization */
+    std::vector< uint8_t > data;
 };
 
 }

@@ -4,6 +4,7 @@
  */
 
 #include <zeq/zeq.h>
+#include <lunchbox/rng.h>
 #include <lunchbox/uri.h>
 
 #define BOOST_TEST_MODULE zeq
@@ -12,6 +13,16 @@
 
 namespace
 {
+lunchbox::URI buildURI( const std::string& hostname = "" )
+{
+    lunchbox::RNG rng;
+    const unsigned short port = (rng.get<uint16_t>() % 60000) + 1024;
+    std::ostringstream uriStr;
+    uriStr << "foo://" << hostname.empty() ? "localhost" : hostname;
+    uriStr << ":" << port;
+    return lunchbox::URI( uriStr.str( ));
+}
+
 const std::vector< float > camera( 16, 42 );
 
 void onEvent( const zeq::Event& event )
@@ -46,28 +57,30 @@ BOOST_AUTO_TEST_CASE(test_invalid_subscribe)
     zeq::Broker broker;
     BOOST_CHECK( !broker.subscribe( lunchbox::URI( "bar://*" )));
 
-    BOOST_CHECK( broker.subscribe( lunchbox::URI( "foo://localhost:12345" )));
-    BOOST_CHECK( !broker.subscribe( lunchbox::URI( "foo://localhost:12345" )));
+    const lunchbox::URI& uri = buildURI();
+    BOOST_CHECK( broker.subscribe( uri ));
+    BOOST_CHECK( !broker.subscribe( uri ));
 }
 
-BOOST_AUTO_TEST_CASE(test_valid_subscribe)
+BOOST_AUTO_TEST_CASE(test_subscribe)
 {
     zeq::Broker broker;
-    BOOST_CHECK( broker.subscribe( lunchbox::URI( "foo://localhost:12345" )));
+    BOOST_CHECK( broker.subscribe( buildURI( )));
 }
 
-BOOST_AUTO_TEST_CASE(test_valid_unsubscribe)
+BOOST_AUTO_TEST_CASE(test_unsubscribe)
 {
     zeq::Broker broker;
-    BOOST_CHECK( broker.subscribe( lunchbox::URI( "foo://localhost:12345" )));
-    BOOST_CHECK( broker.unsubscribe( lunchbox::URI( "foo://localhost:12345" )));
+    const lunchbox::URI& uri = buildURI();
+    BOOST_CHECK( broker.subscribe( uri ));
+    BOOST_CHECK( broker.unsubscribe( uri ));
 }
 
 BOOST_AUTO_TEST_CASE(test_invalid_unsubscribe)
 {
     zeq::Broker broker;
-    BOOST_CHECK( broker.subscribe( lunchbox::URI( "foo://localhost:12345" )));
-    BOOST_CHECK( !broker.unsubscribe( lunchbox::URI( "foo://localhost:12346")));
+    BOOST_CHECK( broker.subscribe( buildURI( )));
+    BOOST_CHECK( !broker.unsubscribe( buildURI( )));
 }
 
 BOOST_AUTO_TEST_CASE(test_invalid_publish)
@@ -80,7 +93,7 @@ BOOST_AUTO_TEST_CASE(test_invalid_publish)
 
 BOOST_AUTO_TEST_CASE(test_publish)
 {
-    zeq::Broker broker( lunchbox::URI( "foo://*:12345" ));
+    zeq::Broker broker( lunchbox::URI( buildURI( "*" )));
     BOOST_CHECK( broker.publish( zeq::vocabulary::serializeCamera( camera)));
 }
 
@@ -120,13 +133,16 @@ BOOST_AUTO_TEST_CASE(test_invalid_deregisterhandler)
 
 BOOST_AUTO_TEST_CASE(test_publish_receive)
 {
+    lunchbox::RNG rng;
+    const unsigned short port = (rng.get<uint16_t>() % 60000) + 1024;
+    const std::string& portStr = boost::lexical_cast< std::string >( port );
     zeq::Broker subscriber;
     BOOST_CHECK(
-               subscriber.subscribe( lunchbox::URI( "foo://localhost:12345" )));
+          subscriber.subscribe( lunchbox::URI( "foo://localhost:" + portStr )));
     BOOST_CHECK( subscriber.registerHandler( zeq::vocabulary::EVENT_CAMERA,
                                              boost::bind( &onEvent, _1 )));
 
-    zeq::Broker publisher( lunchbox::URI( "foo://*:12345" ));
+    zeq::Broker publisher( lunchbox::URI( "foo://*:" + portStr ));
 
     bool received = false;
     for( size_t i = 0; i < 10; ++i )

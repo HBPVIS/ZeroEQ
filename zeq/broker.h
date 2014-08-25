@@ -22,14 +22,14 @@ class Broker : public boost::noncopyable
 {
 public:
     /**
-     * Create a non-publishing broker
+     * Create a subscribe only broker
      */
     Broker();
 
     /**
      * Create a publishing broker on the given URI.
      *
-     * @param uri publishing URI in the format scheme:://[*|IP|IF][:port|:*]
+     * @param uri publishing URI in the format scheme://[*|IP|IF][:port|:*]
      */
     explicit Broker( const lunchbox::URI& uri );
 
@@ -39,9 +39,9 @@ public:
      * Subscribe to the given broker URI to receive events.
      *
      * A subscription to a non-existing broker is valid. It will start receiving
-     * events once the other broker is publishing.
+     * events once the other broker(s) is/are publishing.
      *
-     * @param uri subscribing URI in the format scheme:://[host|IP|IF][:port|:*]
+     * @param uri subscribing URI in the format scheme://[host|IP|IF][:port|:*]
      * @return true if subscription was successful
      */
     bool subscribe( const lunchbox::URI& uri );
@@ -49,7 +49,7 @@ public:
     /**
      * Unsubscribe from the broker URI to stop receive events.
      *
-     * @param uri URI in the format scheme:://[*|host|IP][:port]
+     * @param uri URI in the format scheme://[*|host|IP][:port]
      * @return true if unsubscription was successful
      */
     bool unsubscribe( const lunchbox::URI& uri );
@@ -66,7 +66,7 @@ public:
     bool publish( const Event& event );
 
     /**
-     * Receive once event for each subscriber.
+     * Receive one event for each subscriber.
      *
      * For each received event, the respective handler function is called.
      *
@@ -76,7 +76,7 @@ public:
     bool receive( const uint32_t timeout = LB_TIMEOUT_INDEFINITE );
 
     /**
-     * Register a callback for an event.
+     * Register a new callback for an event.
      *
      * Only one callback for one event is possible.
      *
