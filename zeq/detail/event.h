@@ -26,7 +26,6 @@ public:
 
     Event( const Event& rhs )
         : type( rhs.type )
-        , fbb( rhs.fbb )
         , data( rhs.data )
     {}
 

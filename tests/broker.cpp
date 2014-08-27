@@ -18,7 +18,7 @@ lunchbox::URI buildURI( const std::string& hostname = "" )
     lunchbox::RNG rng;
     const unsigned short port = (rng.get<uint16_t>() % 60000) + 1024;
     std::ostringstream uriStr;
-    uriStr << "foo://" << hostname.empty() ? "localhost" : hostname;
+    uriStr << "foo://" << (hostname.empty() ? "localhost" : hostname);
     uriStr << ":" << port;
     return lunchbox::URI( uriStr.str( ));
 }
