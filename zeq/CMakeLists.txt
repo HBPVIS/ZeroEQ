@@ -3,7 +3,7 @@
 
 source_group(\\ FILES CMakeLists.txt)
 
-FLATC_TARGET(SCHEMER detail/camera.fbs)
+FLATBUFFERS_GENERATE_C_HEADERS(SCHEMER detail/camera.fbs)
 
 set(ZEQ_PUBLIC_HEADERS ${COMMON_INCLUDES} broker.h event.h types.h vocabulary.h)
 set(ZEQ_HEADERS ${SCHEMER_OUTPUTS} detail/event.h detail/serialization.h)
