@@ -16,17 +16,11 @@ namespace zeq
 namespace detail
 {
 
-class Event
+class Event : public boost::noncopyable
 {
 public:
     Event( const uint64_t type_ )
         : type( type_ )
-    {}
-
-
-    Event( const Event& rhs )
-        : type( rhs.type )
-        , data( rhs.data )
     {}
 
     size_t getSize() const
