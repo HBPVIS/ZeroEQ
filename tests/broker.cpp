@@ -182,3 +182,25 @@ BOOST_AUTO_TEST_CASE(test_publish_receive_zeroconf)
     }
     BOOST_CHECK( received );
 }
+
+BOOST_AUTO_TEST_CASE(test_publish_receive_self)
+{
+    zeq::Broker broker( lunchbox::URI( "foo://" ));
+    BOOST_CHECK( broker.subscribe( lunchbox::URI( "foo://" )));
+    BOOST_CHECK( broker.registerHandler( zeq::vocabulary::EVENT_CAMERA,
+                                         boost::bind( &onEvent, _1 )));
+
+    bool received = false;
+    for( size_t i = 0; i < 10; ++i )
+    {
+        BOOST_CHECK( broker.publish(
+                         zeq::vocabulary::serializeCamera( camera )));
+
+        if( broker.receive( 100 ))
+        {
+            received = true;
+            break;
+        }
+    }
+    BOOST_CHECK( received );
+}
