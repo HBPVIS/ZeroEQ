@@ -13,8 +13,9 @@
 namespace zeq
 {
 
-class Broker;
 class Event;
+class Publisher;
+class Subscriber;
 
 typedef boost::function< void( const Event& ) > EventFunc;
 

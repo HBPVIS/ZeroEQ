@@ -10,7 +10,7 @@
 
 namespace zeq
 {
-namespace detail { class Broker; class Event; }
+namespace detail { class Subscriber; class Event; }
 
 /**
  * An event can notify other brokers of a state change.
@@ -45,7 +45,7 @@ public:
     detail::Event* getImpl();
 
 private:
-    friend class detail::Broker;
+    friend class detail::Subscriber;
     void setData( const void* data, const size_t size );
 
     Event& operator=( Event&& rhs );
