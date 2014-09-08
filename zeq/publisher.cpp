@@ -92,10 +92,9 @@ private:
         if( host.empty() || port == 0 )
             _resolveHostAndPort( host, port );
 
-        _service.withdraw(); // go silent during k/v update
-        _service.set( SERVICE_HOST, host );
-        _service.set( SERVICE_PORT, boost::lexical_cast< std::string >( port ));
-        _service.announce( port, host );
+        const std::string instance = host + ":" +
+                                     boost::lexical_cast< std::string >( port );
+        _service.announce( port, instance );
     }
 
     void _resolveHostAndPort( std::string& host, uint16_t& port )
@@ -120,8 +119,9 @@ private:
 
         if( host.empty( ))
         {
-            host = endPointStr.substr( endPointStr.find_last_of( "/" ) + 1 );
-            host = host.substr( 0, host.size() - host.find_last_of( ":" ) + 1 );
+            const size_t start = endPointStr.find_last_of( "/" ) + 1;
+            const size_t end = endPointStr.find_last_of( ":" );
+            host = endPointStr.substr( start, end - start );
             if( host == "0.0.0.0" )
             {
                 char hostname[NI_MAXHOST+1] = {0};

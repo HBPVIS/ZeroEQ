@@ -28,7 +28,4 @@ std::string buildZmqURI( const lunchbox::URI& uri )
 {
     return buildZmqURI( uri.getHost(), uri.getPort( ));
 }
-
-const std::string SERVICE_HOST( "zeq_host" );
-const std::string SERVICE_PORT( "zeq_port" );
 }
