@@ -36,9 +36,6 @@ public:
      * A receive on any Subscriber of a shared group will work on all
      * subscribers and call the registered handlers. Note to implementer: wrap
      * zmg_context in a shared_ptr object used by all instances.
-     *
-     * @param uri publishing URI in the format scheme://[*|host|IP|IF][:port]
-     * @throw std::runtime_error when the subscription failed.
      */
     //Subscriber( const lunchbox::URI& uri, const Subscriber& shared );
 

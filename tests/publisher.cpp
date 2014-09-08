@@ -6,7 +6,7 @@
 
 #include "broker.h"
 
-#include <boost/bind.hpp>
+#include <lunchbox/servus.h>
 
 BOOST_AUTO_TEST_CASE(test_create_uri_publisher)
 {
@@ -27,50 +27,14 @@ BOOST_AUTO_TEST_CASE(test_publish)
     BOOST_CHECK( publisher.publish( zeq::vocabulary::serializeCamera( camera)));
 }
 
-BOOST_AUTO_TEST_CASE(test_publish_receive)
+BOOST_AUTO_TEST_CASE(test_multiple_publisher_on_same_host)
 {
-    lunchbox::RNG rng;
-    const unsigned short port = (rng.get<uint16_t>() % 60000) + 1024;
-    const std::string& portStr = boost::lexical_cast< std::string >( port );
-    zeq::Subscriber subscriber( lunchbox::URI( "foo://localhost:" + portStr ));
-    BOOST_CHECK( subscriber.registerHandler( zeq::vocabulary::EVENT_CAMERA,
-                                             boost::bind( &onEvent, _1 )));
+    zeq::Publisher publisher1( lunchbox::URI( buildURI( "*" )));
+    zeq::Publisher publisher2( lunchbox::URI( buildURI( "*" )));
+    zeq::Publisher publisher3( lunchbox::URI( buildURI( "*" )));
 
-    zeq::Publisher publisher( lunchbox::URI( "foo://*:" + portStr ));
-
-    bool received = false;
-    for( size_t i = 0; i < 10; ++i )
-    {
-        BOOST_CHECK( publisher.publish(
-                         zeq::vocabulary::serializeCamera( camera )));
-
-        if( subscriber.receive( 100 ))
-        {
-            received = true;
-            break;
-        }
-    }
-    BOOST_CHECK( received );
-}
-
-BOOST_AUTO_TEST_CASE(test_publish_receive_zeroconf)
-{
-    zeq::Publisher publisher( lunchbox::URI( "foo://" ));
-    zeq::Subscriber subscriber( lunchbox::URI( "foo://" ));
-
-    BOOST_CHECK( subscriber.registerHandler( zeq::vocabulary::EVENT_CAMERA,
-                                             boost::bind( &onEvent, _1 )));
-    bool received = false;
-    for( size_t i = 0; i < 10; ++i )
-    {
-        BOOST_CHECK( publisher.publish(
-                         zeq::vocabulary::serializeCamera( camera )));
-
-        if( subscriber.receive( 100 ))
-        {
-            received = true;
-            break;
-        }
-    }
-    BOOST_CHECK( received );
+    lunchbox::Servus service( "_foo._tcp" );
+    const lunchbox::Strings& instances =
+            service.discover( lunchbox::Servus::IF_ALL, 500 );
+    BOOST_CHECK_EQUAL( instances.size(), 3 );
 }

@@ -138,10 +138,10 @@ private:
                 _service.discover( lunchbox::Servus::IF_ALL, 500 );
         BOOST_FOREACH( const std::string& instance, instances )
         {
-            const std::string& host = _service.get( instance, SERVICE_HOST );
-            const std::string& port = _service.get( instance, SERVICE_PORT );
-            return buildZmqURI( host.empty() ? instance : host,
-                                boost::lexical_cast< uint16_t >( port ));
+            const size_t pos = instance.find( ":" );
+            const std::string& host = instance.substr( 0, pos );
+            const std::string& port = instance.substr( pos + 1 );
+            return buildZmqURI( host, boost::lexical_cast< uint16_t >( port ));
         }
         return std::string();
     }
