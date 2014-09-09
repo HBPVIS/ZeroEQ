@@ -32,36 +32,21 @@ class Subscriber
 public:
     Subscriber( const lunchbox::URI& uri )
         : _context( zmq_ctx_new( ))
-        , _subscriber( zmq_socket( _context, ZMQ_SUB ))
         , _service( std::string( "_" ) + uri.getScheme() + "._tcp" )
     {
-        // TODO: continuous browsing and update with zeroconf uris. One
-        // subscriber will receive from multiple publishers, i.e., we need to
-        // manage and update multiple sockets.
-        const std::string& zmqURI = _buildSubscriberURI( uri );
-        if( zmqURI.empty( ))
+        const lunchbox::Strings& zmqURIs = _buildSubscriberURI( uri );
+
+        if( zmqURIs.back().empty( ))
         {
             LBTHROW( std::runtime_error(
                          "Could not find a (suitable) publisher for " +
                          boost::lexical_cast< std::string >( uri )));
         }
-        if( zmq_connect( _subscriber, zmqURI.c_str( )) == -1 )
-        {
-            zmq_close( _subscriber );
-            _subscriber = 0;
-            LBTHROW( std::runtime_error(
-                         "Cannot connect subscriber to " + zmqURI + ", got " +
-                         zmq_strerror( zmq_errno( ))));
-        }
 
-        if( zmq_setsockopt( _subscriber, ZMQ_SUBSCRIBE, "", 0 ) == -1 )
-        {
-            zmq_close( _subscriber );
-            _subscriber = 0;
-            LBTHROW( std::runtime_error(
-                         std::string( "Cannot set subscriber, got " ) +
-                         zmq_strerror( zmq_errno( ))));
-        }
+        BOOST_FOREACH( const std::string& zmqURI, zmqURIs )
+            _addConnection( zmqURI );
+
+        _service.beginBrowsing( lunchbox::Servus::IF_ALL );
     }
 
     ~Subscriber()
@@ -73,14 +58,12 @@ public:
 
     bool receive( const uint32_t timeout )
     {
-        std::vector< zmq_pollitem_t > entries( 1 );
-        zmq_pollitem_t &entry = entries[0];
-        entry.socket = _subscriber;
-        entry.events = ZMQ_POLLIN;
+        std::vector< zmq_pollitem_t > entries;
+        _refreshConnections( entries );
 
         const int iPoll = zmq_poll( entries.data(), entries.size(),
-                                    timeout == LB_TIMEOUT_INDEFINITE ? -1
-                                                                     : timeout);
+                                    timeout == LB_TIMEOUT_INDEFINITE? -1
+                                                                    : timeout );
         if( iPoll == -1 )
         {
             LBWARN << "Cannot poll, got " << zmq_strerror( zmq_errno( ))
@@ -88,26 +71,33 @@ public:
             return false;
         }
 
-        if( iPoll == 0 || !( entries[0].revents & ZMQ_POLLIN ))
+        if( iPoll == 0 )
+            /* No events signaled during poll */
             return false;
 
-        zmq_msg_t msg;
-        zmq_msg_init( &msg );
-        zmq_msg_recv( &msg, entries[0].socket, 0 );
-
-        uint64_t type;
-        memcpy( &type, zmq_msg_data( &msg ), sizeof(type) );
-        const bool payload = zmq_msg_more( &msg );
-        zmq_msg_close( &msg );
-
-        zeq::Event event( type );
-        if( payload )
+        BOOST_FOREACH( const zmq_pollitem_t& entry, entries )
         {
+            if( !( entry.revents & ZMQ_POLLIN ))
+                continue;
+
+            zmq_msg_t msg;
             zmq_msg_init( &msg );
-            zmq_msg_recv( &msg, entries[0].socket, 0 );
-            event.setData( zmq_msg_data( &msg ), zmq_msg_size( &msg ));
-            zmq_msg_close( &msg );
-        }
+            zmq_msg_recv( &msg, entry.socket, 0 );
+
+		    uint64_t type;
+		    memcpy( &type, zmq_msg_data( &msg ), sizeof(type) );
+		    const bool payload = zmq_msg_more( &msg );
+		    zmq_msg_close( &msg );
+
+		    zeq::Event event( type );
+		    if( payload )
+		    {
+		        zmq_msg_init( &msg );
+		        zmq_msg_recv( &msg, entries[0].socket, 0 );
+		        event.setData( zmq_msg_data( &msg ), zmq_msg_size( &msg ));
+		        zmq_msg_close( &msg );
+		    }
+		}
 
         if( _eventFuncs.count( type ) != 0 )
             _eventFuncs[type]( event );
@@ -129,27 +119,84 @@ public:
     }
 
 private:
-    std::string _buildSubscriberURI( const lunchbox::URI& uri )
+    void _refreshConnections( std::vector< zmq_pollitem_t >& entries )
     {
+        _service.browse( 0 );
+        const lunchbox::Strings& instances = _service.getInstances();
+        entries.resize( instances.size( ));
+
+        size_t i = 0;
+        BOOST_FOREACH( const std::string& instance, instances )
+        {
+            const std::string& zmqURI = _getZmqURI( instance );
+
+            // New subscription
+            if( _subscribers.count( zmqURI ) == 0 )
+                _addConnection( zmqURI );
+
+            zmq_pollitem_t &entry = entries[i];
+            entry.socket = _subscribers[zmqURI];
+            entry.events = ZMQ_POLLIN;
+            ++i;
+        }
+    }
+
+    void _addConnection( const std::string& zmqURI )
+    {
+        _subscribers[zmqURI] = zmq_socket( _context, ZMQ_SUB );
+
+        if( zmq_connect( _subscribers[zmqURI], zmqURI.c_str( )) == -1 )
+        {
+            zmq_close( _subscribers[zmqURI] );
+            _subscribers.erase( zmqURI );
+            LBTHROW( std::runtime_error(
+                         "Cannot connect subscriber to " + zmqURI + ", got " +
+                         zmq_strerror( zmq_errno( ))));
+        }
+
+        if( zmq_setsockopt( _subscribers[zmqURI], ZMQ_SUBSCRIBE, "", 0 ) == -1 )
+        {
+            zmq_close( _subscribers[zmqURI] );
+            _subscribers.erase( zmqURI );
+            LBTHROW( std::runtime_error(
+                         std::string( "Cannot set subscriber, got " ) +
+                         zmq_strerror( zmq_errno( ))));
+        }
+    }
+
+    lunchbox::Strings _buildSubscriberURI( const lunchbox::URI& uri )
+    {
+        lunchbox::Strings uriList;
         if( !uri.getHost().empty() && uri.getPort() != 0 )
-            return buildZmqURI( uri );
+        {
+            uriList.push_back( buildZmqURI( uri ));
+            return uriList;
+        }
 
         const lunchbox::Strings& instances =
                 _service.discover( lunchbox::Servus::IF_ALL, 1000 );
         BOOST_FOREACH( const std::string& instance, instances )
         {
-            const size_t pos = instance.find( ":" );
-            const std::string& host = instance.substr( 0, pos );
-            const std::string& port = instance.substr( pos + 1 );
-            return buildZmqURI( host, boost::lexical_cast< uint16_t >( port ));
+            uriList.push_back( _getZmqURI( instance ));
         }
-        return std::string();
+        return uriList;
+    }
+
+    std::string _getZmqURI( const std::string& instance )
+    {
+        const size_t pos = instance.find( ":" );
+        const std::string& host = instance.substr( 0, pos );
+        const std::string& port = instance.substr( pos + 1 );
+
+        return buildZmqURI( host, boost::lexical_cast< uint16_t >( port ));
     }
 
     typedef std::map< uint64_t, EventFunc > EventFuncs;
+    typedef std::pair< std::string, void* > SocketType;
+    typedef std::map< std::string, void* > SocketMap;
 
     void* _context;
-    void* _subscriber;
+    SocketMap _subscribers;
     EventFuncs _eventFuncs;
     lunchbox::Servus _service;
 };
