@@ -30,14 +30,14 @@ BOOST_AUTO_TEST_CASE(test_registerhandler)
 {
     zeq::Subscriber subscriber( buildURI( ));
     BOOST_CHECK( subscriber.registerHandler( zeq::vocabulary::EVENT_CAMERA,
-                                             boost::bind( &onEvent, _1 )));
+                                            boost::bind( &onCameraEvent, _1 )));
 }
 
 BOOST_AUTO_TEST_CASE(test_deregisterhandler)
 {
     zeq::Subscriber subscriber( buildURI( ));
     BOOST_CHECK( subscriber.registerHandler( zeq::vocabulary::EVENT_CAMERA,
-                                             boost::bind( &onEvent, _1 )));
+                                            boost::bind( &onCameraEvent, _1 )));
     BOOST_CHECK( subscriber.deregisterHandler( zeq::vocabulary::EVENT_CAMERA ));
 }
 
@@ -45,9 +45,9 @@ BOOST_AUTO_TEST_CASE(test_invalid_registerhandler)
 {
     zeq::Subscriber subscriber( buildURI( ));;
     BOOST_CHECK( subscriber.registerHandler( zeq::vocabulary::EVENT_CAMERA,
-                                             boost::bind( &onEvent, _1 )));
+                                            boost::bind( &onCameraEvent, _1 )));
     BOOST_CHECK( !subscriber.registerHandler( zeq::vocabulary::EVENT_CAMERA,
-                                              boost::bind( &onEvent, _1 )));
+                                            boost::bind( &onCameraEvent, _1 )));
 }
 
 BOOST_AUTO_TEST_CASE(test_invalid_deregisterhandler)
@@ -56,6 +56,6 @@ BOOST_AUTO_TEST_CASE(test_invalid_deregisterhandler)
     BOOST_CHECK( !subscriber.deregisterHandler( zeq::vocabulary::EVENT_CAMERA));
 
     BOOST_CHECK( subscriber.registerHandler( zeq::vocabulary::EVENT_CAMERA,
-                                             boost::bind( &onEvent, _1 )));
+                                            boost::bind( &onCameraEvent, _1 )));
     BOOST_CHECK( !subscriber.deregisterHandler(zeq::vocabulary::EVENT_INVALID));
 }

@@ -61,22 +61,30 @@ public:
         zmq_msg_t msgHeader;
         zmq_msg_init_size( &msgHeader, sizeof(type));
         memcpy( zmq_msg_data(&msgHeader), &type, sizeof(type));
+        int ret = zmq_msg_send( &msgHeader, _publisher,
+                                event.getSize() > 0 ? ZMQ_SNDMORE : 0 );
+        zmq_msg_close( &msgHeader );
+        if( ret == -1 )
+        {
+            LBWARN << "Cannot publish message header, got "
+                   << zmq_strerror( zmq_errno( )) << std::endl;
+            return false;
+        }
+
+        if( event.getSize() == 0 )
+            return true;
 
         zmq_msg_t msg;
         zmq_msg_init_size( &msg, event.getSize( ));
         memcpy( zmq_msg_data(&msg), event.getData(), event.getSize( ));
-
-        if( zmq_msg_send( &msgHeader, _publisher, ZMQ_SNDMORE ) == -1 ||
-            zmq_msg_send( &msg, _publisher, 0 ) == -1 )
+        ret = zmq_msg_send( &msg, _publisher, 0 );
+        zmq_msg_close( &msg );
+        if( ret  == -1 )
         {
-            zmq_msg_close( &msgHeader );
-            zmq_msg_close( &msg );
-            LBWARN << "Cannot publish, got " << zmq_strerror( zmq_errno( ))
-                   << std::endl;
+            LBWARN << "Cannot publish message data, got "
+                   << zmq_strerror( zmq_errno( )) << std::endl;
             return false;
         }
-        zmq_msg_close( &msgHeader );
-        zmq_msg_close( &msg );
         return true;
     }
 
