@@ -25,12 +25,18 @@ lunchbox::URI buildURI( const std::string& hostname = "" )
 
 const std::vector< float > camera( 16, 42 );
 
-void onEvent( const zeq::Event& event )
+void onCameraEvent( const zeq::Event& event )
 {
     BOOST_CHECK( event.getType() == zeq::vocabulary::EVENT_CAMERA );
     const std::vector< float >& deserialized =
             zeq::vocabulary::deserializeCamera( event );
     BOOST_CHECK_EQUAL_COLLECTIONS( camera.begin(), camera.end(),
                                    deserialized.begin(), deserialized.end( ));
+}
+
+void onExitEvent( const zeq::Event& event )
+{
+    BOOST_CHECK_EQUAL( event.getType(), zeq::vocabulary::EVENT_EXIT );
+    BOOST_CHECK_EQUAL( event.getSize(), 0 );
 }
 }

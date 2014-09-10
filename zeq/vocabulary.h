@@ -24,6 +24,7 @@ namespace vocabulary
  */
 enum EventType
 {
+    EVENT_EXIT,
     EVENT_CAMERA,
     EVENT_INVALID
 };

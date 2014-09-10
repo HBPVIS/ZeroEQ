@@ -97,17 +97,17 @@ public:
 
         uint64_t type;
         memcpy( &type, zmq_msg_data( &msg ), sizeof(type) );
-
-        const bool more = zmq_msg_more( &msg );
+        const bool payload = zmq_msg_more( &msg );
         zmq_msg_close( &msg );
-        if( !more )
-            return false;
 
-        zmq_msg_init( &msg );
-        zmq_msg_recv( &msg, entries[0].socket, 0 );
         zeq::Event event( type );
-        event.setData( zmq_msg_data( &msg ), zmq_msg_size( &msg ));
-        zmq_msg_close( &msg );
+        if( payload )
+        {
+            zmq_msg_init( &msg );
+            zmq_msg_recv( &msg, entries[0].socket, 0 );
+            event.setData( zmq_msg_data( &msg ), zmq_msg_size( &msg ));
+            zmq_msg_close( &msg );
+        }
 
         if( _eventFuncs.count( type ) != 0 )
             _eventFuncs[type]( event );
@@ -135,7 +135,7 @@ private:
             return buildZmqURI( uri );
 
         const lunchbox::Strings& instances =
-                _service.discover( lunchbox::Servus::IF_ALL, 500 );
+                _service.discover( lunchbox::Servus::IF_ALL, 1000 );
         BOOST_FOREACH( const std::string& instance, instances )
         {
             const size_t pos = instance.find( ":" );
