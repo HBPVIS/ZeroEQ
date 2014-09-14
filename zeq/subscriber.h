@@ -30,7 +30,7 @@ public:
      */
     explicit Subscriber( const lunchbox::URI& uri );
 
-    /**
+    /*
      * Create a shared subscription to one or more publishers.
      *
      * A receive on any Subscriber of a shared group will work on all
