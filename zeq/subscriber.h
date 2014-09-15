@@ -43,11 +43,12 @@ public:
     ~Subscriber();
 
     /**
-     * Receive one event.
+     * Receive one event from all connected publishers.
      *
      * For the received event, the respective handler function is called.
      *
-     * @param timeout timeout in ms for poll, default blocking indefinitely
+     * @param timeout timeout in ms for poll, default blocking poll until at
+     *                least one event is received
      * @return true if at least one event was received
      */
     bool receive( const uint32_t timeout = LB_TIMEOUT_INDEFINITE );
@@ -59,7 +60,7 @@ public:
      *
      * @param event the event type of interest
      * @param func the callback function on receive of event
-     * @return true if callback can be registered
+     * @return true if callback could be registered
      */
     bool registerHandler( const uint64_t event, const EventFunc& func );
 
@@ -67,7 +68,7 @@ public:
      * Deregister a callback for an event.
      *
      * @param event the event type of interest
-     * @return true if callback can be deregistered
+     * @return true if callback could be deregistered
      */
     bool deregisterHandler( const uint64_t event );
 

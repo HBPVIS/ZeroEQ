@@ -13,10 +13,10 @@ namespace zeq
 namespace detail { class Subscriber; class Event; }
 
 /**
- * An event can notify other brokers of a state change.
+ * An event can notify other subscribers of a state change.
  *
- * Events are published and received via the zeq::Broker. The format of the
- * serialized data is specific to the serialization backend.
+ * Events are published via zeq::Publisher and received via zeq::Subscriber. The
+ * format of the serialized data is specific to the serialization backend.
  */
 class Event : public boost::noncopyable
 {
