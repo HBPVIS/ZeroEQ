@@ -7,6 +7,11 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake
   ${CMAKE_SOURCE_DIR}/CMake/common)
 include(GitExternal)
 
+include(Buildyard)
+if(BUILDYARD_STOP)
+  return()
+endif()
+
 set(LAST_RELEASE 0.0.0)
 set(VERSION_MAJOR "0")
 set(VERSION_MINOR "1")
