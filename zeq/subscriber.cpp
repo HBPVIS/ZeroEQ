@@ -97,7 +97,7 @@ public:
             if( payload )
             {
                 zmq_msg_init( &msg );
-                zmq_msg_recv( &msg, entries[0].socket, 0 );
+                zmq_msg_recv( &msg, entry.socket, 0 );
                 event.setData( zmq_msg_data( &msg ), zmq_msg_size( &msg ));
                 zmq_msg_close( &msg );
             }
@@ -105,6 +105,7 @@ public:
             if( _eventFuncs.count( type ) != 0 )
                 _eventFuncs[type]( event );
         }
+
         return true;
     }
 
