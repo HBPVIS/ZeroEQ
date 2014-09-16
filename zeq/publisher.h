@@ -29,7 +29,7 @@ public:
     ~Publisher();
 
     /**
-     * Publish the given event to any subscribed publisher.
+     * Publish the given event to any subscriber.
      *
      * If there is no subscriber for that event, no event will be send.
      *
