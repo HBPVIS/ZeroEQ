@@ -54,6 +54,7 @@ BOOST_AUTO_TEST_CASE(test_publish_receive_zeroconf)
 
     BOOST_CHECK( subscriber.registerHandler( zeq::vocabulary::EVENT_CAMERA,
                                       boost::bind( &test::onCameraEvent, _1 )));
+
     bool received = false;
     for( size_t i = 0; i < 20; ++i )
     {

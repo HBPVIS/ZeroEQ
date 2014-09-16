@@ -52,8 +52,11 @@ public:
 
     ~Subscriber()
     {
-        if( _subscriber )
-            zmq_close( _subscriber );
+    	BOOST_FOREACH( SocketType socket, _subscribers )
+        {
+            if ( socket.second )
+                zmq_close( socket.second );
+        }
         zmq_ctx_destroy( _context );
     }
 
@@ -85,24 +88,23 @@ public:
             zmq_msg_init( &msg );
             zmq_msg_recv( &msg, entry.socket, 0 );
 
-		    uint64_t type;
-		    memcpy( &type, zmq_msg_data( &msg ), sizeof(type) );
-		    const bool payload = zmq_msg_more( &msg );
-		    zmq_msg_close( &msg );
+            uint64_t type;
+            memcpy( &type, zmq_msg_data( &msg ), sizeof(type) );
+            const bool payload = zmq_msg_more( &msg );
+            zmq_msg_close( &msg );
 
-		    zeq::Event event( type );
-		    if( payload )
-		    {
-		        zmq_msg_init( &msg );
-		        zmq_msg_recv( &msg, entries[0].socket, 0 );
-		        event.setData( zmq_msg_data( &msg ), zmq_msg_size( &msg ));
-		        zmq_msg_close( &msg );
-		    }
-		}
+            zeq::Event event( type );
+            if( payload )
+            {
+                zmq_msg_init( &msg );
+                zmq_msg_recv( &msg, entries[0].socket, 0 );
+                event.setData( zmq_msg_data( &msg ), zmq_msg_size( &msg ));
+                zmq_msg_close( &msg );
+            }
 
-        if( _eventFuncs.count( type ) != 0 )
-            _eventFuncs[type]( event );
-
+            if( _eventFuncs.count( type ) != 0 )
+                _eventFuncs[type]( event );
+        }
         return true;
     }
 
