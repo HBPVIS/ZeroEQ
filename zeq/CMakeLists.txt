@@ -4,6 +4,7 @@
 source_group(\\ FILES CMakeLists.txt)
 
 FLATBUFFERS_GENERATE_C_HEADERS(SCHEMER detail/camera.fbs)
+FLATBUFFERS_GENERATE_C_HEADERS(SCHEMER detail/selection.fbs)
 
 set(ZEQ_PUBLIC_HEADERS ${COMMON_INCLUDES}
   event.h

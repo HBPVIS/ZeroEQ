@@ -1,0 +1,8 @@
+
+namespace zeq;
+
+table Selection {
+  ids:[uint];
+}
+
+root_type Selection;

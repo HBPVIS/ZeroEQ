@@ -14,11 +14,15 @@ namespace zeq
 enum MessageType
 {
     MSG_CAMERA,
+    MSG_SELECTION,
     MSG_INVALID
 };
 
 Event serializeCamera( const std::vector< float >& matrix );
 std::vector< float > deserializeCamera( const Event& camera );
+
+Event serializeSelection( const std::vector< unsigned int >& selection );
+std::vector< unsigned int > deserializeSelection( const Event& selection );
 
 }
 

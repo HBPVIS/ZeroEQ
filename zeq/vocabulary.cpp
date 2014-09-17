@@ -21,5 +21,17 @@ std::vector< float > deserializeCamera( const Event& camera )
     return detail::deserializeCamera( camera );
 }
 
+
+Event serializeSelection( const std::vector< unsigned int >& selection )
+{
+    return detail::serializeSelection( selection );
+}
+
+std::vector< unsigned int > deserializeSelection( const Event& selection )
+{
+    return detail::deserializeSelection( selection );
+}
+
+
 }
 }
