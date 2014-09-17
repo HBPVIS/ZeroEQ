@@ -47,6 +47,7 @@ public:
             BOOST_FOREACH( const std::string& zmqURI, zmqURIs )
                 _addConnection( zmqURI );
         }
+
         _service.beginBrowsing( lunchbox::Servus::IF_ALL );
     }
 
@@ -62,10 +63,9 @@ public:
 
     bool receive( const uint32_t timeout )
     {
-        std::vector< zmq_pollitem_t > entries;
-        _refreshConnections( entries );
+        _refreshConnections( );
 
-        const int iPoll = zmq_poll( entries.data(), entries.size(),
+        const int iPoll = zmq_poll( _entries.data(), _entries.size(),
                                     timeout == LB_TIMEOUT_INDEFINITE? -1
                                                                     : timeout );
         if( iPoll == -1 )
@@ -79,7 +79,7 @@ public:
             /* No events signaled during poll */
             return false;
 
-        BOOST_FOREACH( const zmq_pollitem_t& entry, entries )
+        BOOST_FOREACH( const zmq_pollitem_t& entry, _entries )
         {
             if( !( entry.revents & ZMQ_POLLIN ))
                 continue;
@@ -123,11 +123,12 @@ public:
     }
 
 private:
-    void _refreshConnections( std::vector< zmq_pollitem_t >& entries )
+    void _refreshConnections( )
     {
+        _entries.clear();
         _service.browse( 0 );
         const lunchbox::Strings& instances = _service.getInstances();
-        entries.resize( instances.size( ));
+        _entries.resize( instances.size( ));
 
         size_t i = 0;
         BOOST_FOREACH( const std::string& instance, instances )
@@ -138,7 +139,7 @@ private:
             if( _subscribers.count( zmqURI ) == 0 )
                 _addConnection( zmqURI );
 
-            zmq_pollitem_t &entry = entries[i];
+            zmq_pollitem_t &entry = _entries[i];
             entry.socket = _subscribers[zmqURI];
             entry.events = ZMQ_POLLIN;
             ++i;
@@ -198,6 +199,7 @@ private:
     SocketMap _subscribers;
     EventFuncs _eventFuncs;
     lunchbox::Servus _service;
+    std::vector< zmq_pollitem_t > _entries;
 };
 }
 
