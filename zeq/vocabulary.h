@@ -26,8 +26,8 @@ enum EventType
 {
     EVENT_EXIT,
     EVENT_CAMERA,
-    EVENT_INVALID,
     EVENT_SELECTION,
+    EVENT_INVALID
 };
 
 /**
