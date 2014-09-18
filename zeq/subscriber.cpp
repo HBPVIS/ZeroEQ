@@ -33,6 +33,7 @@ public:
     Subscriber( const lunchbox::URI& uri )
         : _context( zmq_ctx_new( ))
         , _service( std::string( "_" ) + uri.getScheme() + "._tcp" )
+        , _browsing( false )
     {
         if( uri.getScheme().empty( ))
             LBTHROW( std::runtime_error(
@@ -40,20 +41,25 @@ public:
                          " is not a valid URI (scheme is missing)."));
 
         if( !uri.getHost().empty() && uri.getPort() != 0 )
-            _addConnection( buildZmqURI( uri ));
+        {
+            const std::string& zmqURI = buildZmqURI( uri );
+            _addConnection( zmqURI );
+
+            zmq_pollitem_t entry;
+            entry.socket = _subscribers[zmqURI];
+            entry.events = ZMQ_POLLIN;
+            _entries.push_back( entry );
+        }
         else
         {
-            const lunchbox::Strings& zmqURIs = _buildSubscriberURI();
-            BOOST_FOREACH( const std::string& zmqURI, zmqURIs )
-                _addConnection( zmqURI );
+            _browsing = true;
+            _service.beginBrowsing( lunchbox::Servus::IF_ALL );
         }
-
-        _service.beginBrowsing( lunchbox::Servus::IF_ALL );
     }
 
     ~Subscriber()
     {
-    	BOOST_FOREACH( SocketType socket, _subscribers )
+        BOOST_FOREACH( SocketType socket, _subscribers )
         {
             if ( socket.second )
                 zmq_close( socket.second );
@@ -63,7 +69,8 @@ public:
 
     bool receive( const uint32_t timeout )
     {
-        _refreshConnections( );
+        if( _browsing )
+            _refreshConnections();
 
         const int iPoll = zmq_poll( _entries.data(), _entries.size(),
                                     timeout == LB_TIMEOUT_INDEFINITE? -1
@@ -123,11 +130,12 @@ public:
     }
 
 private:
-    void _refreshConnections( )
+    void _refreshConnections()
     {
-        _entries.clear();
         _service.browse( 0 );
         const lunchbox::Strings& instances = _service.getInstances();
+
+        _entries.clear();
         _entries.resize( instances.size( ));
 
         size_t i = 0;
@@ -169,19 +177,6 @@ private:
         }
     }
 
-    lunchbox::Strings _buildSubscriberURI()
-    {
-        lunchbox::Strings uriList;
-
-        const lunchbox::Strings& instances =
-                _service.discover( lunchbox::Servus::IF_ALL, 1000 );
-        BOOST_FOREACH( const std::string& instance, instances )
-        {
-            uriList.push_back( _getZmqURI( instance ));
-        }
-        return uriList;
-    }
-
     std::string _getZmqURI( const std::string& instance )
     {
         const size_t pos = instance.find( ":" );
@@ -199,6 +194,7 @@ private:
     SocketMap _subscribers;
     EventFuncs _eventFuncs;
     lunchbox::Servus _service;
+    bool _browsing;
     std::vector< zmq_pollitem_t > _entries;
 };
 }

@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(test_publish_receive_zeroconf)
     for( size_t i = 0; i < 20; ++i )
     {
         BOOST_CHECK( publisher.publish(
-                         zeq::vocabulary::serializeCamera( camera )));
+                         zeq::vocabulary::serializeCamera( test::camera )));
 
         if( subscriber.receive( 100 ))
         {
