@@ -33,14 +33,18 @@ public:
     Subscriber( const lunchbox::URI& uri )
         : _context( zmq_ctx_new( ))
         , _service( std::string( "_" ) + uri.getScheme() + "._tcp" )
-        , _browsing( false )
     {
         if( uri.getScheme().empty( ))
             LBTHROW( std::runtime_error(
                          boost::lexical_cast< std::string >( uri ) +
                          " is not a valid URI (scheme is missing)."));
 
-        if( !uri.getHost().empty() && uri.getPort() != 0 )
+        if( uri.getHost().empty() || uri.getPort() == 0 )
+        {
+            _service.beginBrowsing( lunchbox::Servus::IF_ALL );
+            _refreshConnections();
+        }
+        else
         {
             const std::string& zmqURI = buildZmqURI( uri );
             _addConnection( zmqURI );
@@ -49,11 +53,6 @@ public:
             entry.socket = _subscribers[zmqURI];
             entry.events = ZMQ_POLLIN;
             _entries.push_back( entry );
-        }
-        else
-        {
-            _browsing = true;
-            _service.beginBrowsing( lunchbox::Servus::IF_ALL );
         }
     }
 
@@ -69,7 +68,7 @@ public:
 
     bool receive( const uint32_t timeout )
     {
-        if( _browsing )
+        if( _service.isBrowsing( ))
             _refreshConnections();
 
         const int iPoll = zmq_poll( _entries.data(), _entries.size(),
@@ -194,7 +193,6 @@ private:
     SocketMap _subscribers;
     EventFuncs _eventFuncs;
     lunchbox::Servus _service;
-    bool _browsing;
     std::vector< zmq_pollitem_t > _entries;
 };
 }
