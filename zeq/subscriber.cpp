@@ -48,11 +48,6 @@ public:
         {
             const std::string& zmqURI = buildZmqURI( uri );
             _addConnection( zmqURI );
-
-            zmq_pollitem_t entry;
-            entry.socket = _subscribers[zmqURI];
-            entry.events = ZMQ_POLLIN;
-            _entries.push_back( entry );
         }
     }
 
@@ -134,10 +129,6 @@ private:
         _service.browse( 0 );
         const lunchbox::Strings& instances = _service.getInstances();
 
-        _entries.clear();
-        _entries.resize( instances.size( ));
-
-        size_t i = 0;
         BOOST_FOREACH( const std::string& instance, instances )
         {
             const std::string& zmqURI = _getZmqURI( instance );
@@ -145,11 +136,6 @@ private:
             // New subscription
             if( _subscribers.count( zmqURI ) == 0 )
                 _addConnection( zmqURI );
-
-            zmq_pollitem_t &entry = _entries[i];
-            entry.socket = _subscribers[zmqURI];
-            entry.events = ZMQ_POLLIN;
-            ++i;
         }
     }
 
@@ -174,6 +160,11 @@ private:
                          std::string( "Cannot set subscriber, got " ) +
                          zmq_strerror( zmq_errno( ))));
         }
+
+        zmq_pollitem_t entry;
+        entry.socket = _subscribers[zmqURI];
+        entry.events = ZMQ_POLLIN;
+        _entries.push_back( entry );
     }
 
     std::string _getZmqURI( const std::string& instance )
