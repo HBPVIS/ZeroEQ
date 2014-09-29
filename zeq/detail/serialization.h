@@ -7,6 +7,7 @@
 #define ZEQ_DETAIL_SERIALIZATION_H
 
 #include <zeq/camera_generated.h>
+#include <zeq/selection_generated.h>
 #include <zeq/vocabulary.h>
 #include "event.h"
 #include <lunchbox/debug.h>
@@ -40,6 +41,29 @@ std::vector< float > deserializeCamera( const zeq::Event& camera )
         returnMatrix[i] = data->matrix()->Get(i);
     return returnMatrix;
 }
+
+
+zeq::Event serializeSelection( const std::vector< unsigned int >& selection )
+{
+    zeq::Event event( vocabulary::EVENT_SELECTION );
+
+    flatbuffers::FlatBufferBuilder& fbb = event.getImpl()->fbb;
+    SelectionBuilder builder( fbb );
+    builder.add_ids( fbb.CreateVector( selection.data(), selection.size() ));
+    fbb.Finish( builder.Finish( ));
+    return event;
+}
+
+std::vector< unsigned int > deserializeSelection( const zeq::Event& selection )
+{
+    auto data = GetSelection( selection.getData( ));
+
+    std::vector< unsigned int > returnSelection( data->ids()->Length( ));
+    for( size_t i = 0; i < data->ids()->Length(); ++i )
+        returnSelection[i] = data->ids()->Get(i);
+    return returnSelection;
+}
+
 
 }
 }

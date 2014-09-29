@@ -15,8 +15,8 @@ namespace detail { class Subscriber; class Event; }
 /**
  * An event is emitted by a Publisher to notify Subscriber of a change.
  *
- * Events are published and received via the zeq::Publisher. The format of the
- * serialized data is specific to the serialization backend.
+ * Events are published via zeq::Publisher and received via zeq::Subscriber. The
+ * format of the serialized data is specific to the serialization backend.
  */
 class Event : public boost::noncopyable
 {

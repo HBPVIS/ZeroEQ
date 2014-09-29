@@ -16,12 +16,6 @@ BOOST_AUTO_TEST_CASE(test_subscribe)
 BOOST_AUTO_TEST_CASE(test_invalid_subscribe)
 {
     BOOST_CHECK_THROW(
-        zeq::Subscriber subscriber( lunchbox::URI( "bar://*" )),
-        std::runtime_error );
-
-    const lunchbox::URI& uri = test::buildURI();
-    zeq::Subscriber subscriber( uri );
-    BOOST_CHECK_THROW(
         zeq::Subscriber subscriber2( lunchbox::URI( "uri" )),
         std::runtime_error );
 }
