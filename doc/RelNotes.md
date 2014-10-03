@@ -9,7 +9,7 @@ Welcome to ZeroEQ, a cross-platform C++ library to publish and subscribe for
 events.
 
 ZeroEQ 0.1 is a prototype version. It can be retrieved by cloning the
-[source code](https://github.com/HBPVIS/VisEDA).
+[source code](https://github.com/HBPVIS/zeq).
 
 ## Features {#Features}
 
@@ -53,7 +53,7 @@ following:
 ## Known Bugs {#Bugs}
 
 The following bugs were known at release time. Please file a
-[Bug Report](https://github.com/HBPVis/VisEDA/issues) if you find any
+[Bug Report](https://github.com/HBPVis/zeq/issues) if you find any
 other issue with this release.
 
 * No known bugs

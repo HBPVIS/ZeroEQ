@@ -12,8 +12,8 @@
 #include <boost/lexical_cast.hpp>
 #include <lunchbox/log.h>
 #include <lunchbox/servus.h>
-#include <map>
 #include <zmq.h>
+#include <map>
 
 // for NI_MAXHOST
 #ifdef _WIN32
