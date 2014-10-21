@@ -6,6 +6,7 @@
 #ifndef ZEQ_EVENT_H
 #define ZEQ_EVENT_H
 
+#include <zeq/api.h>
 #include <zeq/types.h>
 
 namespace zeq
@@ -25,18 +26,18 @@ public:
      * Construct a new event of the given type
      * @param type the desired event type
      */
-    explicit Event( const uint64_t type );
+    ZEQ_API explicit Event( const uint64_t type );
 
     /** Move ctor @internal */
     Event( Event&& rhs );
 
-    ~Event();
+    ZEQ_API ~Event();
 
     /** @return the type of this event */
-    uint64_t getType() const;
+    ZEQ_API uint64_t getType() const;
 
     /** @internal @return the size in bytes of the serialized data */
-    size_t getSize() const;
+    ZEQ_API size_t getSize() const;
 
     /** @internal @return the serialized data */
     const void* getData() const;
