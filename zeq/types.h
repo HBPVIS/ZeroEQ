@@ -7,7 +7,7 @@
 #define ZEQ_TYPES_H
 
 #include <lunchbox/types.h>
-
+#include <lunchbox/uint128_t.h>
 #include <boost/function/function1.hpp>
 
 namespace zeq
@@ -19,6 +19,7 @@ class Subscriber;
 
 typedef boost::function< void( const Event& ) > EventFunc;
 
+using lunchbox::uint128_t;
 }
 
 #endif

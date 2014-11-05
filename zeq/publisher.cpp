@@ -57,7 +57,7 @@ public:
 
     bool publish( const zeq::Event& event )
     {
-        const uint64_t type = event.getType();
+        const uint128_t& type = event.getType();
         zmq_msg_t msgHeader;
         zmq_msg_init_size( &msgHeader, sizeof(type));
         memcpy( zmq_msg_data(&msgHeader), &type, sizeof(type));

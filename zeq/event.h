@@ -25,7 +25,7 @@ public:
      * Construct a new event of the given type
      * @param type the desired event type
      */
-    explicit Event( const uint64_t type );
+    explicit Event( const uint128_t& type );
 
     /** Move ctor @internal */
     Event( Event&& rhs );
@@ -33,7 +33,7 @@ public:
     ~Event();
 
     /** @return the type of this event */
-    uint64_t getType() const;
+    const uint128_t& getType() const;
 
     /** @internal @return the size in bytes of the serialized data */
     size_t getSize() const;

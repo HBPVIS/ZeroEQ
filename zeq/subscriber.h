@@ -62,7 +62,7 @@ public:
      * @param func the callback function on receive of event
      * @return true if callback could be registered
      */
-    bool registerHandler( const uint64_t event, const EventFunc& func );
+    bool registerHandler( const uint128_t& event, const EventFunc& func );
 
     /**
      * Deregister a callback for an event.
@@ -70,7 +70,7 @@ public:
      * @param event the event type of interest
      * @return true if callback could be deregistered
      */
-    bool deregisterHandler( const uint64_t event );
+    bool deregisterHandler( const uint128_t& event );
 
 private:
     detail::Subscriber* const _impl;

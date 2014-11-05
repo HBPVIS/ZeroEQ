@@ -9,7 +9,7 @@
 namespace zeq
 {
 
-Event::Event( const uint64_t type )
+Event::Event( const uint128_t& type )
     : _impl( new detail::Event( type ))
 {}
 
@@ -24,7 +24,7 @@ Event::~Event()
     delete _impl;
 }
 
-uint64_t Event::getType() const
+const uint128_t& Event::getType() const
 {
     return _impl->type;
 }

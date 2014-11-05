@@ -89,7 +89,7 @@ public:
             zmq_msg_init( &msg );
             zmq_msg_recv( &msg, entry.socket, 0 );
 
-            uint64_t type;
+            uint128_t type;
             memcpy( &type, zmq_msg_data( &msg ), sizeof(type) );
             const bool payload = zmq_msg_more( &msg );
             zmq_msg_close( &msg );
@@ -110,7 +110,7 @@ public:
         return true;
     }
 
-    bool registerHandler( const uint64_t event, const EventFunc& func )
+    bool registerHandler( const uint128_t& event, const EventFunc& func )
     {
         if( _eventFuncs.count( event ) != 0 )
             return false;
@@ -118,7 +118,7 @@ public:
         return true;
     }
 
-    bool deregisterHandler( const uint64_t event )
+    bool deregisterHandler( const uint128_t& event )
     {
         return _eventFuncs.erase( event ) > 0;
     }
@@ -176,7 +176,7 @@ private:
         return buildZmqURI( host, boost::lexical_cast< uint16_t >( port ));
     }
 
-    typedef std::map< uint64_t, EventFunc > EventFuncs;
+    typedef std::map< uint128_t, EventFunc > EventFuncs;
     typedef std::pair< std::string, void* > SocketType;
     typedef std::map< std::string, void* > SocketMap;
 
@@ -203,12 +203,12 @@ bool Subscriber::receive( const uint32_t timeout )
     return _impl->receive( timeout );
 }
 
-bool Subscriber::registerHandler( const uint64_t event, const EventFunc& func )
+bool Subscriber::registerHandler( const uint128_t& event, const EventFunc& func)
 {
     return _impl->registerHandler( event, func );
 }
 
-bool Subscriber::deregisterHandler( const uint64_t event )
+bool Subscriber::deregisterHandler( const uint128_t& event )
 {
     return _impl->deregisterHandler( event );
 }

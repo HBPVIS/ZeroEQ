@@ -19,7 +19,7 @@ namespace detail
 class Event : public boost::noncopyable
 {
 public:
-    Event( const uint64_t type_ )
+    Event( const uint128_t& type_ )
         : type( type_ )
     {}
 
@@ -44,7 +44,7 @@ public:
         memcpy( data.data(), data_, size );
     }
 
-    const uint64_t type;
+    const uint128_t type;
 
     /** store the serialized data in here */
     flatbuffers::FlatBufferBuilder fbb;
