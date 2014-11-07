@@ -24,7 +24,7 @@ zeq::Event serializeCamera( const std::vector< float >& matrix )
 
     zeq::Event event( vocabulary::EVENT_CAMERA );
 
-    flatbuffers::FlatBufferBuilder& fbb = event.getImpl()->fbb;
+    flatbuffers::FlatBufferBuilder& fbb = event.getFBB();
     CameraBuilder builder( fbb );
     builder.add_matrix( fbb.CreateVector( matrix.data(), 16 ));
     fbb.Finish( builder.Finish( ));
@@ -47,7 +47,7 @@ zeq::Event serializeSelection( const std::vector< unsigned int >& selection )
 {
     zeq::Event event( vocabulary::EVENT_SELECTION );
 
-    flatbuffers::FlatBufferBuilder& fbb = event.getImpl()->fbb;
+    flatbuffers::FlatBufferBuilder& fbb = event.getFBB();
     SelectionBuilder builder( fbb );
     builder.add_ids( fbb.CreateVector( selection.data(), selection.size() ));
     fbb.Finish( builder.Finish( ));

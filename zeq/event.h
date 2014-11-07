@@ -42,7 +42,7 @@ public:
     const void* getData() const;
 
     /** @internal @return serialization specific implementation */
-    detail::Event* getImpl();
+    flatbuffers::FlatBufferBuilder& getFBB();
 
 private:
     friend class detail::Subscriber;

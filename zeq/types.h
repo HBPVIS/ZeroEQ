@@ -22,4 +22,7 @@ typedef boost::function< void( const Event& ) > EventFunc;
 using lunchbox::uint128_t;
 }
 
+// internal
+namespace flatbuffers { class FlatBufferBuilder; }
+
 #endif

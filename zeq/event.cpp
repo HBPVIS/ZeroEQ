@@ -44,9 +44,9 @@ void Event::setData( const void* data, const size_t size )
     _impl->setData( data, size );
 }
 
-detail::Event* Event::getImpl()
+flatbuffers::FlatBufferBuilder& Event::getFBB()
 {
-    return _impl;
+    return _impl->fbb;
 }
 
 }
