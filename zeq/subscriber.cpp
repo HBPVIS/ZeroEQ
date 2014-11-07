@@ -91,6 +91,9 @@ public:
 
             uint128_t type;
             memcpy( &type, zmq_msg_data( &msg ), sizeof(type) );
+#ifdef LB_BIGEENDIAN
+            lunchbox::byteswap( type );
+#endif
             const bool payload = zmq_msg_more( &msg );
             zmq_msg_close( &msg );
 
