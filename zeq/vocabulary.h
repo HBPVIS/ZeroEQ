@@ -19,6 +19,8 @@ namespace zeq
  * lunchbox::make_uint128() using a unique string formed using the fully
  * qualified class name, including namespaces, of the event, e.g.,
  * lunchbox::make_uint128( "mynamespace::ExcitingEvent" ).
+ *
+ * Example: @include tests/newEvent.fbs @include tests/newEvent.cpp
  */
 namespace vocabulary
 {
