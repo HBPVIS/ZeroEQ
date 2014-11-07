@@ -61,7 +61,7 @@ public:
         const uint128_t& type = event.getType();
 #else
         uint128_t type = event.getType();
-        lunchbox::byteswap( type );
+        lunchbox::byteswap( type ); // convert to little endian wire protocol
 #endif
         zmq_msg_t msgHeader;
         zmq_msg_init_size( &msgHeader, sizeof(type));
