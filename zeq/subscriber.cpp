@@ -66,7 +66,7 @@ public:
         if( _service.isBrowsing( ))
             _refreshConnections();
 
-        const int iPoll = zmq_poll( _entries.data(), _entries.size(),
+        const int iPoll = zmq_poll( _entries.data(), int(_entries.size( )),
                                     timeout == LB_TIMEOUT_INDEFINITE? -1
                                                                     : timeout );
         if( iPoll == -1 )

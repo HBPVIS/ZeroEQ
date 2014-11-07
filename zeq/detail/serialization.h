@@ -37,7 +37,7 @@ std::vector< float > deserializeCamera( const zeq::Event& camera )
     LBASSERT( data->matrix()->Length() == 16 );
 
     std::vector< float > returnMatrix( data->matrix()->Length( ));
-    for( size_t i = 0; i < data->matrix()->Length(); ++i )
+    for( flatbuffers::uoffset_t i = 0; i < data->matrix()->Length(); ++i )
         returnMatrix[i] = data->matrix()->Get(i);
     return returnMatrix;
 }
@@ -59,7 +59,7 @@ std::vector< unsigned int > deserializeSelection( const zeq::Event& selection )
     auto data = GetSelection( selection.getData( ));
 
     std::vector< unsigned int > returnSelection( data->ids()->Length( ));
-    for( size_t i = 0; i < data->ids()->Length(); ++i )
+    for( flatbuffers::uoffset_t i = 0; i < data->ids()->Length(); ++i )
         returnSelection[i] = data->ids()->Get(i);
     return returnSelection;
 }

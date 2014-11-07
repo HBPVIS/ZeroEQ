@@ -27,5 +27,8 @@ set(ZEQ_SOURCES
   vocabulary.cpp)
 
 set(ZEQ_LINK_LIBRARIES ${LUNCHBOX_LIBRARIES} ${LIBZMQ_LIBRARIES})
+if(MSVC)
+  list(APPEND ZEQ_LINK_LIBRARIES Ws2_32)
+endif()
 
 common_library(zeq)

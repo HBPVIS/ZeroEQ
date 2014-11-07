@@ -8,6 +8,7 @@
 #define ZEQ_PUBLISHER_H
 
 #include <boost/noncopyable.hpp>
+#include <zeq/api.h>
 #include <zeq/types.h>
 
 namespace zeq
@@ -24,9 +25,9 @@ public:
      *
      * @param uri publishing URI in the format scheme://[*|host|IP|IF][:port]
      */
-    explicit Publisher( const lunchbox::URI& uri );
+    ZEQ_API explicit Publisher( const lunchbox::URI& uri );
 
-    ~Publisher();
+    ZEQ_API ~Publisher();
 
     /**
      * Publish the given event to any subscriber.
@@ -36,7 +37,7 @@ public:
      * @param event the serialized event to publish
      * @return true if publish was successful
      */
-    bool publish( const Event& event );
+    ZEQ_API bool publish( const Event& event );
 
 private:
     detail::Publisher* const _impl;
