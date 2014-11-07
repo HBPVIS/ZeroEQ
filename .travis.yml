@@ -20,6 +20,7 @@ before_install:
  - sudo apt-get update -qq
  - sudo apt-get install -qq autoconf || /bin/true
  - sudo apt-get install -qq automake || /bin/true
+ - sudo apt-get install -qq avahi-daemon || /bin/true
  - sudo apt-get install -qq clang || /bin/true
  - sudo apt-get install -qq clang-format-3.5 || /bin/true
  - sudo apt-get install -qq cmake || /bin/true
@@ -39,8 +40,10 @@ before_install:
  - sudo apt-get install -qq libhwloc-dev || /bin/true
  - sudo apt-get install -qq libjpeg-turbo8-dev || /bin/true
  - sudo apt-get install -qq libleveldb-dev || /bin/true
+ - sudo apt-get install -qq libopenmpi-dev || /bin/true
  - sudo apt-get install -qq libturbojpeg || /bin/true
  - sudo apt-get install -qq libzmq3-dev || /bin/true
  - sudo apt-get install -qq ninja-build || /bin/true
+ - sudo apt-get install -qq openmpi-bin || /bin/true
  - sudo apt-get install -qq pkg-config || /bin/true
  - sudo apt-get install -qq subversion || /bin/true
