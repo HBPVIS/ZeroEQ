@@ -1,0 +1,8 @@
+
+namespace zeqtest;
+
+table Message {
+  message:string;
+}
+
+root_type Message;

@@ -12,8 +12,8 @@
 #include <boost/lexical_cast.hpp>
 #include <lunchbox/log.h>
 #include <lunchbox/servus.h>
-#include <map>
 #include <zmq.h>
+#include <map>
 
 // for NI_MAXHOST
 #ifdef _WIN32
@@ -57,7 +57,12 @@ public:
 
     bool publish( const zeq::Event& event )
     {
-        const uint64_t type = event.getType();
+#ifdef LB_LITTLEENDIAN
+        const uint128_t& type = event.getType();
+#else
+        uint128_t type = event.getType();
+        lunchbox::byteswap( type ); // convert to little endian wire protocol
+#endif
         zmq_msg_t msgHeader;
         zmq_msg_init_size( &msgHeader, sizeof(type));
         memcpy( zmq_msg_data(&msgHeader), &type, sizeof(type));

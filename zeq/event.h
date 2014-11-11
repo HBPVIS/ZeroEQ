@@ -14,7 +14,7 @@ namespace zeq
 namespace detail { class Subscriber; class Event; }
 
 /**
- * An event can notify other subscribers of a state change.
+ * An event is emitted by a Publisher to notify Subscriber of a change.
  *
  * Events are published via zeq::Publisher and received via zeq::Subscriber. The
  * format of the serialized data is specific to the serialization backend.
@@ -26,7 +26,7 @@ public:
      * Construct a new event of the given type
      * @param type the desired event type
      */
-    ZEQ_API explicit Event( const uint64_t type );
+    ZEQ_API explicit Event( const uint128_t& type );
 
     /** Move ctor @internal */
     Event( Event&& rhs );
@@ -34,7 +34,7 @@ public:
     ZEQ_API ~Event();
 
     /** @return the type of this event */
-    ZEQ_API uint64_t getType() const;
+    ZEQ_API const uint128_t& getType() const;
 
     /** @internal @return the size in bytes of the serialized data */
     ZEQ_API size_t getSize() const;
@@ -43,7 +43,7 @@ public:
     const void* getData() const;
 
     /** @internal @return serialization specific implementation */
-    detail::Event* getImpl();
+    flatbuffers::FlatBufferBuilder& getFBB();
 
 private:
     friend class detail::Subscriber;

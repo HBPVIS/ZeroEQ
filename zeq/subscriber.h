@@ -31,7 +31,7 @@ public:
      */
     ZEQ_API explicit Subscriber( const lunchbox::URI& uri );
 
-    /**
+    /*
      * Create a shared subscription to one or more publishers.
      *
      * A receive on any Subscriber of a shared group will work on all
@@ -63,7 +63,7 @@ public:
      * @param func the callback function on receive of event
      * @return true if callback could be registered
      */
-    ZEQ_API bool registerHandler( const uint64_t event, const EventFunc& func );
+    ZEQ_API bool registerHandler( const uint128_t& event, const EventFunc& func );
 
     /**
      * Deregister a callback for an event.
@@ -71,7 +71,7 @@ public:
      * @param event the event type of interest
      * @return true if callback could be deregistered
      */
-    ZEQ_API bool deregisterHandler( const uint64_t event );
+    ZEQ_API bool deregisterHandler( const uint128_t& event );
 
 private:
     detail::Subscriber* const _impl;
