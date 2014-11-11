@@ -51,6 +51,7 @@ public:
      * @param timeout timeout in ms for poll, default blocking poll until at
      *                least one event is received
      * @return true if at least one event was received
+     * @throw std::runtime_error when polling the publishers failed.
      */
     ZEQ_API bool receive( const uint32_t timeout = LB_TIMEOUT_INDEFINITE );
 
@@ -63,7 +64,8 @@ public:
      * @param func the callback function on receive of event
      * @return true if callback could be registered
      */
-    ZEQ_API bool registerHandler( const uint128_t& event, const EventFunc& func );
+    ZEQ_API bool registerHandler( const uint128_t& event,
+                                  const EventFunc& func );
 
     /**
      * Deregister a callback for an event.

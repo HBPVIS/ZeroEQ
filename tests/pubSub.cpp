@@ -1,11 +1,42 @@
 
 /* Copyright (c) 2014, Human Brain Project
  *                     Daniel Nachbaur <daniel.nachbaur@epfl.ch>
+ *                     Stefan.Eilemann@epfl.ch
  */
 
 #include "broker.h"
 
+#include <lunchbox/sleep.h>
+#include <lunchbox/thread.h>
 #include <boost/bind.hpp>
+
+namespace
+{
+class Publisher : public lunchbox::Thread
+{
+public:
+    Publisher()
+        : running( true )
+        , _publisher( lunchbox::URI( "foo://" ))
+    {}
+
+    void run() override
+    {
+        running = true;
+        while( running )
+        {
+            BOOST_CHECK( _publisher.publish(
+                             zeq::vocabulary::serializeCamera( test::camera )));
+            lunchbox::sleep( 100 );
+        }
+    }
+
+    bool running;
+
+private:
+    zeq::Publisher _publisher;
+};
+}
 
 BOOST_AUTO_TEST_CASE(test_subscribe_to_same_schema)
 {
@@ -74,6 +105,20 @@ BOOST_AUTO_TEST_CASE(test_publish_receive_zeroconf)
         }
     }
     BOOST_CHECK( received );
+}
+
+BOOST_AUTO_TEST_CASE(test_publish_blocking_receive_zeroconf)
+{
+    zeq::Subscriber subscriber( lunchbox::URI( "foo://" ));
+    BOOST_CHECK( subscriber.registerHandler( zeq::vocabulary::EVENT_CAMERA,
+                                      boost::bind( &test::onCameraEvent, _1 )));
+
+    Publisher publisher;
+    publisher.start();
+    BOOST_CHECK( subscriber.receive( ));
+
+    publisher.running = false;
+    BOOST_CHECK( publisher.join( ));
 }
 
 BOOST_AUTO_TEST_CASE(test_publish_receive_late_zeroconf)
