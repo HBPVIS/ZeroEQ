@@ -47,6 +47,12 @@ BOOST_AUTO_TEST_CASE(test_publish_receive)
     BOOST_CHECK( received );
 }
 
+BOOST_AUTO_TEST_CASE(test_no_receive)
+{
+    zeq::Subscriber subscriber( lunchbox::URI( "foo://" ));
+    BOOST_CHECK( !subscriber.receive( 100 ));
+}
+
 BOOST_AUTO_TEST_CASE(test_publish_receive_zeroconf)
 {
     zeq::Publisher publisher( lunchbox::URI( "foo://" ));
