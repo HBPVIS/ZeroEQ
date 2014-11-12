@@ -23,11 +23,16 @@ public:
     void run() override
     {
         running = true;
+        size_t i = 0;
         while( running )
         {
             BOOST_CHECK( _publisher.publish(
                              zeq::vocabulary::serializeCamera( test::camera )));
             lunchbox::sleep( 100 );
+            ++i;
+
+            if( i > 20 )
+                LBTHROW( std::runtime_error( "Publisher giving up after 2s" ));
         }
     }
 
