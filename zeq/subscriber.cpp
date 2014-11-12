@@ -123,6 +123,7 @@ private:
         entry.socket = _subscribers[zmqURI];
         entry.events = ZMQ_POLLIN;
         _entries.push_back( entry );
+        LBINFO << "Subscribed to " << zmqURI << std::endl;
     }
 
 
