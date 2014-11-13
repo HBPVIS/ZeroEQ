@@ -31,8 +31,8 @@ public:
             lunchbox::sleep( 100 );
             ++i;
 
-            if( i > 20 )
-                LBTHROW( std::runtime_error( "Publisher giving up after 2s" ));
+            if( i > 200 )
+                LBTHROW( std::runtime_error( "Publisher giving up after 20s" ));
         }
     }
 
