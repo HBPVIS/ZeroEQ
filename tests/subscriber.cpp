@@ -51,5 +51,5 @@ BOOST_AUTO_TEST_CASE(test_invalid_deregisterhandler)
 
     BOOST_CHECK( subscriber.registerHandler( zeq::vocabulary::EVENT_CAMERA,
                                       boost::bind( &test::onCameraEvent, _1 )));
-    BOOST_CHECK( !subscriber.deregisterHandler(zeq::vocabulary::EVENT_INVALID));
+    BOOST_CHECK( !subscriber.deregisterHandler(zeq::vocabulary::EVENT_EXIT ));
 }

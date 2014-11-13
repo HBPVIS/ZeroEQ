@@ -32,7 +32,6 @@ using lunchbox::make_uint128;
 static const uint128_t EVENT_EXIT( make_uint128( "zeq::ExitEvent" ));
 static const uint128_t EVENT_CAMERA( make_uint128( "zeq::CameraEvent" ));
 static const uint128_t EVENT_SELECTION( make_uint128( "zeq::SelectionEvent" ));
-static const uint128_t EVENT_INVALID( make_uint128( "zeq::InvalidEvent" ));
 //@}
 
 /**
