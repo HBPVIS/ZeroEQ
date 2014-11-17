@@ -10,6 +10,7 @@
 
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
+#include <lunchbox/clock.h>
 #include <lunchbox/log.h>
 #include <lunchbox/servus.h>
 #include <zmq.h>
@@ -64,55 +65,9 @@ public:
     bool receive( const uint32_t timeout )
     {
         if( _service.isBrowsing( ))
-            _refreshConnections();
-
-        const int iPoll = zmq_poll( _entries.data(), int(_entries.size( )),
-                                    timeout == LB_TIMEOUT_INDEFINITE? -1
-                                                                    : timeout );
-        if( iPoll == -1 )
-        {
-            LBWARN << "Cannot poll, got " << zmq_strerror( zmq_errno( ))
-                   << std::endl;
-            return false;
-        }
-
-        if( iPoll == 0 )
-            /* No events signaled during poll */
-            return false;
-
-        BOOST_FOREACH( const zmq_pollitem_t& entry, _entries )
-        {
-            if( !( entry.revents & ZMQ_POLLIN ))
-                continue;
-
-            zmq_msg_t msg;
-            zmq_msg_init( &msg );
-            zmq_msg_recv( &msg, entry.socket, 0 );
-
-            uint128_t type;
-            memcpy( &type, zmq_msg_data( &msg ), sizeof(type) );
-#ifdef LB_BIGEENDIAN
-            lunchbox::byteswap( type ); // convert from little endian wire
-#endif
-            const bool payload = zmq_msg_more( &msg );
-            zmq_msg_close( &msg );
-
-            zeq::Event event( type );
-            if( payload )
-            {
-                zmq_msg_init( &msg );
-                zmq_msg_recv( &msg, entry.socket, 0 );
-                event.setData( zmq_msg_data( &msg ), zmq_msg_size( &msg ));
-                zmq_msg_close( &msg );
-            }
-
-            if( _eventFuncs.count( type ) != 0 )
-                _eventFuncs[type]( event );
-        }
-
-        return true;
+            return _receiveAndUpdate( timeout );
+        return _receive( timeout );
     }
-
     bool registerHandler( const uint128_t& event, const EventFunc& func )
     {
         if( _eventFuncs.count( event ) != 0 )
@@ -168,6 +123,98 @@ private:
         entry.socket = _subscribers[zmqURI];
         entry.events = ZMQ_POLLIN;
         _entries.push_back( entry );
+        LBINFO << "Subscribed to " << zmqURI << std::endl;
+    }
+
+
+    bool _receive( const uint32_t timeout )
+    {
+        switch( zmq_poll( _entries.data(), int(_entries.size( )),
+                          timeout == LB_TIMEOUT_INDEFINITE ? -1 : timeout ))
+        {
+        case -1: // error
+            LBTHROW( std::runtime_error( std::string( "Poll error: " ) +
+                                         zmq_strerror( zmq_errno( ))));
+        case 0: // timeout; no events signaled during poll
+            return false;
+
+        default:
+            _process();
+            return true;
+        }
+    }
+
+    bool _receiveAndUpdate( const uint32_t timeout )
+    {
+        if( timeout == LB_TIMEOUT_INDEFINITE )
+            return _receiveAndUpdate();
+
+        // Never fully block. Check at least ten times or every second during a
+        // receive for new connections from zeroconf (#20)
+        const uint32_t block = std::min( 1000u, timeout / 10 );
+
+        lunchbox::Clock timer;
+        while( true )
+        {
+            _refreshConnections();
+
+            const uint64_t elapsed = timer.getTime64();
+            long wait = 0;
+            if( elapsed < timeout )
+                wait = std::min( timeout - uint32_t( elapsed ), block );
+
+            if( _receive( wait ))
+                return true;
+
+            if( elapsed >= timeout )
+                return false;
+        }
+    }
+
+    bool _receiveAndUpdate()
+    {
+        while( true )
+        {
+            _refreshConnections();
+
+            // Never fully block. Check every second during a receive for new
+            // connections from zeroconf (#20)
+            if( _receive( 1000 ))
+                return true;
+        }
+    }
+
+    void _process()
+    {
+        BOOST_FOREACH( const zmq_pollitem_t& entry, _entries )
+        {
+            if( !( entry.revents & ZMQ_POLLIN ))
+                continue;
+
+            zmq_msg_t msg;
+            zmq_msg_init( &msg );
+            zmq_msg_recv( &msg, entry.socket, 0 );
+
+            uint128_t type;
+            memcpy( &type, zmq_msg_data( &msg ), sizeof(type) );
+#ifdef LB_BIGEENDIAN
+            lunchbox::byteswap( type ); // convert from little endian wire
+#endif
+            const bool payload = zmq_msg_more( &msg );
+            zmq_msg_close( &msg );
+
+            zeq::Event event( type );
+            if( payload )
+            {
+                zmq_msg_init( &msg );
+                zmq_msg_recv( &msg, entry.socket, 0 );
+                event.setData( zmq_msg_data( &msg ), zmq_msg_size( &msg ));
+                zmq_msg_close( &msg );
+            }
+
+            if( _eventFuncs.count( type ) != 0 )
+                _eventFuncs[type]( event );
+        }
     }
 
     std::string _getZmqURI( const std::string& instance )
