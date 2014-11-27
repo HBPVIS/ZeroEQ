@@ -4,6 +4,14 @@
  *                     Stefan.Eilemann@epfl.ch
  */
 
+// for NI_MAXHOST
+#ifdef _WIN32
+#define NOMINMAX
+#  include <Ws2tcpip.h>
+#else
+#  include <netdb.h>
+#endif
+
 #include "subscriber.h"
 #include "event.h"
 #include "detail/broker.h"
@@ -15,13 +23,6 @@
 #include <lunchbox/servus.h>
 #include <zmq.h>
 #include <map>
-
-// for NI_MAXHOST
-#ifdef _WIN32
-#  include <Ws2tcpip.h>
-#else
-#  include <netdb.h>
-#endif
 
 namespace zeq
 {
@@ -151,7 +152,7 @@ private:
 
         // Never fully block. Check at least ten times or every second during a
         // receive for new connections from zeroconf (#20)
-        const uint32_t block = (std::min)( 1000u, timeout / 10 );
+        const uint32_t block = std::min( 1000u, timeout / 10 );
 
         lunchbox::Clock timer;
         while( true )
@@ -161,7 +162,7 @@ private:
             const uint64_t elapsed = timer.getTime64();
             long wait = 0;
             if( elapsed < timeout )
-                wait = (std::min)( timeout - uint32_t( elapsed ), block );
+                wait = std::min( timeout - uint32_t( elapsed ), block );
 
             if( _receive( wait ))
                 return true;
