@@ -29,7 +29,7 @@ public:
     ZEQ_API explicit Event( const uint128_t& type );
 
     /** Move ctor @internal */
-    ZEQ_API Event(Event&& rhs);
+    ZEQ_API Event( Event&& rhs );
 
     ZEQ_API ~Event();
 
