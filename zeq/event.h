@@ -29,7 +29,7 @@ public:
     ZEQ_API explicit Event( const uint128_t& type );
 
     /** Move ctor @internal */
-    Event( Event&& rhs );
+    ZEQ_API Event( Event&& rhs );
 
     ZEQ_API ~Event();
 
@@ -40,10 +40,10 @@ public:
     ZEQ_API size_t getSize() const;
 
     /** @internal @return the serialized data */
-    const void* getData() const;
+    ZEQ_API const void* getData() const;
 
     /** @internal @return serialization specific implementation */
-    flatbuffers::FlatBufferBuilder& getFBB();
+    ZEQ_API flatbuffers::FlatBufferBuilder& getFBB();
 
 private:
     friend class detail::Subscriber;

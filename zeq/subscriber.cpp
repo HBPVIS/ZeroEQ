@@ -4,6 +4,14 @@
  *                     Stefan.Eilemann@epfl.ch
  */
 
+// for NI_MAXHOST
+#ifdef _WIN32
+#define NOMINMAX
+#  include <Ws2tcpip.h>
+#else
+#  include <netdb.h>
+#endif
+
 #include "subscriber.h"
 #include "event.h"
 #include "detail/broker.h"
@@ -15,13 +23,6 @@
 #include <lunchbox/servus.h>
 #include <zmq.h>
 #include <map>
-
-// for NI_MAXHOST
-#ifdef _WIN32
-#  include <Ws2tcpip.h>
-#else
-#  include <netdb.h>
-#endif
 
 namespace zeq
 {
