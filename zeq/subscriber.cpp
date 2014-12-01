@@ -42,6 +42,10 @@ public:
 
         if( uri.getHost().empty() || uri.getPort() == 0 )
         {
+            if( !lunchbox::Servus::isAvailable( ))
+                LBTHROW( std::runtime_error(
+                             std::string( "Empty servus implementation" )));
+
             _service.beginBrowsing( lunchbox::Servus::IF_ALL );
             _refreshConnections();
         }

@@ -5,7 +5,7 @@
  */
 
 #include "broker.h"
-
+#include <lunchbox/servus.h>
 #include <boost/bind.hpp>
 
 BOOST_AUTO_TEST_CASE(test_subscribe)
@@ -52,4 +52,13 @@ BOOST_AUTO_TEST_CASE(test_invalid_deregisterhandler)
     BOOST_CHECK( subscriber.registerHandler( zeq::vocabulary::EVENT_CAMERA,
                                       boost::bind( &test::onCameraEvent, _1 )));
     BOOST_CHECK( !subscriber.deregisterHandler(zeq::vocabulary::EVENT_EXIT ));
+}
+
+BOOST_AUTO_TEST_CASE(test_not_implemented_servus )
+{
+    if( lunchbox::Servus::isAvailable( ) )
+        return;
+
+    const lunchbox::URI uri( "foo://" );
+    BOOST_CHECK_THROW( zeq::Subscriber subscriber( uri ), std::runtime_error );
 }

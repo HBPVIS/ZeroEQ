@@ -8,6 +8,7 @@
 
 #include <lunchbox/sleep.h>
 #include <lunchbox/thread.h>
+#include <lunchbox/servus.h>
 #include <boost/bind.hpp>
 
 namespace
@@ -91,6 +92,9 @@ BOOST_AUTO_TEST_CASE(test_no_receive)
 
 BOOST_AUTO_TEST_CASE(test_publish_receive_zeroconf)
 {
+    if( !lunchbox::Servus::isAvailable( ) )
+        return;
+
     zeq::Publisher publisher( lunchbox::URI( "foo://" ));
     zeq::Subscriber subscriber( lunchbox::URI( "foo://" ));
 
@@ -114,6 +118,9 @@ BOOST_AUTO_TEST_CASE(test_publish_receive_zeroconf)
 
 BOOST_AUTO_TEST_CASE(test_publish_blocking_receive_zeroconf)
 {
+    if( !lunchbox::Servus::isAvailable( ) )
+        return;
+
     zeq::Subscriber subscriber( lunchbox::URI( "foo://" ));
     BOOST_CHECK( subscriber.registerHandler( zeq::vocabulary::EVENT_CAMERA,
                                       boost::bind( &test::onCameraEvent, _1 )));
@@ -128,6 +135,9 @@ BOOST_AUTO_TEST_CASE(test_publish_blocking_receive_zeroconf)
 
 BOOST_AUTO_TEST_CASE(test_publish_receive_late_zeroconf)
 {
+    if( !lunchbox::Servus::isAvailable( ) )
+        return;
+
     zeq::Subscriber subscriber( lunchbox::URI( "foo://" ));
     zeq::Publisher publisher( lunchbox::URI( "foo://" ));
 
@@ -150,6 +160,9 @@ BOOST_AUTO_TEST_CASE(test_publish_receive_late_zeroconf)
 
 BOOST_AUTO_TEST_CASE(test_publish_receive_empty_event)
 {
+    if( !lunchbox::Servus::isAvailable( ) )
+        return;
+
     zeq::Publisher publisher( lunchbox::URI( "foo://" ));
     zeq::Subscriber subscriber( lunchbox::URI( "foo://" ));
 
