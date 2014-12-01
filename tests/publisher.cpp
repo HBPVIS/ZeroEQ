@@ -36,6 +36,9 @@ BOOST_AUTO_TEST_CASE(test_publish_empty_event)
 
 BOOST_AUTO_TEST_CASE(test_multiple_publisher_on_same_host)
 {
+    if( !lunchbox::Servus::isAvailable( ) )
+        return;
+
     zeq::Publisher publisher1( lunchbox::URI( test::buildURI( "*" )));
     zeq::Publisher publisher2( lunchbox::URI( test::buildURI( "*" )));
     zeq::Publisher publisher3( lunchbox::URI( test::buildURI( "*" )));
@@ -45,3 +48,4 @@ BOOST_AUTO_TEST_CASE(test_multiple_publisher_on_same_host)
             service.discover( lunchbox::Servus::IF_ALL, 1000 );
     BOOST_CHECK_EQUAL( instances.size(), 3 );
 }
+
