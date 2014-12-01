@@ -105,9 +105,12 @@ private:
         if( host.empty() || port == 0 )
             _resolveHostAndPort( host, port );
 
-        const std::string instance = host + ":" +
-                                     boost::lexical_cast< std::string >( port );
-        _service.announce( port, instance );
+        if( lunchbox::Servus::isAvailable( ) )
+        {
+            const std::string instance = host + ":" +
+                                         boost::lexical_cast< std::string >( port );
+            _service.announce( port, instance );
+        }
     }
 
     void _resolveHostAndPort( std::string& host, uint16_t& port )
