@@ -35,15 +35,16 @@ public:
         , _publisher( zmq_socket( _context, ZMQ_PUB ))
         , _service( std::string( "_" ) + uri.getScheme() + "._tcp" )
     {
-        if( zmq_bind( _publisher, buildZmqURI( uri ).c_str( )) == -1 )
+        const std::string& zmqURI = buildZmqURI( uri );
+        if( zmq_bind( _publisher, zmqURI.c_str( )) == -1 )
         {
             zmq_close( _publisher );
             zmq_ctx_destroy( _context );
             _publisher = 0;
 
             LBTHROW( std::runtime_error(
-                         std::string( "Cannot bind publisher socket, got " ) +
-                                      zmq_strerror( zmq_errno( ))));
+                         std::string( "Cannot bind publisher socket '" ) +
+                         zmqURI + "', got " + zmq_strerror( zmq_errno( ))));
         }
 
         _initService( uri.getHost(), uri.getPort( ));
