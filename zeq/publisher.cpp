@@ -104,7 +104,10 @@ private:
             host.clear();
 
         if( host.empty() || port == 0 )
+        {
             _resolveHostAndPort( host, port );
+            LBINFO << "Bound publisher to " << host << ":" << port << std::endl;
+        }
 
         if( lunchbox::Servus::isAvailable( ) )
         {
