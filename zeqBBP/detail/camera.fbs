@@ -1,0 +1,8 @@
+
+namespace zeq.bbp;
+
+table Camera {
+  matrix:[float];
+}
+
+root_type Camera;
