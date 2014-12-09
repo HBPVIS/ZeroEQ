@@ -23,10 +23,18 @@ BOOST_AUTO_TEST_CASE(test_serialization)
     const std::vector< unsigned int > selection(
         ids, ids + sizeof(ids) / sizeof(unsigned int) );
     const zeq::Event& selection_event =
-        zeq::bbp::serializeSelection( selection );
+        zeq::bbp::serializeSelectedIDs( selection );
     const std::vector< unsigned int >& deserialized_selection =
-            zeq::bbp::deserializeSelection( selection_event );
+            zeq::bbp::deserializeSelectedIDs( selection_event );
     BOOST_CHECK_EQUAL_COLLECTIONS(
         selection.begin(), selection.end(),
         deserialized_selection.begin(), deserialized_selection.end( ));
+
+    const zeq::Event& toggleRequest_event =
+        zeq::bbp::serializeToggleIDRequest( selection );
+    const std::vector< unsigned int >& deserialized_toggleRequest =
+            zeq::bbp::deserializeToggleIDRequest( toggleRequest_event );
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        selection.begin(), selection.end(),
+        deserialized_toggleRequest.begin(), deserialized_toggleRequest.end( ));
 }

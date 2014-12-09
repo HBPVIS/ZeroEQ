@@ -3,9 +3,13 @@
 //
 namespace zeq.bbp;
 
-table Camera
+table SelectedIDs
 {
-  matrix:[float];
+  ids:[uint];
 }
 
-root_type Camera;
+table ToggleIDRequest
+{
+  ids:[uint];
+}
+

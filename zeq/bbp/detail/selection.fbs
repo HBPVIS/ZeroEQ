@@ -1,8 +1,0 @@
-
-namespace zeq.bbp;
-
-table Selection {
-  ids:[uint];
-}
-
-root_type Selection;
