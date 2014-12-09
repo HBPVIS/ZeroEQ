@@ -29,6 +29,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#define BOOST_TEST_MODULE zeq_new_event
+
 #include "broker.h"
 
 #include <tests/newEvent_generated.h>

@@ -4,15 +4,20 @@
  *                     Stefan.Eilemann@epfl.ch
  */
 
+#define BOOST_TEST_MODULE zeq_pub_sub
+
 #include "broker.h"
 
 #include <lunchbox/sleep.h>
 #include <lunchbox/thread.h>
 #include <lunchbox/servus.h>
+
 #include <boost/bind.hpp>
 
 #include <random>
 #include <chrono>
+
+using namespace zeq::vocabulary;
 
 namespace
 {
@@ -30,8 +35,8 @@ public:
         size_t i = 0;
         while( running )
         {
-            BOOST_CHECK( _publisher.publish(
-                             zeq::vocabulary::serializeCamera( test::camera )));
+            BOOST_CHECK(
+                _publisher.publish( serializeEcho( test::echoMessage )));
             lunchbox::sleep( 100 );
             ++i;
 
@@ -102,16 +107,15 @@ BOOST_AUTO_TEST_CASE(test_publish_receive)
     const unsigned short port = (rng.get<uint16_t>() % 60000) + 1024;
     const std::string& portStr = boost::lexical_cast< std::string >( port );
     zeq::Subscriber subscriber( lunchbox::URI( "foo://localhost:" + portStr ));
-    BOOST_CHECK( subscriber.registerHandler( zeq::vocabulary::EVENT_CAMERA,
-                                      boost::bind( &test::onCameraEvent, _1 )));
+    BOOST_CHECK( subscriber.registerHandler(
+                     EVENT_ECHO, boost::bind( &test::onEchoEvent, _1 )));
 
     zeq::Publisher publisher( lunchbox::URI( "foo://*:" + portStr ));
 
     bool received = false;
     for( size_t i = 0; i < 10; ++i )
     {
-        BOOST_CHECK( publisher.publish(
-                         zeq::vocabulary::serializeCamera( test::camera )));
+        BOOST_CHECK( publisher.publish( serializeEcho( test::echoMessage )));
 
         if( subscriber.receive( 100 ))
         {
@@ -149,14 +153,14 @@ BOOST_AUTO_TEST_CASE(test_publish_receive_zeroconf)
     zeq::Publisher publisher( lunchbox::URI( "foo://" ));
     zeq::Subscriber subscriber( lunchbox::URI( "foo://" ));
 
-    BOOST_CHECK( subscriber.registerHandler( zeq::vocabulary::EVENT_CAMERA,
-                                      boost::bind( &test::onCameraEvent, _1 )));
+    BOOST_CHECK( subscriber.registerHandler(
+                     EVENT_ECHO, boost::bind( &test::onEchoEvent, _1 )));
 
     bool received = false;
     for( size_t i = 0; i < 20; ++i )
     {
         BOOST_CHECK( publisher.publish(
-                         zeq::vocabulary::serializeCamera( test::camera )));
+                         zeq::vocabulary::serializeEcho( test::echoMessage )));
 
         if( subscriber.receive( 100 ))
         {
@@ -173,8 +177,8 @@ BOOST_AUTO_TEST_CASE(test_publish_blocking_receive_zeroconf)
         return;
 
     zeq::Subscriber subscriber( lunchbox::URI( "foo://" ));
-    BOOST_CHECK( subscriber.registerHandler( zeq::vocabulary::EVENT_CAMERA,
-                                      boost::bind( &test::onCameraEvent, _1 )));
+    BOOST_CHECK( subscriber.registerHandler(
+                     EVENT_ECHO, boost::bind( &test::onEchoEvent, _1 )));
 
     Publisher publisher;
     publisher.start();
@@ -192,13 +196,12 @@ BOOST_AUTO_TEST_CASE(test_publish_receive_late_zeroconf)
     zeq::Subscriber subscriber( lunchbox::URI( "foo://" ));
     zeq::Publisher publisher( lunchbox::URI( "foo://" ));
 
-    BOOST_CHECK( subscriber.registerHandler( zeq::vocabulary::EVENT_CAMERA,
-                                      boost::bind( &test::onCameraEvent, _1 )));
+    BOOST_CHECK( subscriber.registerHandler(
+                     EVENT_ECHO, boost::bind( &test::onEchoEvent, _1 )));
     bool received = false;
     for( size_t i = 0; i < 20; ++i )
     {
-        BOOST_CHECK( publisher.publish(
-                         zeq::vocabulary::serializeCamera( test::camera )));
+        BOOST_CHECK( publisher.publish( serializeEcho( test::echoMessage )));
 
         if( subscriber.receive( 100 ))
         {
@@ -218,10 +221,10 @@ BOOST_AUTO_TEST_CASE(test_publish_receive_empty_event_zeroconf)
     zeq::Publisher publisher( lunchbox::URI( "foo://" ));
     zeq::Subscriber subscriber( lunchbox::URI( "foo://" ));
 
-    BOOST_CHECK( subscriber.registerHandler( zeq::vocabulary::EVENT_EXIT,
-                                        boost::bind( &test::onExitEvent, _1 )));
+    BOOST_CHECK( subscriber.registerHandler(
+                     EVENT_EXIT, boost::bind( &test::onExitEvent, _1 )));
     bool received = false;
-    const zeq::Event event( zeq::vocabulary::EVENT_EXIT );
+    const zeq::Event event( EVENT_EXIT );
     for( size_t i = 0; i < 20; ++i )
     {
         BOOST_CHECK( publisher.publish( event ));

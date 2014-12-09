@@ -4,6 +4,8 @@
  *                     Stefan.Eilemann@epfl.ch
  */
 
+#define BOOST_TEST_MODULE zeq_publisher
+
 #include "broker.h"
 
 #include <lunchbox/servus.h>
@@ -25,7 +27,7 @@ BOOST_AUTO_TEST_CASE(test_publish)
 {
     zeq::Publisher publisher( lunchbox::URI( test::buildURI( "*" )));
     BOOST_CHECK( publisher.publish(
-                     zeq::vocabulary::serializeCamera( test::camera )));
+                     zeq::vocabulary::serializeEcho( test::echoMessage )));
 }
 
 BOOST_AUTO_TEST_CASE(test_publish_empty_event)
