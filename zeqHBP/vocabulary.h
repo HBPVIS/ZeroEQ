@@ -1,27 +1,28 @@
 
 /* Copyright (c) 2014, Human Brain Project
  *                     Daniel Nachbaur <daniel.nachbaur@epfl.ch>
+ *                     Juan Hernando <jhernando@fi.upm.es>
  */
 
-#ifndef ZEQ_BBP_VOCABULARY_H
-#define ZEQ_BBP_VOCABULARY_H
+#ifndef ZEQ_HBP_VOCABULARY_H
+#define ZEQ_HBP_VOCABULARY_H
 
 #include <zeq/types.h>
 #include <zeq/api.h>
 
 namespace zeq
 {
-namespace bbp
+namespace hbp
 {
 
-/** @group BBP messages */
+/** @group HBP messages */
 //@{
 static const uint128_t EVENT_CAMERA(
-    lunchbox::make_uint128( "bbp::CameraEvent" ));
+    lunchbox::make_uint128( "hbp::CameraEvent" ));
 static const uint128_t EVENT_SELECTED_IDS(
-    lunchbox::make_uint128( "bbp::SelectedIDsEvent" ));
+    lunchbox::make_uint128( "hbp::SelectedIDsEvent" ));
 static const uint128_t EVENT_TOGGLE_ID_REQUEST(
-    lunchbox::make_uint128( "bbp::ToggleIDRequest" ));
+    lunchbox::make_uint128( "hbp::ToggleIDRequest" ));
 //@}
 
 /**

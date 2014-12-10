@@ -5,8 +5,8 @@
 
 #include "vocabulary.h"
 
-#include "zeqBBP/camera_generated.h"
-#include "zeqBBP/selections_generated.h"
+#include "zeqHBP/camera_generated.h"
+#include "zeqHBP/selections_generated.h"
 
 #include "zeq/event.h"
 #include "zeq/vocabulary.h"
@@ -15,7 +15,7 @@
 
 namespace zeq
 {
-namespace bbp
+namespace hbp
 {
 
 typedef std::vector< unsigned int > uints;

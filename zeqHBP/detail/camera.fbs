@@ -1,15 +1,11 @@
 // Copyright (c) 2014, Human Brain Project
 //                     Juan Hernando <jhernando@fi.upm.es>
 //
-namespace zeq.bbp;
+namespace zeq.hbp;
 
-table SelectedIDs
+table Camera
 {
-  ids:[uint];
+  matrix:[float];
 }
 
-table ToggleIDRequest
-{
-  ids:[uint];
-}
-
+root_type Camera;
