@@ -7,9 +7,7 @@
 #ifndef ZEQ_SUBSCRIBER_H
 #define ZEQ_SUBSCRIBER_H
 
-#include <boost/noncopyable.hpp>
-#include <zeq/api.h>
-#include <zeq/types.h>
+#include <zeq/receiver.h> // base class
 
 namespace zeq
 {
@@ -17,7 +15,7 @@ namespace zeq
 namespace detail { class Subscriber; }
 
 /** Subscribes to Publisher to receive events. */
-class Subscriber : public boost::noncopyable
+class Subscriber : public Receiver
 {
 public:
     /**
@@ -37,8 +35,12 @@ public:
      * A receive on any Subscriber of a shared group will work on all
      * subscribers and call the registered handlers. Note to implementer: wrap
      * zmg_context in a shared_ptr object used by all instances.
+     *
+     * @param uri publishing URI in the format scheme://[*|host|IP|IF][:port]
+     * @param shared another receiver to share data reception with.
+     * @throw std::runtime_error when the subscription failed.
      */
-    //Subscriber( const lunchbox::URI& uri, const Subscriber& shared );
+    ZEQ_API Subscriber( const lunchbox::URI& uri, Receiver& shared );
 
     /** Destroy this subscriber and withdraw any subscriptions. */
     ZEQ_API ~Subscriber();

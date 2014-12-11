@@ -9,6 +9,7 @@ set(ZEQ_PUBLIC_HEADERS
   ${COMMON_INCLUDES}
   event.h
   publisher.h
+  receiver.h
   subscriber.h
   types.h
   vocabulary.h)
