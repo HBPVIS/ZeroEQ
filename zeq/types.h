@@ -20,6 +20,8 @@ class Subscriber;
 typedef boost::function< void( const Event& ) > EventFunc;
 
 using lunchbox::uint128_t;
+
+namespace detail { struct Socket; }
 }
 
 // internal

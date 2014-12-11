@@ -46,18 +46,6 @@ public:
     ZEQ_API ~Subscriber();
 
     /**
-     * Receive one event from all connected publishers.
-     *
-     * For the received event, the respective handler function is called.
-     *
-     * @param timeout timeout in ms for poll, default blocking poll until at
-     *                least one event is received
-     * @return true if at least one event was received
-     * @throw std::runtime_error when polling the publishers failed.
-     */
-    ZEQ_API bool receive( const uint32_t timeout = LB_TIMEOUT_INDEFINITE );
-
-    /**
      * Register a new callback for an event.
      *
      * Only one callback per event is possible in the current implementation.
@@ -79,6 +67,11 @@ public:
 
 private:
     detail::Subscriber* const _impl;
+
+    // Receiver API
+    void addSockets( std::vector< detail::Socket >& entries ) final;
+    void process( detail::Socket& socket ) final;
+    void update() final;
 };
 
 }

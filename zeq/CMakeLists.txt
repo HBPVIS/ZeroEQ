@@ -18,12 +18,14 @@ set(ZEQ_HEADERS
   ${FBS_OUTPUTS}
   detail/broker.h
   detail/event.h
-  detail/serialization.h)
+  detail/serialization.h
+  detail/socket.h)
 
 set(ZEQ_SOURCES
   ${COMMON_SOURCES}
   event.cpp
   publisher.cpp
+  receiver.cpp
   subscriber.cpp
   vocabulary.cpp)
 

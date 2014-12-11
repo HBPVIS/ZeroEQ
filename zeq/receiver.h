@@ -18,7 +18,7 @@ namespace detail { class Receiver; }
 
 /**
  * Base class for entities receiving data.
- * Not intended to be used independently.
+ * Not intended to be used independently. Not thread safe.
  */
 class Receiver : public boost::noncopyable
 {
@@ -37,7 +37,7 @@ public:
     ZEQ_API explicit Receiver( Receiver& shared );
 
     /** Destroy this receiver. */
-    ZEQ_API ~Receiver();
+    ZEQ_API virtual ~Receiver();
 
     /**
      * Receive at least one event from all shared receivers.
@@ -50,6 +50,27 @@ public:
     ZEQ_API bool receive( const uint32_t timeout = LB_TIMEOUT_INDEFINITE );
 
 protected:
+    friend class detail::Receiver;
+
+    /** Add this receiver's socket to the given list */
+    virtual void addSockets( std::vector< detail::Socket >& entries ) = 0;
+
+    /**
+     * Process data on a signalled socket.
+     *
+     * @param the socket provided from addSockets().
+     */
+    virtual void process( detail::Socket& socket ) = 0;
+
+    /**
+     * Update the internal connection list.
+     *
+     * Called on all members of a shared group regularly by receive() to update
+     * their list of sockets.
+     */
+    virtual void update() {}
+
+    void* getZMQContext(); //!< @internal returns the ZeroMQ context
 
 private:
     boost::shared_ptr< detail::Receiver > const _impl;
