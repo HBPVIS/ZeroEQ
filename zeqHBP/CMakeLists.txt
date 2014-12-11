@@ -23,4 +23,5 @@ if(MSVC)
 endif()
 
 set(PROJECT_INCLUDE_NAME zeqHBP)
+add_definitions(-DZEQ_SHARED)
 common_library(zeqHBP)
