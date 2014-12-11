@@ -65,8 +65,8 @@ public:
         lunchbox::byteswap( type ); // convert to little endian wire protocol
 #endif
         zmq_msg_t msgHeader;
-        zmq_msg_init_size( &msgHeader, sizeof(type));
-        memcpy( zmq_msg_data(&msgHeader), &type, sizeof(type));
+        zmq_msg_init_size( &msgHeader, sizeof( type ));
+        memcpy( zmq_msg_data( &msgHeader ), &type, sizeof( type ));
         int ret = zmq_msg_send( &msgHeader, _publisher,
                                 event.getSize() > 0 ? ZMQ_SNDMORE : 0 );
         zmq_msg_close( &msgHeader );
