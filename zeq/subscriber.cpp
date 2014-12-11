@@ -147,7 +147,7 @@ private:
                          zmq_strerror( zmq_errno( ))));
         }
 
-        zmq_pollitem_t entry;
+        Socket entry;
         entry.socket = _subscribers[zmqURI];
         entry.events = ZMQ_POLLIN;
         _entries.push_back( entry );
@@ -170,7 +170,7 @@ private:
     SocketMap _subscribers;
     EventFuncs _eventFuncs;
     lunchbox::Servus _service;
-    std::vector< zmq_pollitem_t > _entries;
+    std::vector< Socket > _entries;
 };
 }
 
