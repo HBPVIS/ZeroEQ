@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(test_publish_empty_event)
 
 BOOST_AUTO_TEST_CASE(test_multiple_publisher_on_same_host)
 {
-    if( !lunchbox::Servus::isAvailable( ) )
+    if( !lunchbox::Servus::isAvailable() || getenv("TRAVIS"))
         return;
 
     zeq::Publisher publisher1( lunchbox::URI( test::buildURI( "*" )));
