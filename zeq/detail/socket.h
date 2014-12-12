@@ -22,7 +22,8 @@ struct Socket : public zmq_pollitem_t
 {
     Socket& operator = ( const zmq_pollitem_t& from )
     {
-        memcpy( this, &from, sizeof( from ));
+        if( this != &from )
+            memcpy( this, &from, sizeof( from ));
         return *this;
     }
 };

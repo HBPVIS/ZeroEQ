@@ -24,7 +24,7 @@ class Receiver : public boost::noncopyable
 {
 public:
     /** Create a new standalone receiver. */
-    ZEQ_API explicit Receiver();
+    ZEQ_API Receiver();
 
     /**
      * Create a shared receiver.

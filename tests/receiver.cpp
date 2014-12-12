@@ -22,7 +22,7 @@ void onEvent2( const zeq::Event& )
     gotTwo = true;
 }
 
-BOOST_AUTO_TEST_CASE(test_two_publishers)
+BOOST_AUTO_TEST_CASE(test_two_subscribers)
 {
     lunchbox::RNG rng;
     const unsigned short port = (rng.get<uint16_t>() % 60000) + 1024;
