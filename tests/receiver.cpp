@@ -3,6 +3,8 @@
  *                     Stefan.Eilemann@epfl.ch
  */
 
+#define BOOST_TEST_MODULE zeq_receiver
+
 #include "broker.h"
 
 #include <lunchbox/sleep.h>
@@ -22,6 +24,8 @@ void onEvent2( const zeq::Event& )
     gotTwo = true;
 }
 
+using zeq::vocabulary::serializeEcho;
+
 BOOST_AUTO_TEST_CASE(test_two_subscribers)
 {
     lunchbox::RNG rng;
@@ -31,9 +35,9 @@ BOOST_AUTO_TEST_CASE(test_two_subscribers)
     zeq::Subscriber subscriber2( lunchbox::URI( "foo://localhost:" + portStr ),
                                  subscriber1 );
 
-    BOOST_CHECK( subscriber1.registerHandler( zeq::vocabulary::EVENT_CAMERA,
+    BOOST_CHECK( subscriber1.registerHandler( zeq::vocabulary::EVENT_ECHO,
                                               boost::bind( &onEvent1, _1 )));
-    BOOST_CHECK( subscriber2.registerHandler( zeq::vocabulary::EVENT_CAMERA,
+    BOOST_CHECK( subscriber2.registerHandler( zeq::vocabulary::EVENT_ECHO,
                                               boost::bind( &onEvent2, _1 )));
 
     zeq::Publisher publisher( lunchbox::URI( "foo://*:" + portStr ));
@@ -42,10 +46,9 @@ BOOST_AUTO_TEST_CASE(test_two_subscribers)
     gotTwo = false;
     for( size_t i = 0; i < 10; ++i )
     {
-        BOOST_CHECK( publisher.publish(
-                         zeq::vocabulary::serializeCamera( test::camera )));
-
+        BOOST_CHECK( publisher.publish( serializeEcho( test::echoMessage )));
         subscriber1.receive( 100 );
+
         if( gotOne && gotTwo )
             break;
     }
@@ -56,10 +59,9 @@ BOOST_AUTO_TEST_CASE(test_two_subscribers)
     gotTwo = false;
     for( size_t i = 0; i < 10; ++i )
     {
-        BOOST_CHECK( publisher.publish(
-                         zeq::vocabulary::serializeCamera( test::camera )));
-
+        BOOST_CHECK( publisher.publish( serializeEcho( test::echoMessage )));
         subscriber2.receive( 100 );
+
         if( gotOne && gotTwo )
             break;
     }
@@ -76,9 +78,9 @@ BOOST_AUTO_TEST_CASE(test_publisher_routing)
     zeq::Subscriber subscriber2( lunchbox::URI( "foo://localhost:" + portStr ),
                                  subscriber1 );
 
-    BOOST_CHECK( subscriber1.registerHandler( zeq::vocabulary::EVENT_CAMERA,
+    BOOST_CHECK( subscriber1.registerHandler( zeq::vocabulary::EVENT_ECHO,
                                               boost::bind( &onEvent1, _1 )));
-    BOOST_CHECK( subscriber2.registerHandler( zeq::vocabulary::EVENT_CAMERA,
+    BOOST_CHECK( subscriber2.registerHandler( zeq::vocabulary::EVENT_ECHO,
                                               boost::bind( &onEvent2, _1 )));
 
     zeq::Publisher publisher( lunchbox::URI( "foo://*:" + portStr ));
@@ -87,10 +89,9 @@ BOOST_AUTO_TEST_CASE(test_publisher_routing)
     gotTwo = false;
     for( size_t i = 0; i < 10; ++i )
     {
-        BOOST_CHECK( publisher.publish(
-                         zeq::vocabulary::serializeCamera( test::camera )));
-
+        BOOST_CHECK( publisher.publish( serializeEcho( test::echoMessage )));
         subscriber1.receive( 100 );
+
         if( gotTwo )
             break;
     }
@@ -101,10 +102,9 @@ BOOST_AUTO_TEST_CASE(test_publisher_routing)
     gotTwo = false;
     for( size_t i = 0; i < 10; ++i )
     {
-        BOOST_CHECK( publisher.publish(
-                         zeq::vocabulary::serializeCamera( test::camera )));
-
+        BOOST_CHECK( publisher.publish( serializeEcho( test::echoMessage )));
         subscriber2.receive( 100 );
+
         if( gotTwo )
             break;
     }
