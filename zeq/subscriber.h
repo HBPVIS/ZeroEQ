@@ -14,7 +14,11 @@ namespace zeq
 
 namespace detail { class Subscriber; }
 
-/** Subscribes to Publisher to receive events. */
+/**
+ * Subscribes to Publisher to receive events.
+ *
+ * Example: @include tests/subscriber.cpp
+ */
 class Subscriber : public Receiver
 {
 public:

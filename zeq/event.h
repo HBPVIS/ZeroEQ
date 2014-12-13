@@ -18,6 +18,8 @@ namespace detail { class Subscriber; class Event; }
  *
  * Events are published via zeq::Publisher and received via zeq::Subscriber. The
  * format of the serialized data is specific to the serialization backend.
+ *
+ * Example: @include tests/serialization.cpp
  */
 class Event : public boost::noncopyable
 {

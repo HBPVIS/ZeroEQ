@@ -18,7 +18,14 @@ namespace detail { class Receiver; }
 
 /**
  * Base class for entities receiving data.
+ *
+ * Provides a receive() method, which demultiplexes data between multiple inputs
+ * of multiple instances of receivers. Receivers form a shared group by linking
+ * them at construction time.
+ *
  * Not intended to be used independently. Not thread safe.
+ *
+ * Example: @include tests/receiver.cpp
  */
 class Receiver : public boost::noncopyable
 {
@@ -58,7 +65,7 @@ protected:
     /**
      * Process data on a signalled socket.
      *
-     * @param the socket provided from addSockets().
+     * @param socket the socket provided from addSockets().
      */
     virtual void process( detail::Socket& socket ) = 0;
 

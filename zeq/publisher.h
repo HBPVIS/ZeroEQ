@@ -16,7 +16,11 @@ namespace zeq
 
 namespace detail { class Publisher; }
 
-/** Serves and publishes events, consumed by Subscriber. */
+/**
+ * Serves and publishes events, consumed by Subscriber.
+ *
+ * Example: @include tests/publisher.cpp
+ */
 class Publisher : public boost::noncopyable
 {
 public:
