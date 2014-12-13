@@ -6,8 +6,7 @@
 #ifndef ZEQ_DETAIL_SERIALIZATION_H
 #define ZEQ_DETAIL_SERIALIZATION_H
 
-#include <zeq/camera_generated.h>
-#include <zeq/selection_generated.h>
+#include <zeq/echo_generated.h>
 #include <zeq/vocabulary.h>
 #include "event.h"
 #include <lunchbox/debug.h>
@@ -17,53 +16,23 @@ namespace zeq
 namespace detail
 {
 
-zeq::Event serializeCamera( const std::vector< float >& matrix )
+zeq::Event serializeEcho( const std::string& msg )
 {
-    LBASSERT( matrix.size() == 16 )
-    zeq::Event event( vocabulary::EVENT_CAMERA );
+    zeq::Event event( vocabulary::EVENT_ECHO );
 
     flatbuffers::FlatBufferBuilder& fbb = event.getFBB();
-    CameraBuilder builder( fbb );
-    builder.add_matrix( fbb.CreateVector( matrix.data(), matrix.size( )));
+    EchoBuilder builder( fbb );
+    builder.add_message( fbb.CreateString ( msg ));
     fbb.Finish( builder.Finish( ));
     return event;
 }
 
-std::vector< float > deserializeCamera( const zeq::Event& camera )
+std::string deserializeEcho( const zeq::Event& event )
 {
-    auto data = GetCamera( camera.getData( ));
-    LBASSERT( data->matrix()->Length() == 16 );
-
-    std::vector< float > returnMatrix( data->matrix()->Length( ));
-    for( flatbuffers::uoffset_t i = 0; i < data->matrix()->Length(); ++i )
-        returnMatrix[i] = data->matrix()->Get(i);
-    return returnMatrix;
+    auto data = GetEcho( event.getData( ));
+    return data->message()->c_str();
 }
-
-
-zeq::Event serializeSelection( const std::vector< unsigned int >& selection )
-{
-    zeq::Event event( vocabulary::EVENT_SELECTION );
-
-    flatbuffers::FlatBufferBuilder& fbb = event.getFBB();
-    SelectionBuilder builder( fbb );
-    builder.add_ids( fbb.CreateVector( selection.data(), selection.size() ));
-    fbb.Finish( builder.Finish( ));
-    return event;
-}
-
-std::vector< unsigned int > deserializeSelection( const zeq::Event& selection )
-{
-    auto data = GetSelection( selection.getData( ));
-
-    std::vector< unsigned int > returnSelection( data->ids()->Length( ));
-    for( flatbuffers::uoffset_t i = 0; i < data->ids()->Length(); ++i )
-        returnSelection[i] = data->ids()->Get(i);
-    return returnSelection;
-}
-
 
 }
 }
-
 #endif
