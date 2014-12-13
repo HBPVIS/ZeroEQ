@@ -4,9 +4,13 @@
  *                     Stefan.Eilemann@epfl.ch
  */
 
+#define BOOST_TEST_MODULE zeq_subscriber
+
 #include "broker.h"
 #include <lunchbox/servus.h>
 #include <boost/bind.hpp>
+
+using namespace zeq::vocabulary;
 
 BOOST_AUTO_TEST_CASE(test_subscribe)
 {
@@ -23,34 +27,33 @@ BOOST_AUTO_TEST_CASE(test_invalid_subscribe)
 BOOST_AUTO_TEST_CASE(test_registerhandler)
 {
     zeq::Subscriber subscriber( test::buildURI( ));
-    BOOST_CHECK( subscriber.registerHandler( zeq::vocabulary::EVENT_CAMERA,
-                                      boost::bind( &test::onCameraEvent, _1 )));
+    BOOST_CHECK( subscriber.registerHandler(
+                     EVENT_ECHO, boost::bind( &test::onEchoEvent, _1 )));
 }
 
 BOOST_AUTO_TEST_CASE(test_deregisterhandler)
 {
     zeq::Subscriber subscriber( test::buildURI( ));
-    BOOST_CHECK( subscriber.registerHandler( zeq::vocabulary::EVENT_CAMERA,
-                                      boost::bind( &test::onCameraEvent, _1 )));
-    BOOST_CHECK( subscriber.deregisterHandler( zeq::vocabulary::EVENT_CAMERA ));
+    BOOST_CHECK( subscriber.registerHandler(
+                     EVENT_ECHO, boost::bind( &test::onEchoEvent, _1 )));
+    BOOST_CHECK( subscriber.deregisterHandler( EVENT_ECHO ));
 }
 
 BOOST_AUTO_TEST_CASE(test_invalid_registerhandler)
 {
     zeq::Subscriber subscriber( test::buildURI( ));
-    BOOST_CHECK( subscriber.registerHandler( zeq::vocabulary::EVENT_CAMERA,
-                                      boost::bind( &test::onCameraEvent, _1 )));
-    BOOST_CHECK( !subscriber.registerHandler( zeq::vocabulary::EVENT_CAMERA,
-                                      boost::bind( &test::onCameraEvent, _1 )));
+    BOOST_CHECK( subscriber.registerHandler(
+                     EVENT_ECHO, boost::bind( &test::onEchoEvent, _1 )));
+    BOOST_CHECK( !subscriber.registerHandler(
+                     EVENT_ECHO, boost::bind( &test::onEchoEvent, _1 )));
 }
 
 BOOST_AUTO_TEST_CASE(test_invalid_deregisterhandler)
 {
     zeq::Subscriber subscriber( test::buildURI( ));
-    BOOST_CHECK( !subscriber.deregisterHandler( zeq::vocabulary::EVENT_CAMERA));
-
-    BOOST_CHECK( subscriber.registerHandler( zeq::vocabulary::EVENT_CAMERA,
-                                      boost::bind( &test::onCameraEvent, _1 )));
+    BOOST_CHECK( !subscriber.deregisterHandler( EVENT_ECHO ));
+    BOOST_CHECK( subscriber.registerHandler(
+                     EVENT_ECHO, boost::bind( &test::onEchoEvent, _1 )));
     BOOST_CHECK( !subscriber.deregisterHandler(zeq::vocabulary::EVENT_EXIT ));
 }
 

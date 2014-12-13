@@ -1,0 +1,7 @@
+namespace zeq;
+
+table Echo {
+  message: string;
+}
+
+root_type Echo;

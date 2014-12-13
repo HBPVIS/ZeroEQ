@@ -1,9 +1,8 @@
 
 /* Copyright (c) 2014, Human Brain Project
- *                     Daniel Nachbaur <daniel.nachbaur@epfl.ch>
+ *                     Juan Hernando <jhernando@fi.upm.es>
  */
 
-#include "vocabulary.h"
 #include "detail/serialization.h"
 
 namespace zeq
@@ -11,27 +10,15 @@ namespace zeq
 namespace vocabulary
 {
 
-Event serializeCamera( const std::vector< float >& matrix )
+Event serializeEcho( const std::string& message )
 {
-    return detail::serializeCamera( matrix );
+    return detail::serializeEcho( message );
 }
 
-std::vector< float > deserializeCamera( const Event& camera )
+std::string deserializeEcho( const Event& event )
 {
-    return detail::deserializeCamera( camera );
+    return detail::deserializeEcho( event );
 }
-
-
-Event serializeSelection( const std::vector< unsigned int >& selection )
-{
-    return detail::serializeSelection( selection );
-}
-
-std::vector< unsigned int > deserializeSelection( const Event& selection )
-{
-    return detail::deserializeSelection( selection );
-}
-
 
 }
 }

@@ -1,0 +1,11 @@
+// Copyright (c) 2014, Human Brain Project
+//                     Juan Hernando <jhernando@fi.upm.es>
+//
+namespace zeq.hbp;
+
+table Camera
+{
+  matrix:[float];
+}
+
+root_type Camera;

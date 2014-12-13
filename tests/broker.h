@@ -8,7 +8,6 @@
 #include <lunchbox/rng.h>
 #include <lunchbox/uri.h>
 
-#define BOOST_TEST_MODULE zeq
 #include <boost/test/unit_test.hpp>
 
 namespace test
@@ -23,15 +22,13 @@ lunchbox::URI buildURI( const std::string& hostname = "" )
     return lunchbox::URI( uriStr.str( ));
 }
 
-const std::vector< float > camera( 16, 42 );
+const std::string echoMessage( "echo_event" );
 
-void onCameraEvent( const zeq::Event& event )
+void onEchoEvent( const zeq::Event& event )
 {
-    BOOST_CHECK( event.getType() == zeq::vocabulary::EVENT_CAMERA );
-    const std::vector< float >& deserialized =
-            zeq::vocabulary::deserializeCamera( event );
-    BOOST_CHECK_EQUAL_COLLECTIONS( camera.begin(), camera.end(),
-                                   deserialized.begin(), deserialized.end( ));
+    BOOST_CHECK( event.getType() == zeq::vocabulary::EVENT_ECHO );
+    const std::string message = zeq::vocabulary::deserializeEcho( event );
+    BOOST_CHECK_EQUAL( echoMessage, message );
 }
 
 void onExitEvent( const zeq::Event& event )

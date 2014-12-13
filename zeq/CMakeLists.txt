@@ -3,7 +3,7 @@
 
 source_group(\\ FILES CMakeLists.txt)
 
-flatbuffers_generate_c_headers(FBS detail/camera.fbs detail/selection.fbs)
+flatbuffers_generate_c_headers(ZEQ_FBS detail/echo.fbs)
 
 set(ZEQ_PUBLIC_HEADERS
   ${COMMON_INCLUDES}
@@ -15,7 +15,7 @@ set(ZEQ_PUBLIC_HEADERS
   vocabulary.h)
 
 set(ZEQ_HEADERS
-  ${FBS_OUTPUTS}
+  ${ZEQ_FBS_OUTPUTS}
   detail/broker.h
   detail/event.h
   detail/serialization.h
