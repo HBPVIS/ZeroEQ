@@ -4,14 +4,6 @@
  *                     Stefan.Eilemann@epfl.ch
  */
 
-// for NI_MAXHOST
-#ifdef _WIN32
-#define NOMINMAX
-#  include <Ws2tcpip.h>
-#else
-#  include <netdb.h>
-#endif
-
 #include "receiver.h"
 #include "detail/socket.h"
 
@@ -44,7 +36,8 @@ public:
 
     void remove( ::zeq::Receiver* receiver )
     {
-        std::remove( _shared.begin(), _shared.end(), receiver );
+        _shared.erase( std::remove( _shared.begin(), _shared.end(), receiver ),
+                       _shared.end( ));
     }
 
     bool receive( const uint32_t timeout )

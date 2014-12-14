@@ -4,14 +4,6 @@
  *                     Stefan.Eilemann@epfl.ch
  */
 
-// for NI_MAXHOST
-#ifdef _WIN32
-#define NOMINMAX
-#  include <Ws2tcpip.h>
-#else
-#  include <netdb.h>
-#endif
-
 #include "subscriber.h"
 #include "event.h"
 #include "detail/broker.h"
