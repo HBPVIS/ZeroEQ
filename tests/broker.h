@@ -12,14 +12,12 @@
 
 namespace test
 {
-lunchbox::URI buildURI( const std::string& hostname = "" )
+lunchbox::URI buildURI( const std::string& hostname = std::string( ))
 {
-    lunchbox::RNG rng;
-    const unsigned short port = (rng.get<uint16_t>() % 60000) + 1024;
-    std::ostringstream uriStr;
-    uriStr << "foo://" << (hostname.empty() ? "localhost" : hostname);
-    uriStr << ":" << port;
-    return lunchbox::URI( uriStr.str( ));
+    std::ostringstream uri;
+    uri << "foo://" << (hostname.empty() ? "localhost" : hostname)
+        << ":" << (lunchbox::RNG().get<uint16_t>() % 60000) + 1024;
+    return lunchbox::URI( uri.str( ));
 }
 
 const std::string echoMessage( "echo_event" );

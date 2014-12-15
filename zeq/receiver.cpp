@@ -123,7 +123,7 @@ private:
 
             BOOST_FOREACH( Socket& socket, sockets )
             {
-                if( interval-- == 0 )
+                while( interval == 0 || interval-- == 0 )
                 {
                     ++i;
                     interval = intervals.front();
