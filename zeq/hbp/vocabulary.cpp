@@ -5,9 +5,8 @@
 
 #include "vocabulary.h"
 
-#include "zeqHBP/camera_generated.h"
-#include "zeqHBP/selections_generated.h"
-
+#include "zeq/hbp/camera_generated.h"
+#include "zeq/hbp/selections_generated.h"
 #include "zeq/event.h"
 #include "zeq/vocabulary.h"
 

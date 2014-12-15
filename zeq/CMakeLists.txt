@@ -32,3 +32,4 @@ if(MSVC)
 endif()
 
 common_library(zeq)
+add_subdirectory(hbp)

@@ -5,8 +5,8 @@
 
 #define BOOST_TEST_MODULE hbp_serialization
 
+#include <zeq/hbp/vocabulary.h>
 #include <zeq/zeq.h>
-#include <zeqHBP/zeqHBP.h>
 
 #include <boost/test/unit_test.hpp>
 
