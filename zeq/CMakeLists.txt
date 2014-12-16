@@ -9,6 +9,7 @@ set(ZEQ_PUBLIC_HEADERS
   ${COMMON_INCLUDES}
   event.h
   publisher.h
+  receiver.h
   subscriber.h
   types.h
   vocabulary.h)
@@ -17,12 +18,14 @@ set(ZEQ_HEADERS
   ${ZEQ_FBS_OUTPUTS}
   detail/broker.h
   detail/event.h
-  detail/serialization.h)
+  detail/serialization.h
+  detail/socket.h)
 
 set(ZEQ_SOURCES
   ${COMMON_SOURCES}
   event.cpp
   publisher.cpp
+  receiver.cpp
   subscriber.cpp
   vocabulary.cpp)
 
