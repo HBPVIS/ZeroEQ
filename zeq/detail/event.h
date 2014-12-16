@@ -9,6 +9,7 @@
 #include <zeq/types.h>
 #include <zeq/event.h>
 
+#include <lunchbox/buffer.h>
 #include <flatbuffers/flatbuffers.h>
 
 namespace zeq
@@ -25,23 +26,22 @@ public:
 
     size_t getSize() const
     {
-        if( !data.empty( ))
-            return data.size();
+        if( !data.isEmpty( ))
+            return data.getSize();
         return fbb.GetSize();
     }
 
     const void* getData() const
     {
-        if( !data.empty( ))
-            return data.data();
+        if( !data.isEmpty( ))
+            return data.getData();
         return fbb.GetBufferPointer();
     }
 
     void setData( const void* data_, const size_t size )
     {
         fbb.Clear();
-        data.resize( size );
-        memcpy( data.data(), data_, size );
+        data.replace( data_, size );
     }
 
     const uint128_t type;
@@ -50,7 +50,7 @@ public:
     flatbuffers::FlatBufferBuilder fbb;
 
     /** setData() uses this instead of fbb during deserialization */
-    std::vector< uint8_t > data;
+    lunchbox::Bufferb data;
 };
 
 }
