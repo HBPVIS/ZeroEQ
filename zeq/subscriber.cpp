@@ -11,6 +11,7 @@
 
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
+#include <lunchbox/bitOperation.h>
 #include <lunchbox/log.h>
 #include <lunchbox/servus.h>
 #include <map>
