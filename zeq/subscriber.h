@@ -1,7 +1,7 @@
 
-/* Copyright (c) 2014, Human Brain Project
- *                     Daniel Nachbaur <daniel.nachbaur@epfl.ch>
- *                     Stefan.Eilemann@epfl.ch
+/* Copyright (c) 2014-2015, Human Brain Project
+ *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
+ *                          Stefan.Eilemann@epfl.ch
  */
 
 #ifndef ZEQ_SUBSCRIBER_H
@@ -78,6 +78,7 @@ private:
     void addSockets( std::vector< detail::Socket >& entries ) final;
     void process( detail::Socket& socket ) final;
     void update() final;
+    void addConnection( const std::string& uri ) final;
 };
 
 }

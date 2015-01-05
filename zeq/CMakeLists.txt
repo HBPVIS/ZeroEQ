@@ -7,6 +7,8 @@ flatbuffers_generate_c_headers(ZEQ_FBS detail/echo.fbs)
 
 set(ZEQ_PUBLIC_HEADERS
   ${COMMON_INCLUDES}
+  connection/broker.h
+  connection/service.h
   event.h
   publisher.h
   receiver.h
@@ -23,6 +25,8 @@ set(ZEQ_HEADERS
 
 set(ZEQ_SOURCES
   ${COMMON_SOURCES}
+  connection/broker.cpp
+  connection/service.cpp
   event.cpp
   publisher.cpp
   receiver.cpp
