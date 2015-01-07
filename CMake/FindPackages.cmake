@@ -137,7 +137,7 @@ if(Lunchbox_name)
   endif()
 endif()
 
-set(ZEQ_BUILD_DEBS autoconf;automake;avahi-daemon;cmake;doxygen;git;git-review;libavahi-client-dev;libboost-filesystem-dev;libboost-regex-dev;libboost-serialization-dev;libboost-system-dev;libboost-test-dev;libboost-thread-dev;libhwloc-dev;libjpeg-turbo8-dev;libleveldb-dev;libopenmpi-dev;libturbojpeg;libzmq3-dev;openmpi-bin;pkg-config;subversion)
+set(ZEQ_BUILD_DEBS autoconf;automake;avahi-daemon;cmake;doxygen;git;git-review;libavahi-client-dev;libboost-filesystem-dev;libboost-regex-dev;libboost-serialization-dev;libboost-system-dev;libboost-test-dev;libboost-thread-dev;libhwloc-dev;libleveldb-dev;libopenmpi-dev;libzmq3-dev;openmpi-bin;pkg-config;subversion)
 
 set(ZEQ_DEPENDS libzmq;FlatBuffers;Boost;Lunchbox)
 

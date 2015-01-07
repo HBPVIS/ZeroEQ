@@ -4,6 +4,8 @@
  *                     Stefan.Eilemann@epfl.ch
  */
 
+#define NOMINMAX // otherwise std::min/max below don't work on VS
+
 #include "receiver.h"
 #include "detail/socket.h"
 

@@ -1,10 +1,11 @@
 
-/* Copyright (c) 2014, Human Brain Project
- *                     Daniel Nachbaur <daniel.nachbaur@epfl.ch>
- *                     Stefan.Eilemann@epfl.ch
+/* Copyright (c) 2014-2015, Human Brain Project
+ *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
+ *                          Stefan.Eilemann@epfl.ch
  */
 
 #include "subscriber.h"
+
 #include "event.h"
 #include "detail/broker.h"
 #include "detail/socket.h"
@@ -19,7 +20,6 @@ namespace zeq
 {
 namespace detail
 {
-
 class Subscriber
 {
 public:
@@ -43,7 +43,7 @@ public:
         else
         {
             const std::string& zmqURI = buildZmqURI( uri );
-            _addConnection( context, zmqURI );
+            addConnection( context, zmqURI );
         }
     }
 
@@ -112,12 +112,11 @@ public:
 
             // New subscription
             if( _subscribers.count( zmqURI ) == 0 )
-                _addConnection( context, zmqURI );
+                addConnection( context, zmqURI );
         }
     }
 
-private:
-    void _addConnection( void* context, const std::string& zmqURI )
+    void addConnection( void* context, const std::string& zmqURI )
     {
         _subscribers[zmqURI] = zmq_socket( context, ZMQ_SUB );
 
@@ -146,6 +145,7 @@ private:
         LBINFO << "Subscribed to " << zmqURI << std::endl;
     }
 
+private:
     std::string _getZmqURI( const std::string& instance )
     {
         const size_t pos = instance.find( ":" );
@@ -206,6 +206,11 @@ void Subscriber::process( detail::Socket& socket )
 void Subscriber::update()
 {
     _impl->update( getZMQContext( ));
+}
+
+void Subscriber::addConnection( const std::string& uri )
+{
+    _impl->addConnection( getZMQContext(), uri );
 }
 
 }

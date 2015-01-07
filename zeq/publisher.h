@@ -1,7 +1,7 @@
 
-/* Copyright (c) 2014, Human Brain Project
- *                     Daniel Nachbaur <daniel.nachbaur@epfl.ch>
- *                     Stefan.Eilemann@epfl.ch
+/* Copyright (c) 2014-2015, Human Brain Project
+ *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
+ *                          Stefan.Eilemann@epfl.ch
  */
 
 #ifndef ZEQ_PUBLISHER_H
@@ -42,6 +42,8 @@ public:
      * @return true if publish was successful
      */
     ZEQ_API bool publish( const Event& event );
+
+    const std::string& getAddress() const; //!< @internal
 
 private:
     detail::Publisher* const _impl;

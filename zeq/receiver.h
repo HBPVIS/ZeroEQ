@@ -1,6 +1,6 @@
 
-/* Copyright (c) 2014, Human Brain Project
- *                     Stefan.Eilemann@epfl.ch
+/* Copyright (c) 2014-2015, Human Brain Project
+ *                          Stefan.Eilemann@epfl.ch
  */
 
 #ifndef ZEQ_RECEIVER_H
@@ -15,6 +15,7 @@
 namespace zeq
 {
 namespace detail { class Receiver; }
+namespace connection{ namespace detail{ class Broker; }}
 
 /**
  * Base class for entities receiving data.
@@ -39,7 +40,8 @@ public:
      * All receivers sharing a group may receive data when receive() is called
      * on any of them.
      *
-     * @param shared another receiver to form a simultaneous receive group with.     */
+     * @param shared another receiver to form a simultaneous receive group with.
+     */
     ZEQ_API explicit Receiver( Receiver& shared );
 
     /** Destroy this receiver. */
@@ -75,6 +77,14 @@ protected:
      * their list of sockets.
      */
     virtual void update() {}
+
+    /**
+     * Add the given connection to the list of receiving sockets.
+     *
+     * @param address the ZeroMQ address to connect to.
+     */
+    virtual void addConnection( const std::string& uri ) = 0;
+    friend class connection::detail::Broker;
 
     void* getZMQContext(); //!< @internal returns the ZeroMQ context
 

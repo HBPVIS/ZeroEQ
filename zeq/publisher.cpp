@@ -1,7 +1,7 @@
 
-/* Copyright (c) 2014, Human Brain Project
- *                     Daniel Nachbaur <daniel.nachbaur@epfl.ch>
- *                     Stefan.Eilemann@epfl.ch
+/* Copyright (c) 2014-2015, Human Brain Project
+ *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
+ *                          Stefan.Eilemann@epfl.ch
  */
 
 #include "publisher.h"
@@ -10,6 +10,7 @@
 
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
+#include <lunchbox/bitOperation.h>
 #include <lunchbox/log.h>
 #include <lunchbox/servus.h>
 #include <zmq.h>
@@ -21,6 +22,8 @@
 #else
 #  include <netdb.h>
 #endif
+
+using boost::lexical_cast;
 
 namespace zeq
 {
@@ -44,7 +47,7 @@ public:
 
             LBTHROW( std::runtime_error(
                          std::string( "Cannot bind publisher socket '" ) +
-                         zmqURI + "', got " + zmq_strerror( zmq_errno( ))));
+                         zmqURI + "': " + zmq_strerror( zmq_errno( ))));
         }
 
         _initService( uri.getHost(), uri.getPort( ));
@@ -94,67 +97,65 @@ public:
         return true;
     }
 
+    const std::string& getAddress() const { return _address; }
+
 private:
     void _initService( std::string host, uint16_t port )
     {
-        if( !_publisher )
-            return;
+        _initAddress( host, port );
+        if( lunchbox::Servus::isAvailable( ))
+            _service.announce( port, _address );
+    }
 
+    void _initAddress( std::string& host, uint16_t& port )
+    {
         if( host == "*" )
             host.clear();
 
         if( host.empty() || port == 0 )
         {
-            _resolveHostAndPort( host, port );
+            char endPoint[1024];
+            size_t size = sizeof( endPoint );
+            if( zmq_getsockopt( _publisher, ZMQ_LAST_ENDPOINT, &endPoint,
+                                &size ) == -1 )
+            {
+                LBTHROW( std::runtime_error(
+                             "Cannot determine port of publisher" ));
+            }
+
+            const std::string endPointStr( endPoint );
+
+            if( port == 0 )
+            {
+                const std::string portStr =
+                    endPointStr.substr( endPointStr.find_last_of( ":" ) + 1 );
+                port = lexical_cast< uint16_t >( portStr );
+            }
+
+            if( host.empty( ))
+            {
+                const size_t start = endPointStr.find_last_of( "/" ) + 1;
+                const size_t end = endPointStr.find_last_of( ":" );
+                host = endPointStr.substr( start, end - start );
+                if( host == "0.0.0.0" )
+                {
+                    char hostname[NI_MAXHOST+1] = {0};
+                    gethostname( hostname, NI_MAXHOST );
+                    hostname[NI_MAXHOST] = '\0';
+                    host = hostname;
+                }
+            }
+
             LBINFO << "Bound publisher to " << host << ":" << port << std::endl;
         }
 
-        if( lunchbox::Servus::isAvailable( ) )
-        {
-            const std::string instance = host + ":" +
-                                         boost::lexical_cast< std::string >( port );
-            _service.announce( port, instance );
-        }
-    }
-
-    void _resolveHostAndPort( std::string& host, uint16_t& port )
-    {
-        char endPoint[1024];
-        size_t size = sizeof(endPoint);
-        if( zmq_getsockopt( _publisher, ZMQ_LAST_ENDPOINT, &endPoint,
-                            &size ) == -1 )
-        {
-            LBTHROW( std::runtime_error(
-                         "Cannot determine port of publisher" ));
-        }
-
-        const std::string endPointStr( endPoint );
-
-        if( port == 0 )
-        {
-            const std::string portStr =
-                  endPointStr.substr( endPointStr.find_last_of( ":" ) + 1 );
-            port = boost::lexical_cast< uint16_t >( portStr );
-        }
-
-        if( host.empty( ))
-        {
-            const size_t start = endPointStr.find_last_of( "/" ) + 1;
-            const size_t end = endPointStr.find_last_of( ":" );
-            host = endPointStr.substr( start, end - start );
-            if( host == "0.0.0.0" )
-            {
-                char hostname[NI_MAXHOST+1] = {0};
-                gethostname( hostname, NI_MAXHOST );
-                hostname[NI_MAXHOST] = '\0';
-                host = hostname;
-            }
-        }
+        _address = host + ":" + lexical_cast< std::string >( port );
     }
 
     void* _context;
     void* _publisher;
     lunchbox::Servus _service;
+    std::string _address;
 };
 }
 
@@ -171,6 +172,11 @@ Publisher::~Publisher()
 bool Publisher::publish( const Event& event )
 {
     return _impl->publish( event );
+}
+
+const std::string& Publisher::getAddress() const
+{
+    return _impl->getAddress();
 }
 
 }
