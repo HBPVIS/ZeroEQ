@@ -81,7 +81,7 @@ protected:
     /**
      * Add the given connection to the list of receiving sockets.
      *
-     * @param address the ZeroMQ address to connect to.
+     * @param uri the ZeroMQ address to connect to.
      */
     virtual void addConnection( const std::string& uri ) = 0;
     friend class connection::detail::Broker;
