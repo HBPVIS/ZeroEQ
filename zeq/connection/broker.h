@@ -11,6 +11,7 @@
 
 namespace zeq
 {
+/** Connection broker to introduce remote publishers to a subscriber. */
 namespace connection
 {
 namespace detail { class Broker; }

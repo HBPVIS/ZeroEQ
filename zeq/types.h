@@ -10,6 +10,7 @@
 #include <lunchbox/uint128_t.h>
 #include <boost/function/function1.hpp>
 
+/** Publish-subscribe classes for typed events. */
 namespace zeq
 {
 
