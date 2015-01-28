@@ -2,6 +2,7 @@
 /* Copyright (c) 2014-2015, Human Brain Project
  *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *                          Juan Hernando <jhernando@fi.upm.es>
+ *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  */
 
 #ifndef ZEQ_HBP_VOCABULARY_H
@@ -14,6 +15,32 @@ namespace zeq
 {
 namespace hbp
 {
+namespace data
+{
+/**
+ * This structure holds informations about raw rgba 8-bits images.
+ * It has resolution infomations and the image data, data is a pointer
+ * to avoid copy. The data pointer is only valid as long as the zeq Event
+ * or rendering resource internal event with image data stays alive.
+ */
+struct ImageRawRGBA8
+{
+    ImageRawRGBA8( const uint32_t resX, const uint32_t resY, const uint8_t* data )
+        : _resX( resX )
+        , _resY( resY )
+        , _data( data )
+    {}
+    uint32_t getResX() const { return _resX; }
+    uint32_t getResY() const { return _resY; }
+    const uint8_t* getDataPtr() const { return _data; }
+
+private:
+    const uint32_t _resX;
+    const uint32_t _resY;
+    const uint8_t* _data;
+};
+
+}
 
 /** @group HBP messages */
 //@{
@@ -22,6 +49,39 @@ static const uint128_t EVENT_SELECTED_IDS(
 static const uint128_t EVENT_TOGGLE_ID_REQUEST(
     lunchbox::make_uint128( "hbp::ToggleIDRequest" ));
 //@}
+
+/**
+ * Serialize the given rgba raw image into an Event of type EVENT_IMAGE_RAW.
+ * The image format must be raw rgba with 8bits per component.
+ * @param image the image.
+ * @return the serialized event.
+ */
+::zeq::Event serializeImageRawRGBA8( const data::ImageRawRGBA8& image );
+
+/**
+ * Deserialize the given EVENT_IMAGE_RAW event into an rgba raw image.
+ * The image format is raw rgba with 8bits per component.
+ * @param event the zeq EVENT_IMAGE_RAW.
+ * @return the image.
+ */
+data::ImageRawRGBA8 deserializeImageRawRGBA8( const ::zeq::Event& event );
+
+/**
+ * Serialize the given event type into an Event of type EVENT_REQUEST.
+ * Based on the type, the target application is responsible to send back
+ * the requested event.
+ * @param type the type of event that the application should send back.
+ * @return the serialized event.
+ */
+::zeq::Event serializeRequest( const lunchbox::uint128_t& eventType );
+
+/**
+ * Deserialize the given request event into a uint128_t.
+ * The uint128_t received is a zeq event.
+ * @param event the zeq EVENT_REQUEST.
+ * @return an uint128_t to identify the zeq event to be created.
+ */
+lunchbox::uint128_t deserializeRequest( const ::zeq::Event& event );
 
 /**
  * Serialize the given camera matrix into an Event of type EVENT_CAMERA.

@@ -1,16 +1,21 @@
-/* Copyright (c) 2014, Human Brain Project
- *                     Daniel Nachbaur <daniel.nachbaur@epfl.ch>
- *                     Juan Hernando <jhernando@fi.upm.es@epfl.ch>
+/* Copyright (c) 2014-2015, Human Brain Project
+ *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
+ *                          Juan Hernando <jhernando@fi.upm.es@epfl.ch>
+ *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  */
 
 #include "vocabulary.h"
 
 #include "zeq/hbp/camera_generated.h"
 #include "zeq/hbp/selections_generated.h"
+#include "zeq/hbp/request_generated.h"
+#include "zeq/hbp/imageRawRGBA8_generated.h"
 #include "zeq/event.h"
 #include "zeq/vocabulary.h"
 
 #include <lunchbox/debug.h>
+
+#define RGBA_NBYTES 4
 
 namespace zeq
 {
@@ -58,6 +63,49 @@ zeq::Event serializeCamera( const std::vector< float >& matrix )
     zeq::Event event( EVENT_CAMERA );
     BUILD_VECTOR_ONLY_BUFFER( event, Camera, matrix, matrix );
     return event;
+}
+
+::zeq::Event serializeImageRawRGBA8( const data::ImageRawRGBA8& image )
+{
+    ::zeq::Event event( EVENT_IMAGERAWRGBA8 );
+    flatbuffers::FlatBufferBuilder& fbb = event.getFBB();
+    auto imageData = fbb.CreateVector( image.getDataPtr(),
+                                       image.getResX() * image.getResY() * RGBA_NBYTES );
+
+    ImageRawRGBA8Builder builder( fbb );
+    builder.add_resX( image.getResX() );
+    builder.add_resY( image.getResY() );
+    builder.add_data( imageData );
+
+    fbb.Finish( builder.Finish() );
+    return event;
+}
+
+data::ImageRawRGBA8 deserializeImageRawRGBA8( const ::zeq::Event& event )
+{
+    auto data = GetImageRawRGBA8( event.getData( ));
+    data::ImageRawRGBA8 result( data->resX(), data->resY(), data->data()->Data() );
+
+    return result;
+}
+
+::zeq::Event serializeRequest( const lunchbox::uint128_t& eventType)
+{
+    ::zeq::Event event( EVENT_REQUEST );
+    flatbuffers::FlatBufferBuilder& fbb = event.getFBB();
+
+    RequestBuilder builder( fbb );
+    builder.add_eventLow( eventType.low());
+    builder.add_eventHigh( eventType.high());
+
+    fbb.Finish( builder.Finish( ));
+    return event;
+}
+
+lunchbox::uint128_t deserializeRequest( const ::zeq::Event& event )
+{
+    auto data = GetRequest( event.getData( ));
+    return lunchbox::uint128_t( data->eventHigh(), data->eventLow());
 }
 
 std::vector< float > deserializeCamera( const Event& event )
