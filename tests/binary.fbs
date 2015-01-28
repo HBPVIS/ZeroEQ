@@ -1,0 +1,7 @@
+namespace zeqtest;
+
+table Binary {
+  data: [ubyte];
+}
+
+root_type Binary;

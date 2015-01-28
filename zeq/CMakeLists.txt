@@ -1,12 +1,16 @@
-# Copyright (c) HBP 2014 Daniel.Nachbaur@epfl.ch
+# Copyright (c) HBP 2014-2015 Daniel.Nachbaur@epfl.ch
 # All rights reserved. Do not distribute without further notice.
 
 source_group(\\ FILES CMakeLists.txt)
 
-flatbuffers_generate_c_headers(ZEQ_FBS detail/echo.fbs)
+flatbuffers_generate_c_headers(ZEQ_FBS detail/echo.fbs detail/exit.fbs)
+
+list(APPEND CPPCHECK_EXTRA_ARGS
+  --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/*_generated.h)
 
 set(ZEQ_PUBLIC_HEADERS
   ${COMMON_INCLUDES}
+  ${ZEQ_FBS_OUTPUTS}
   connection/broker.h
   connection/service.h
   event.h
@@ -17,23 +21,23 @@ set(ZEQ_PUBLIC_HEADERS
   vocabulary.h)
 
 set(ZEQ_HEADERS
-  ${ZEQ_FBS_OUTPUTS}
   detail/broker.h
   detail/event.h
-  detail/serialization.h
-  detail/socket.h)
+  detail/socket.h
+  detail/vocabulary.h)
 
 set(ZEQ_SOURCES
   ${COMMON_SOURCES}
   connection/broker.cpp
   connection/service.cpp
+  detail/vocabulary.cpp
   event.cpp
   publisher.cpp
   receiver.cpp
   subscriber.cpp
   vocabulary.cpp)
 
-set(ZEQ_LINK_LIBRARIES ${LUNCHBOX_LIBRARIES} ${LIBZMQ_LIBRARIES})
+set(ZEQ_LINK_LIBRARIES ${LUNCHBOX_LIBRARIES} ${LIBZMQ_LIBRARIES} ${FLATBUFFERS_LIBRARY})
 if(MSVC)
   list(APPEND ZEQ_LINK_LIBRARIES Ws2_32)
 endif()

@@ -1,4 +1,4 @@
-namespace zeq;
+namespace zeq.vocabulary;
 
 table Echo {
   message: string;
