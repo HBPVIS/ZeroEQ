@@ -1,4 +1,4 @@
-# Copyright (c) BBP/EPFL 2011-2014
+# Copyright (c) BBP/EPFL 2011-2015
 #               Stefan.Eilemann@epfl.ch
 # All rights reserved. Do not distribute without further notice.
 
@@ -12,4 +12,3 @@ set(CPACK_PACKAGE_LICENSE "Proprietary")
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "libboost-test-dev")
 
 include(CommonCPack)
-include(GNUModules)

@@ -6,6 +6,4 @@ flatbuffers_generate_c_headers(FBS newEvent.fbs)
 set_source_files_properties(
   newEvent.cpp PROPERTIES OBJECT_DEPENDS ${FBS_OUTPUTS})
 
-include_directories(${PROJECT_BINARY_DIR/include})
-
 include(CommonCTest)
