@@ -1,6 +1,6 @@
 
-/* Copyright (c) 2014, Human Brain Project
- *                     Daniel Nachbaur <daniel.nachbaur@epfl.ch>
+/* Copyright (c) 2014-2015, Human Brain Project
+ *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  */
 
 #include "event.h"
@@ -46,7 +46,17 @@ void Event::setData( const void* data, const size_t size )
 
 flatbuffers::FlatBufferBuilder& Event::getFBB()
 {
-    return _impl->fbb;
+    return _impl->parser.builder_;
+}
+
+flatbuffers::Parser& Event::getParser()
+{
+    return _impl->parser;
+}
+
+const flatbuffers::Parser& Event::getParser() const
+{
+    return _impl->parser;
 }
 
 }

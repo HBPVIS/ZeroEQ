@@ -1,6 +1,6 @@
 
-/* Copyright (c) 2014, Human Brain Project
- *                     Daniel Nachbaur <daniel.nachbaur@epfl.ch>
+/* Copyright (c) 2014-2015, Human Brain Project
+ *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  */
 
 #ifndef ZEQ_EVENT_H
@@ -47,6 +47,10 @@ public:
 
     /** @internal @return serialization specific implementation */
     ZEQ_API flatbuffers::FlatBufferBuilder& getFBB();
+
+    /** @internal @return serialization specific implementation */
+    ZEQ_API flatbuffers::Parser& getParser();
+    ZEQ_API const flatbuffers::Parser& getParser() const;
 
 private:
     friend class detail::Subscriber;

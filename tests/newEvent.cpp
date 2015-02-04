@@ -1,6 +1,7 @@
 
-/* Copyright (c) 2014, Human Brain Project
- *                     Stefan.Eilemann@epfl.ch
+/* Copyright (c) 2014-2015, Human Brain Project
+ *                          Stefan.Eilemann@epfl.ch
+ *                          Daniel.Nachbaur@epfl.ch
  *
  * This file is part of ZeroEQ (https://github.com/HBPVIS/zeq)
  *
@@ -39,18 +40,16 @@
 
 namespace zeqtest
 {
-static const lunchbox::uint128_t EVENT_NEW(
-    lunchbox::make_uint128( "zeq::TestNewEvent" ));
 static const std::string message( "So long, and thanks for all the fish" );
 
 zeq::Event serializeString( const std::string& string )
 {
-    ::zeq::Event event( EVENT_NEW );
+    ::zeq::Event event( EVENT_NEWEVENT );
 
     flatbuffers::FlatBufferBuilder& fbb = event.getFBB();
     auto data = fbb.CreateString( string );
 
-    MessageBuilder builder( fbb );
+    NewEventBuilder builder( fbb );
     builder.add_message( data );
     fbb.Finish( builder.Finish( ));
     return event;
@@ -58,9 +57,9 @@ zeq::Event serializeString( const std::string& string )
 
 std::string deserializeString( const ::zeq::Event& event )
 {
-    BOOST_CHECK_EQUAL( event.getType(), EVENT_NEW );
+    BOOST_CHECK_EQUAL( event.getType(), EVENT_NEWEVENT );
 
-    auto data = GetMessage( event.getData( ));
+    auto data = GetNewEvent( event.getData( ));
     return std::string( data->message()->c_str( ));
 }
 
@@ -76,7 +75,7 @@ BOOST_AUTO_TEST_CASE(test_new_event)
     const unsigned short port = (rng.get<uint16_t>() % 60000) + 1024;
     const std::string& portStr = boost::lexical_cast< std::string >( port );
     zeq::Subscriber subscriber( lunchbox::URI( "foo://localhost:" + portStr ));
-    BOOST_CHECK( subscriber.registerHandler( zeqtest::EVENT_NEW,
+    BOOST_CHECK( subscriber.registerHandler( zeqtest::EVENT_NEWEVENT,
                                   boost::bind( &zeqtest::onMessageEvent, _1 )));
 
     zeq::Publisher publisher( lunchbox::URI( "foo://*:" + portStr ));

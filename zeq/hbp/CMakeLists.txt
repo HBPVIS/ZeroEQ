@@ -1,4 +1,5 @@
-# Copyright (c) HBP 2014 Juan Hernando <jhernando@fi.upm.es>
+# Copyright (c) HBP 2014-2015 Juan Hernando <jhernando@fi.upm.es>
+#                             Daniel Nachbaur <daniel.nachbaur@epfl.ch>
 # All rights reserved. Do not distribute without further notice.
 
 flatbuffers_generate_c_headers(HBP_FBS
@@ -12,6 +13,9 @@ set(ZEQHBP_LINK_LIBRARIES ${LUNCHBOX_LIBRARIES} ${LIBZMQ_LIBRARIES} zeq)
 if(MSVC)
   list(APPEND ZEQHBP_LINK_LIBRARIES Ws2_32)
 endif()
+
+list(APPEND CPPCHECK_EXTRA_ARGS
+  --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/*_generated.h)
 
 set(PROJECT_INCLUDE_NAME zeq/hbp)
 add_definitions(-DZEQ_SHARED)

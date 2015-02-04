@@ -1,6 +1,6 @@
 
-/* Copyright (c) 2014, Human Brain Project
- *                     Daniel Nachbaur <daniel.nachbaur@epfl.ch>
+/* Copyright (c) 2014-2015, Human Brain Project
+ *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  */
 
 #ifndef ZEQ_TYPES_H
@@ -36,11 +36,12 @@ class Subscriber;
 typedef boost::function< void( const Event& ) > EventFunc;
 
 using lunchbox::uint128_t;
+using lunchbox::make_uint128;
 
 namespace detail { struct Socket; }
 }
 
 // internal
-namespace flatbuffers { class FlatBufferBuilder; }
+namespace flatbuffers { class FlatBufferBuilder; class Parser; }
 
 #endif
