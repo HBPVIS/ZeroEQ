@@ -95,7 +95,7 @@ if(FlatBuffers_name)
   set(FIND_PACKAGES_FOUND "${FIND_PACKAGES_FOUND} FlatBuffers")
   link_directories(${${FlatBuffers_name}_LIBRARY_DIRS})
   if(NOT "${${FlatBuffers_name}_INCLUDE_DIRS}" MATCHES "-NOTFOUND")
-    include_directories(SYSTEM ${${FlatBuffers_name}_INCLUDE_DIRS})
+    include_directories(BEFORE SYSTEM ${${FlatBuffers_name}_INCLUDE_DIRS})
   endif()
 endif()
 
