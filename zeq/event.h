@@ -8,6 +8,7 @@
 
 #include <zeq/api.h>
 #include <zeq/types.h>
+#include <boost/noncopyable.hpp>
 
 namespace zeq
 {
