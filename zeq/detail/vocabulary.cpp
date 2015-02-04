@@ -57,6 +57,7 @@ std::string deserializeJSON( const zeq::Event& event )
     std::string json;
     flatbuffers::GeneratorOptions opts;
     opts.base64_byte_array = true;
+    opts.strict_json = true;
     GenerateText( event.getParser(), event.getData(), opts, &json );
     return json;
 }
