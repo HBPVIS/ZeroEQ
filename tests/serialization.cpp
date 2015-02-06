@@ -23,7 +23,7 @@ BOOST_AUTO_TEST_CASE(test_serialization)
 BOOST_AUTO_TEST_CASE(test_json_serialization)
 {
     const std::string json( "{\n"
-                            "  message: \"test message\"\n"
+                            "  \"message\": \"test message\"\n"
                             "}\n" );
     const zeq::Event& event =
             zeq::vocabulary::serializeJSON( zeq::vocabulary::EVENT_ECHO, json );
@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(test_json_serialization)
 BOOST_AUTO_TEST_CASE(test_json_with_binary_data_serialization)
 {
     const std::string json( "{\n"
-                            "  data: \"UXQgaXMgZ3JlYXQh\"\n"
+                            "  \"data\": \"UXQgaXMgZ3JlYXQh\"\n"
                             "}\n" );
     const zeq::Event& event =
             zeq::vocabulary::serializeJSON( zeqtest::EVENT_BINARY, json );
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(test_from_cpp_to_json_serialization)
     const zeq::Event& event = serializeBinary( "Hello there" );
 
     const std::string json( "{\n"
-                            "  data: \"SGVsbG8gdGhlcmU=\"\n"
+                            "  \"data\": \"SGVsbG8gdGhlcmU=\"\n"
                             "}\n" );
     const std::string& deserialized = zeq::vocabulary::deserializeJSON( event );
     BOOST_CHECK_EQUAL( json, deserialized );
