@@ -1,0 +1,13 @@
+// Copyright (c) 2015, Human Brain Project
+//                     Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
+
+namespace zeq.hbp;
+
+table ImageRawRGBA8
+{
+  resX:uint;
+  resY:uint;
+  data:[ubyte];
+}
+
+root_type ImageRawRGBA8;
