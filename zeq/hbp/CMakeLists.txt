@@ -6,7 +6,7 @@ flatbuffers_generate_c_headers(HBP_FBS
   detail/camera.fbs
   detail/selections.fbs
   detail/request.fbs
-  detail/imageRawRGBA8.fbs)
+  detail/imageJPEG.fbs)
 
 set(ZEQHBP_PUBLIC_HEADERS vocabulary.h ${HBP_FBS_OUTPUTS})
 set(ZEQHBP_SOURCES vocabulary.cpp)
