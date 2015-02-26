@@ -9,13 +9,11 @@
 #include "zeq/hbp/camera_generated.h"
 #include "zeq/hbp/selections_generated.h"
 #include "zeq/hbp/request_generated.h"
-#include "zeq/hbp/imageRawRGBA8_generated.h"
+#include "zeq/hbp/imageJPEG_generated.h"
 #include "zeq/event.h"
 #include "zeq/vocabulary.h"
 
 #include <lunchbox/debug.h>
-
-#define RGBA_NBYTES 4
 
 namespace zeq
 {
@@ -65,26 +63,23 @@ zeq::Event serializeCamera( const std::vector< float >& matrix )
     return event;
 }
 
-::zeq::Event serializeImageRawRGBA8( const data::ImageRawRGBA8& image )
+::zeq::Event serializeImageJPEG( const data::ImageJPEG& image )
 {
-    ::zeq::Event event( EVENT_IMAGERAWRGBA8 );
+    ::zeq::Event event( EVENT_IMAGEJPEG );
     flatbuffers::FlatBufferBuilder& fbb = event.getFBB();
-    auto imageData = fbb.CreateVector( image.getDataPtr(),
-                                       image.getResX() * image.getResY() * RGBA_NBYTES );
+    auto imageData = fbb.CreateVector( image.getDataPtr(), image.getSizeInBytes() );
 
-    ImageRawRGBA8Builder builder( fbb );
-    builder.add_resX( image.getResX() );
-    builder.add_resY( image.getResY() );
+    ImageJPEGBuilder builder( fbb );
     builder.add_data( imageData );
 
     fbb.Finish( builder.Finish() );
     return event;
 }
 
-data::ImageRawRGBA8 deserializeImageRawRGBA8( const ::zeq::Event& event )
+data::ImageJPEG deserializeImageJPEG( const ::zeq::Event& event )
 {
-    auto data = GetImageRawRGBA8( event.getData( ));
-    data::ImageRawRGBA8 result( data->resX(), data->resY(), data->data()->Data() );
+    auto data = GetImageJPEG( event.getData( ) );
+    data::ImageJPEG result( data->data()->size(), data->data()->Data() );
 
     return result;
 }

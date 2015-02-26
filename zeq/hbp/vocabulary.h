@@ -17,26 +17,24 @@ namespace hbp
 {
 namespace data
 {
+
 /**
- * This structure holds informations about raw rgba 8-bits images.
- * It has resolution infomations and the image data, data is a pointer
+ * This structure holds informations about JPEG images.
+ * It has the size infomations and the image data, data is a pointer
  * to avoid copy. The data pointer is only valid as long as the zeq Event
  * or rendering resource internal event with image data stays alive.
  */
-struct ImageRawRGBA8
+struct ImageJPEG
 {
-    ImageRawRGBA8( const uint32_t resX, const uint32_t resY, const uint8_t* data )
-        : _resX( resX )
-        , _resY( resY )
+    ImageJPEG( const uint32_t sizeInBytes, const uint8_t* data )
+        : _sizeInBytes( sizeInBytes )
         , _data( data )
     {}
-    uint32_t getResX() const { return _resX; }
-    uint32_t getResY() const { return _resY; }
+    uint32_t getSizeInBytes() const { return _sizeInBytes; }
     const uint8_t* getDataPtr() const { return _data; }
 
 private:
-    const uint32_t _resX;
-    const uint32_t _resY;
+    const uint32_t _sizeInBytes;
     const uint8_t* _data;
 };
 
@@ -51,20 +49,18 @@ static const uint128_t EVENT_TOGGLE_ID_REQUEST(
 //@}
 
 /**
- * Serialize the given rgba raw image into an Event of type EVENT_IMAGE_RAW.
- * The image format must be raw rgba with 8bits per component.
- * @param image the image.
+ * Serialize the given JPEG image into an Event of type EVENT_IMAGEJPEG.
+ * @param image the JPEG image.
  * @return the serialized event.
  */
-::zeq::Event serializeImageRawRGBA8( const data::ImageRawRGBA8& image );
+::zeq::Event serializeImageJPEG( const data::ImageJPEG& image );
 
 /**
- * Deserialize the given EVENT_IMAGE_RAW event into an rgba raw image.
- * The image format is raw rgba with 8bits per component.
- * @param event the zeq EVENT_IMAGE_RAW.
- * @return the image.
+ * Deserialize the given EVENT_IMAGEJPEG event into an JPEG image.
+ * @param event the zeq EVENT_IMAGEJPEG.
+ * @return the jpeg image.
  */
-data::ImageRawRGBA8 deserializeImageRawRGBA8( const ::zeq::Event& event );
+data::ImageJPEG deserializeImageJPEG( const ::zeq::Event& event );
 
 /**
  * Serialize the given event type into an Event of type EVENT_REQUEST.
