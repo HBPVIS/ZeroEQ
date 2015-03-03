@@ -40,6 +40,8 @@ private:
 
 }
 
+static const uint128_t EVENT_HEARTBEAT(
+    lunchbox::make_uint128( "hbp::HeartbeatEvent" ));
 /** @group HBP messages */
 //@{
 static const uint128_t EVENT_SELECTED_IDS(
