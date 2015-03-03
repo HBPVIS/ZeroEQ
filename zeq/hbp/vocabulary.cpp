@@ -112,7 +112,7 @@ std::vector< float > deserializeCamera( const Event& event )
 
 Event serializeSelectedIDs( const uints& ids )
 {
-    zeq::Event event( EVENT_SELECTED_IDS );
+    zeq::Event event( EVENT_SELECTEDIDS );
     BUILD_VECTOR_ONLY_BUFFER( event, SelectedIDs, ids, ids );
     return event;
 }
@@ -124,7 +124,7 @@ uints deserializeSelectedIDs( const Event& event )
 
 zeq::Event serializeToggleIDRequest( const uints& ids )
 {
-    zeq::Event event( EVENT_TOGGLE_ID_REQUEST );
+    zeq::Event event( EVENT_TOGGLEIDREQUEST );
     BUILD_VECTOR_ONLY_BUFFER( event, ToggleIDRequest, ids, ids );
     return event;
 }

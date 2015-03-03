@@ -11,6 +11,12 @@
 #include <zeq/types.h>
 #include <zeq/api.h>
 
+#include <zeq/hbp/camera_zeq_generated.h>
+#include <zeq/hbp/heartbeat_zeq_generated.h>
+#include <zeq/hbp/imageJPEG_zeq_generated.h>
+#include <zeq/hbp/request_zeq_generated.h>
+#include <zeq/hbp/selections_zeq_generated.h>
+
 namespace zeq
 {
 namespace hbp
@@ -40,29 +46,19 @@ private:
 
 }
 
-static const uint128_t EVENT_HEARTBEAT(
-    lunchbox::make_uint128( "hbp::HeartbeatEvent" ));
-/** @group HBP messages */
-//@{
-static const uint128_t EVENT_SELECTED_IDS(
-    lunchbox::make_uint128( "hbp::SelectedIDsEvent" ));
-static const uint128_t EVENT_TOGGLE_ID_REQUEST(
-    lunchbox::make_uint128( "hbp::ToggleIDRequest" ));
-//@}
-
 /**
  * Serialize the given JPEG image into an Event of type EVENT_IMAGEJPEG.
  * @param image the JPEG image.
  * @return the serialized event.
  */
-::zeq::Event serializeImageJPEG( const data::ImageJPEG& image );
+ZEQ_API Event serializeImageJPEG( const data::ImageJPEG& image );
 
 /**
  * Deserialize the given EVENT_IMAGEJPEG event into an JPEG image.
  * @param event the zeq EVENT_IMAGEJPEG.
  * @return the jpeg image.
  */
-data::ImageJPEG deserializeImageJPEG( const ::zeq::Event& event );
+ZEQ_API data::ImageJPEG deserializeImageJPEG( const Event& event );
 
 /**
  * Serialize the given event type into an Event of type EVENT_REQUEST.
@@ -71,7 +67,7 @@ data::ImageJPEG deserializeImageJPEG( const ::zeq::Event& event );
  * @param type the type of event that the application should send back.
  * @return the serialized event.
  */
-::zeq::Event serializeRequest( const lunchbox::uint128_t& eventType );
+ZEQ_API Event serializeRequest( const lunchbox::uint128_t& eventType );
 
 /**
  * Deserialize the given request event into a uint128_t.
@@ -79,7 +75,7 @@ data::ImageJPEG deserializeImageJPEG( const ::zeq::Event& event );
  * @param event the zeq EVENT_REQUEST.
  * @return an uint128_t to identify the zeq event to be created.
  */
-lunchbox::uint128_t deserializeRequest( const ::zeq::Event& event );
+ZEQ_API lunchbox::uint128_t deserializeRequest( const Event& event );
 
 /**
  * Serialize the given camera matrix into an Event of type EVENT_CAMERA.

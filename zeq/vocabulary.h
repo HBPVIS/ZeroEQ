@@ -66,4 +66,7 @@ ZEQ_API void registerEvent( const uint128_t& type, const std::string& schema );
 }
 }
 
+#include <zeq/echo_zeq_generated.h>
+#include <zeq/exit_zeq_generated.h>
+
 #endif
