@@ -10,7 +10,7 @@ list(APPEND CPPCHECK_EXTRA_ARGS
 
 set(ZEQ_PUBLIC_HEADERS
   ${COMMON_INCLUDES}
-  ${ZEQ_FBS_OUTPUTS}
+  ${ZEQ_FBS_ZEQ_OUTPUTS}
   connection/broker.h
   connection/service.h
   event.h

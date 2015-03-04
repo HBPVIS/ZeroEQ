@@ -9,6 +9,7 @@
 #include <zeq/zeq.h>
 
 #include <tests/binary_generated.h>
+#include <tests/binary_zeq_generated.h>
 
 #include <boost/test/unit_test.hpp>
 
