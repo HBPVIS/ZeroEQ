@@ -4,11 +4,13 @@
 
 flatbuffers_generate_c_headers(HBP_FBS
   detail/camera.fbs
-  detail/selections.fbs
+  detail/heartbeat.fbs
+  detail/imageJPEG.fbs
   detail/request.fbs
-  detail/imageRawRGBA8.fbs)
+  detail/selections.fbs
+)
 
-set(ZEQHBP_PUBLIC_HEADERS vocabulary.h ${HBP_FBS_OUTPUTS})
+set(ZEQHBP_PUBLIC_HEADERS vocabulary.h ${HBP_FBS_ZEQ_OUTPUTS})
 set(ZEQHBP_SOURCES vocabulary.cpp)
 set(ZEQHBP_LINK_LIBRARIES ${LUNCHBOX_LIBRARIES} ${LIBZMQ_LIBRARIES} zeq)
 if(MSVC)

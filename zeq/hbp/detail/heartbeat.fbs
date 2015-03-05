@@ -1,0 +1,10 @@
+// Copyright (c) 2015, Human Brain Project
+//                     Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
+
+namespace zeq.hbp;
+
+table Heartbeat
+{
+}
+
+root_type Heartbeat;

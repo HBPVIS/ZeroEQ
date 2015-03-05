@@ -35,6 +35,7 @@
 #include "broker.h"
 
 #include <tests/newEvent_generated.h>
+#include <tests/newEvent_zeq_generated.h>
 
 #include <boost/bind.hpp>
 

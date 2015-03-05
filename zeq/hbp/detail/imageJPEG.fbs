@@ -3,11 +3,9 @@
 
 namespace zeq.hbp;
 
-table ImageRawRGBA8
+table ImageJPEG
 {
-  resX:uint;
-  resY:uint;
   data:[ubyte];
 }
 
-root_type ImageRawRGBA8;
+root_type ImageJPEG;
