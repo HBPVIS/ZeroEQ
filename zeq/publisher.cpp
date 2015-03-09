@@ -146,7 +146,8 @@ private:
                 }
             }
 
-            LBINFO << "Bound publisher to " << host << ":" << port << std::endl;
+            LBINFO << "Bound " << _service.getName() << " publisher to " << host
+                   << ":" << port << std::endl;
         }
 
         _address = host + ":" + lexical_cast< std::string >( port );
