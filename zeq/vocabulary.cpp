@@ -7,11 +7,22 @@
 #include "detail/vocabulary.h"
 
 #include "event.h"
+#include <zeq/eventDescriptor.h>
 
 namespace zeq
 {
 namespace vocabulary
 {
+
+Event serializeVocabulary( const EventDescriptors& vocabulary )
+{
+    return detail::serializeVocabulary( vocabulary );
+}
+
+EventDescriptors deserializeVocabulary( const Event& event )
+{
+    return detail::deserializeVocabulary( event );
+}
 
 Event serializeEcho( const std::string& message )
 {

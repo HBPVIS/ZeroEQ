@@ -28,6 +28,21 @@ namespace vocabulary
 ZEQ_API Event serializeEcho( const std::string& message );
 ZEQ_API std::string deserializeEcho( const Event& event );
 
+/**
+ * Serialize the given vocabulary into an Event of type EVENT_VOCABULARY.
+ * @param vocabulary the vocabulary ( a vector of EventDescriptors ).
+ * @return the serialized event.
+ */
+ZEQ_API Event serializeVocabulary( const EventDescriptors& vocabulary );
+
+/**
+ * Deserialize the given EVENT_VOCABULARY event into a vector of EventDescriptors.
+ * @param event the zeq EVENT_VOCABULARY.
+ * @return the vector of EventDescriptors.
+ */
+ZEQ_API EventDescriptors deserializeVocabulary( const Event& event );
+
+
 /** Serialize an event from JSON to a zeq::Event.
  *
  * The JSON must exactly match the schema of the given event type. The type to
@@ -68,5 +83,6 @@ ZEQ_API void registerEvent( const uint128_t& type, const std::string& schema );
 
 #include <zeq/echo_zeq_generated.h>
 #include <zeq/exit_zeq_generated.h>
+#include <zeq/vocabulary_zeq_generated.h>
 
 #endif

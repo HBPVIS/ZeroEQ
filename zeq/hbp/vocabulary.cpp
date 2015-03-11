@@ -90,8 +90,8 @@ data::ImageJPEG deserializeImageJPEG( const ::zeq::Event& event )
     flatbuffers::FlatBufferBuilder& fbb = event.getFBB();
 
     RequestBuilder builder( fbb );
-    builder.add_eventLow( eventType.low());
     builder.add_eventHigh( eventType.high());
+    builder.add_eventLow( eventType.low());
 
     fbb.Finish( builder.Finish( ));
     return event;
