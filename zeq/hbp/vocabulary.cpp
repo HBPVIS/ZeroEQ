@@ -7,9 +7,10 @@
 #include "vocabulary.h"
 
 #include "zeq/hbp/camera_generated.h"
-#include "zeq/hbp/selections_generated.h"
-#include "zeq/hbp/request_generated.h"
 #include "zeq/hbp/imageJPEG_generated.h"
+#include "zeq/hbp/lookupTable1D_generated.h"
+#include "zeq/hbp/request_generated.h"
+#include "zeq/hbp/selections_generated.h"
 #include "zeq/event.h"
 #include "zeq/vocabulary.h"
 
@@ -63,6 +64,13 @@ zeq::Event serializeCamera( const std::vector< float >& matrix )
     return event;
 }
 
+std::vector< float > deserializeCamera( const Event& event )
+{
+    auto data = GetCamera( event.getData( ));
+    LBASSERT( data->matrix()->Length() == 16 );
+    return deserializeVector( data->matrix( ));
+}
+
 ::zeq::Event serializeImageJPEG( const data::ImageJPEG& image )
 {
     ::zeq::Event event( EVENT_IMAGEJPEG );
@@ -103,13 +111,6 @@ lunchbox::uint128_t deserializeRequest( const ::zeq::Event& event )
     return lunchbox::uint128_t( data->eventHigh(), data->eventLow());
 }
 
-std::vector< float > deserializeCamera( const Event& event )
-{
-    auto data = GetCamera( event.getData( ));
-    LBASSERT( data->matrix()->Length() == 16 );
-    return deserializeVector( data->matrix( ));
-}
-
 Event serializeSelectedIDs( const uints& ids )
 {
     zeq::Event event( EVENT_SELECTEDIDS );
@@ -134,8 +135,20 @@ uints deserializeToggleIDRequest( const zeq::Event& event )
     return deserializeVector( event, &ToggleIDRequest::ids );
 }
 
+zeq::Event serializeLookupTable1D( const std::vector< uint8_t >& lut )
+{
+    LBASSERT( lut.size() == 1024 )
+    zeq::Event event( EVENT_LOOKUPTABLE1D );
+    BUILD_VECTOR_ONLY_BUFFER( event, LookupTable1D, lut, lut );
+    return event;
+}
 
-#undef BUILD_VECTOR_ONLY_BUFFER
+std::vector< uint8_t > deserializeLookupTable1D( const Event& event )
+{
+    auto data = GetLookupTable1D( event.getData( ));
+    LBASSERT( data->lut()->Length() == 1024 );
+    return deserializeVector( data->lut( ));
+}
 
 }
 }

@@ -6,6 +6,7 @@ flatbuffers_generate_c_headers(HBP_FBS
   detail/camera.fbs
   detail/heartbeat.fbs
   detail/imageJPEG.fbs
+  detail/lookupTable1D.fbs
   detail/request.fbs
   detail/selections.fbs
 )
