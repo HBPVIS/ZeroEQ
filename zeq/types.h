@@ -32,7 +32,9 @@ namespace zeq
 class Event;
 class Publisher;
 class Subscriber;
+struct EventDescriptor;
 
+typedef std::vector< EventDescriptor > EventDescriptors;
 typedef boost::function< void( const Event& ) > EventFunc;
 
 using lunchbox::uint128_t;

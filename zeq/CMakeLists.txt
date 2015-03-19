@@ -3,7 +3,7 @@
 
 source_group(\\ FILES CMakeLists.txt)
 
-flatbuffers_generate_c_headers(ZEQ_FBS detail/echo.fbs detail/exit.fbs)
+flatbuffers_generate_c_headers(ZEQ_FBS detail/echo.fbs detail/exit.fbs detail/vocabulary.fbs)
 
 list(APPEND CPPCHECK_EXTRA_ARGS
   --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/*_generated.h)
@@ -14,6 +14,7 @@ set(ZEQ_PUBLIC_HEADERS
   connection/broker.h
   connection/service.h
   event.h
+  eventDescriptor.h
   publisher.h
   receiver.h
   subscriber.h
@@ -23,6 +24,7 @@ set(ZEQ_PUBLIC_HEADERS
 set(ZEQ_HEADERS
   detail/broker.h
   detail/event.h
+  detail/eventDescriptor.h
   detail/socket.h
   detail/vocabulary.h)
 
@@ -32,6 +34,7 @@ set(ZEQ_SOURCES
   connection/service.cpp
   detail/vocabulary.cpp
   event.cpp
+  eventDescriptor.cpp
   publisher.cpp
   receiver.cpp
   subscriber.cpp

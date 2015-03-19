@@ -15,6 +15,10 @@ namespace vocabulary
 namespace detail
 {
 
+Event serializeVocabulary( const EventDescriptors& vocabulary );
+
+EventDescriptors deserializeVocabulary( const Event& event );
+
 zeq::Event serializeEcho( const std::string& msg );
 
 std::string deserializeEcho( const zeq::Event& event );

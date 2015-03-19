@@ -8,10 +8,46 @@
 
 #include <zeq/zeq.h>
 
+#include <zeq/vocabulary_generated.h>
+#include <zeq/vocabulary_zeq_generated.h>
+#include <zeq/eventDescriptor.h>
+
 #include <tests/binary_generated.h>
 #include <tests/binary_zeq_generated.h>
 
 #include <boost/test/unit_test.hpp>
+
+BOOST_AUTO_TEST_CASE( vocabulary_serialization )
+{
+    ::zeq::EventDescriptors vocabulary;
+
+    ::zeq::EventDescriptor eventDescriptor1( "testName01",
+                                                     lunchbox::uint128_t( 1 ), "testSchema01" );
+    ::zeq::EventDescriptor eventDescriptor2( "testName02",
+                                                     lunchbox::uint128_t( 2 ), "testSchema02" );
+    ::zeq::EventDescriptor eventDescriptor3( "testName03",
+                                                     lunchbox::uint128_t( 3 ), "testSchema03" );
+    vocabulary.push_back( std::move(eventDescriptor1) );
+    vocabulary.push_back( std::move(eventDescriptor2) );
+    vocabulary.push_back( std::move(eventDescriptor3) );
+
+    const zeq::Event& event = zeq::vocabulary::serializeVocabulary( vocabulary );
+
+    ::zeq::EventDescriptors deserialized_vocabulary =
+                                zeq::vocabulary::deserializeVocabulary( event );
+
+    BOOST_CHECK_EQUAL( deserialized_vocabulary[0].getRestName(), "testName01" );
+    BOOST_CHECK_EQUAL( deserialized_vocabulary[0].getEventType(), lunchbox::uint128_t( 1 ) );
+    BOOST_CHECK_EQUAL( deserialized_vocabulary[0].getSchema(), "testSchema01" );
+
+    BOOST_CHECK_EQUAL( deserialized_vocabulary[1].getRestName(), "testName02" );
+    BOOST_CHECK_EQUAL( deserialized_vocabulary[1].getEventType(), lunchbox::uint128_t( 2 ) );
+    BOOST_CHECK_EQUAL( deserialized_vocabulary[1].getSchema(), "testSchema02" );
+
+    BOOST_CHECK_EQUAL( deserialized_vocabulary[2].getRestName(), "testName03" );
+    BOOST_CHECK_EQUAL( deserialized_vocabulary[2].getEventType(), lunchbox::uint128_t( 3 ) );
+    BOOST_CHECK_EQUAL( deserialized_vocabulary[2].getSchema(), "testSchema03" );
+}
 
 BOOST_AUTO_TEST_CASE(test_serialization)
 {
