@@ -3,7 +3,12 @@
 
 source_group(\\ FILES CMakeLists.txt)
 
-flatbuffers_generate_c_headers(ZEQ_FBS detail/echo.fbs detail/exit.fbs detail/vocabulary.fbs)
+flatbuffers_generate_c_headers(ZEQ_FBS
+  detail/echo.fbs
+  detail/exit.fbs
+  detail/heartbeat.fbs
+  detail/request.fbs
+  detail/vocabulary.fbs)
 
 list(APPEND CPPCHECK_EXTRA_ARGS
   --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/*_generated.h)

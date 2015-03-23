@@ -67,3 +67,12 @@ BOOST_AUTO_TEST_CASE(test_broker)
     subscriber.join();
     BOOST_CHECK( subscriber.received );
 }
+
+BOOST_AUTO_TEST_CASE(test_invalid_broker)
+{
+    zeq::Subscriber subscriber( lunchbox::URI( "foo://127.0.0.1:" +
+                                      lexical_cast< std::string >( port )));
+    BOOST_CHECK_THROW( zeq::connection::Broker( std::string( "invalidIP" ),
+                                                subscriber ),
+                       std::runtime_error );
+}

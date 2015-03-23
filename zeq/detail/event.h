@@ -30,7 +30,7 @@ public:
 
         // populate parser with schema from type
         if( !schema.empty() && !parser.Parse( schema.c_str( )))
-            throw std::runtime_error( parser.error_ );
+            LBTHROW( std::runtime_error( parser.error_ ));
     }
 
     size_t getSize() const

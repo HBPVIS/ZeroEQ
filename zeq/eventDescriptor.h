@@ -29,7 +29,8 @@ struct EventDescriptor : public boost::noncopyable
      * @param eventType the zeq event's uint128
      * @param schema the flatbuffers schema as string
      */
-    ZEQ_API EventDescriptor( const std::string& restName, const lunchbox::uint128_t& eventType,
+    ZEQ_API EventDescriptor( const std::string& restName,
+                             const uint128_t& eventType,
                              const std::string& schema );
 
     /** Move ctor @internal */
@@ -41,7 +42,7 @@ struct EventDescriptor : public boost::noncopyable
     ZEQ_API const std::string& getRestName() const;
 
     /** @return the zeq event's uint128 */
-    ZEQ_API const lunchbox::uint128_t& getEventType() const;
+    ZEQ_API const uint128_t& getEventType() const;
 
     /** @return the flatbuffers schema string*/
     ZEQ_API const std::string& getSchema() const;

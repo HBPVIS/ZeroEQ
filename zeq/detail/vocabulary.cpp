@@ -4,11 +4,13 @@
  */
 
 #include "event.h"
-#include <zeq/eventDescriptor.h>
+
+#include "../eventDescriptor.h"
+#include "../vocabulary.h"
 
 #include <zeq/echo_generated.h>
+#include <zeq/request_generated.h>
 #include <zeq/vocabulary_generated.h>
-#include <zeq/vocabulary.h>
 
 #include <lunchbox/debug.h>
 #include <lunchbox/stdExt.h>
@@ -42,16 +44,19 @@ Event serializeVocabulary( const EventDescriptors& vocabulary )
 
     BOOST_FOREACH( const EventDescriptor& eventDescriptor, vocabulary )
     {
-        restNames.push_back( fbb.CreateString( eventDescriptor.getRestName() ) );
-        eventTypeHighs.push_back( eventDescriptor.getEventType().high() );
-        eventTypeLows.push_back( eventDescriptor.getEventType().low() );
-        schemas.push_back( fbb.CreateString( eventDescriptor.getSchema() ) );
+        restNames.push_back( fbb.CreateString( eventDescriptor.getRestName( )));
+        eventTypeHighs.push_back( eventDescriptor.getEventType().high( ));
+        eventTypeLows.push_back( eventDescriptor.getEventType().low( ));
+        schemas.push_back( fbb.CreateString( eventDescriptor.getSchema( )));
     }
 
-    auto restNamesForZeq = fbb.CreateVector( &restNames[0], restNames.size() );
-    auto eventTypeHighsForZeq = fbb.CreateVector( &eventTypeHighs[0], eventTypeHighs.size() );
-    auto eventTypeLowsForZeq = fbb.CreateVector( &eventTypeLows[0], eventTypeLows.size() );
-    auto schemasForZeq = fbb.CreateVector( &schemas[0], schemas.size() );
+    const auto& restNamesForZeq = fbb.CreateVector( &restNames[0],
+                                                    restNames.size( ));
+    const auto& eventTypeHighsForZeq = fbb.CreateVector( &eventTypeHighs[0],
+                                                        eventTypeHighs.size( ));
+    const auto& eventTypeLowsForZeq = fbb.CreateVector( &eventTypeLows[0],
+                                                         eventTypeLows.size( ));
+    const auto& schemasForZeq = fbb.CreateVector( &schemas[0], schemas.size( ));
 
     VocabularyBuilder builder( fbb );
     builder.add_restNames( restNamesForZeq );
@@ -65,20 +70,41 @@ Event serializeVocabulary( const EventDescriptors& vocabulary )
 
 EventDescriptors deserializeVocabulary( const Event& event )
 {
-    auto data = GetVocabulary( event.getData() );
+    const auto& data = GetVocabulary( event.getData() );
 
-    std::vector< ::zeq::EventDescriptor > vocabulary;
+    EventDescriptors vocabulary;
     vocabulary.reserve( data->restNames()->Length() );
 
     for( flatbuffers::uoffset_t i = 0; i < data->restNames()->Length(); ++i )
     {
-        const lunchbox::uint128_t eventType( data->eventHighs()->Get(i), data->eventLows()->Get(i));
-        ::zeq::EventDescriptor restZeqEvent( data->restNames()->Get(i)->c_str(), eventType,
-                                                     data->schemas()->Get(i)->c_str());
-        vocabulary.push_back( std::move(restZeqEvent) );
+        const uint128_t eventType( data->eventHighs()->Get(i),
+                                   data->eventLows()->Get(i));
+        EventDescriptor restZeqEvent( data->restNames()->Get(i)->c_str(),
+                                      eventType,
+                                      data->schemas()->Get(i)->c_str( ));
+        vocabulary.push_back( std::move( restZeqEvent ));
     }
 
     return vocabulary;
+}
+
+::zeq::Event serializeRequest( const uint128_t& eventType )
+{
+    ::zeq::Event event( ::zeq::vocabulary::EVENT_REQUEST );
+    flatbuffers::FlatBufferBuilder& fbb = event.getFBB();
+
+    RequestBuilder builder( fbb );
+    builder.add_eventHigh( eventType.high());
+    builder.add_eventLow( eventType.low());
+
+    fbb.Finish( builder.Finish( ));
+    return event;
+}
+
+uint128_t deserializeRequest( const ::zeq::Event& event )
+{
+    auto data = GetRequest( event.getData( ));
+    return uint128_t( data->eventHigh(), data->eventLow());
 }
 
 zeq::Event serializeEcho( const std::string& msg )
@@ -103,7 +129,7 @@ zeq::Event serializeJSON( const uint128_t& type, const std::string& json )
     zeq::Event event( type );
     flatbuffers::Parser& parser = event.getParser();
     if( !parser.Parse( json.c_str( )))
-        throw std::runtime_error( parser.error_ );
+        LBTHROW( std::runtime_error( parser.error_ ));
     return event;
 }
 

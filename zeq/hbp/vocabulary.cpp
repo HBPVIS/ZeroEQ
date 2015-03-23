@@ -6,13 +6,12 @@
 
 #include "vocabulary.h"
 
-#include "zeq/hbp/camera_generated.h"
-#include "zeq/hbp/imageJPEG_generated.h"
-#include "zeq/hbp/lookupTable1D_generated.h"
-#include "zeq/hbp/request_generated.h"
-#include "zeq/hbp/selections_generated.h"
-#include "zeq/event.h"
-#include "zeq/vocabulary.h"
+#include <zeq/hbp/camera_generated.h>
+#include <zeq/hbp/imageJPEG_generated.h>
+#include <zeq/hbp/lookupTable1D_generated.h>
+#include <zeq/hbp/selections_generated.h>
+#include <zeq/event.h>
+#include <zeq/vocabulary.h>
 
 #include <lunchbox/debug.h>
 
@@ -53,14 +52,14 @@ std::vector< T > deserializeVector(
     return deserializeVector(( data->*getter )( ));
 }
 
-#define BUILD_VECTOR_ONLY_BUFFER( event, type, attribute, vector ) \
-  buildVectorOnlyBuffer( event, &type##Builder::add_##attribute, vector);
+#define BUILD_VECTOR_ONLY_BUFFER( event, type, vector ) \
+  buildVectorOnlyBuffer( event, &type##Builder::add_##vector, vector);
 
 zeq::Event serializeCamera( const std::vector< float >& matrix )
 {
     LBASSERT( matrix.size() == 16 )
     zeq::Event event( EVENT_CAMERA );
-    BUILD_VECTOR_ONLY_BUFFER( event, Camera, matrix, matrix );
+    BUILD_VECTOR_ONLY_BUFFER( event, Camera, matrix );
     return event;
 }
 
@@ -75,7 +74,8 @@ std::vector< float > deserializeCamera( const Event& event )
 {
     ::zeq::Event event( EVENT_IMAGEJPEG );
     flatbuffers::FlatBufferBuilder& fbb = event.getFBB();
-    auto imageData = fbb.CreateVector( image.getDataPtr(), image.getSizeInBytes() );
+    auto imageData = fbb.CreateVector( image.getDataPtr(),
+                                       image.getSizeInBytes( ));
 
     ImageJPEGBuilder builder( fbb );
     builder.add_data( imageData );
@@ -87,34 +87,13 @@ std::vector< float > deserializeCamera( const Event& event )
 data::ImageJPEG deserializeImageJPEG( const ::zeq::Event& event )
 {
     auto data = GetImageJPEG( event.getData( ) );
-    data::ImageJPEG result( data->data()->size(), data->data()->Data() );
-
-    return result;
-}
-
-::zeq::Event serializeRequest( const lunchbox::uint128_t& eventType)
-{
-    ::zeq::Event event( EVENT_REQUEST );
-    flatbuffers::FlatBufferBuilder& fbb = event.getFBB();
-
-    RequestBuilder builder( fbb );
-    builder.add_eventHigh( eventType.high());
-    builder.add_eventLow( eventType.low());
-
-    fbb.Finish( builder.Finish( ));
-    return event;
-}
-
-lunchbox::uint128_t deserializeRequest( const ::zeq::Event& event )
-{
-    auto data = GetRequest( event.getData( ));
-    return lunchbox::uint128_t( data->eventHigh(), data->eventLow());
+    return data::ImageJPEG( data->data()->size(), data->data()->Data( ));
 }
 
 Event serializeSelectedIDs( const uints& ids )
 {
     zeq::Event event( EVENT_SELECTEDIDS );
-    BUILD_VECTOR_ONLY_BUFFER( event, SelectedIDs, ids, ids );
+    BUILD_VECTOR_ONLY_BUFFER( event, SelectedIDs, ids );
     return event;
 }
 
@@ -126,7 +105,7 @@ uints deserializeSelectedIDs( const Event& event )
 zeq::Event serializeToggleIDRequest( const uints& ids )
 {
     zeq::Event event( EVENT_TOGGLEIDREQUEST );
-    BUILD_VECTOR_ONLY_BUFFER( event, ToggleIDRequest, ids, ids );
+    BUILD_VECTOR_ONLY_BUFFER( event, ToggleIDRequest, ids );
     return event;
 }
 
@@ -139,7 +118,7 @@ zeq::Event serializeLookupTable1D( const std::vector< uint8_t >& lut )
 {
     LBASSERT( lut.size() == 1024 )
     zeq::Event event( EVENT_LOOKUPTABLE1D );
-    BUILD_VECTOR_ONLY_BUFFER( event, LookupTable1D, lut, lut );
+    BUILD_VECTOR_ONLY_BUFFER( event, LookupTable1D, lut );
     return event;
 }
 

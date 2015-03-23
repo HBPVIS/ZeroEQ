@@ -13,6 +13,7 @@
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 #include <lunchbox/bitOperation.h>
+#include <lunchbox/debug.h>
 #include <lunchbox/log.h>
 #include <lunchbox/servus.h>
 #include <map>
@@ -95,6 +96,7 @@ public:
             zmq_msg_init( &msg );
             zmq_msg_recv( &msg, socket.socket, 0 );
             event.setData( zmq_msg_data( &msg ), zmq_msg_size( &msg ));
+            LBASSERT( event.getSize() == zmq_msg_size( &msg ));
             zmq_msg_close( &msg );
         }
 

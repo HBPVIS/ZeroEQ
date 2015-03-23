@@ -24,6 +24,16 @@ EventDescriptors deserializeVocabulary( const Event& event )
     return detail::deserializeVocabulary( event );
 }
 
+Event serializeRequest( const uint128_t& eventType )
+{
+    return detail::serializeRequest( eventType );
+}
+
+uint128_t deserializeRequest( const Event& event )
+{
+    return detail::deserializeRequest( event );
+}
+
 Event serializeEcho( const std::string& message )
 {
     return detail::serializeEcho( message );

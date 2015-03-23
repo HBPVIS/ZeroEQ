@@ -7,7 +7,6 @@
 #define BOOST_TEST_MODULE hbp_serialization
 
 #include <zeq/hbp/vocabulary.h>
-#include <zeq/hbp/imageJPEG_generated.h>
 #include <zeq/zeq.h>
 
 #include <boost/test/unit_test.hpp>
@@ -24,7 +23,6 @@ BOOST_AUTO_TEST_CASE( test_cameraEvent )
 
 BOOST_AUTO_TEST_CASE( test_selectionsEvent )
 {
-
     unsigned int ids[] = {16,2,77,29};
     const std::vector< unsigned int > selection(
         ids, ids + sizeof(ids) / sizeof(unsigned int) );
@@ -51,25 +49,30 @@ BOOST_AUTO_TEST_CASE( test_toggleRequestEvent )
         deserialized_toggleRequest.begin(), deserialized_toggleRequest.end( ));
 }
 
+BOOST_AUTO_TEST_CASE( test_lookupTable1D )
+{
+    const std::vector< uint8_t > lut( 1024 );
+    const zeq::Event& lookupTableEvent = zeq::hbp::serializeLookupTable1D( lut);
+    const std::vector< uint8_t >& deserializedLut =
+            zeq::hbp::deserializeLookupTable1D( lookupTableEvent );
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        lut.begin(), lut.end(), deserializedLut.begin(), deserializedLut.end());
+}
+
 BOOST_AUTO_TEST_CASE( test_imageJPEGEvent )
 {
-    uint8_t imageJPEGData[ 24u ] = { 13, 11, 17, 19, 34, 73, 25, 24, 36, 74, 21, 56,
-                                     78, 23, 42, 23, 24, 42, 74, 32, 12, 35, 35, 13 };
-    zeq::hbp::data::ImageJPEG image( 24u, &imageJPEGData[0] );
+    const size_t size = 24;
+    const uint8_t imageJPEGData[ size ] = { 13, 11, 17, 19, 34, 73, 25, 24, 36,
+                                            74, 21, 56, 78, 23, 42, 23, 24, 42,
+                                            74, 32, 12, 35, 35, 13 };
+    zeq::hbp::data::ImageJPEG image( size, &imageJPEGData[0] );
 
     const zeq::Event& imageEvent = zeq::hbp::serializeImageJPEG( image );
-    zeq::hbp::data::ImageJPEG deserializedImage = zeq::hbp::deserializeImageJPEG( imageEvent );
-    BOOST_CHECK_EQUAL( image.getSizeInBytes(), deserializedImage.getSizeInBytes() );
-    BOOST_CHECK_EQUAL_COLLECTIONS( imageJPEGData, imageJPEGData + 24u,
+    const zeq::hbp::data::ImageJPEG& deserializedImage =
+            zeq::hbp::deserializeImageJPEG( imageEvent );
+    BOOST_CHECK_EQUAL( image.getSizeInBytes(),
+                       deserializedImage.getSizeInBytes( ));
+    BOOST_CHECK_EQUAL_COLLECTIONS( imageJPEGData, imageJPEGData + size,
                                    deserializedImage.getDataPtr(),
-                                   deserializedImage.getDataPtr() + 24u );
+                                   deserializedImage.getDataPtr() + size );
 }
-
-BOOST_AUTO_TEST_CASE( test_requestEvent )
-{
-    lunchbox::uint128_t eventType( zeq::hbp::EVENT_IMAGEJPEG );
-    const zeq::Event& requestEvent = zeq::hbp::serializeRequest( eventType );
-    lunchbox::uint128_t deserializedEventType = zeq::hbp::deserializeRequest( requestEvent );
-    BOOST_CHECK_EQUAL( eventType, deserializedEventType );
-}
-
