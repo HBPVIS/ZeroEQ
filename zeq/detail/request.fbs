@@ -2,7 +2,7 @@
 //                     Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
 //                     Cyrille Favreau <cyrille.favreau@epfl.ch>
 
-namespace zeq.hbp;
+namespace zeq.vocabulary;
 
 table Request
 {

@@ -49,7 +49,7 @@ private:
     // Receiver API
     void addSockets( std::vector< zeq::detail::Socket >& entries ) final;
     void process( zeq::detail::Socket& socket ) final;
-    void addConnection( const std::string& ) final { LBDONTCALL; }
+    void addConnection( const std::string& ) final { LBDONTCALL; } // LCOV_EXCL_LINE
 };
 
 }

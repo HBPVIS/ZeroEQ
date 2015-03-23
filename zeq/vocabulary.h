@@ -43,6 +43,24 @@ ZEQ_API Event serializeVocabulary( const EventDescriptors& vocabulary );
 ZEQ_API EventDescriptors deserializeVocabulary( const Event& event );
 
 
+/** Serialize the given event type into an Event of type EVENT_REQUEST.
+ *
+ * Based on the type, the target application is responsible to publish the
+ * requested event.
+ *
+ * @param eventType the type of event that the application should publish.
+ * @return the serialized event.
+ */
+ZEQ_API Event serializeRequest( const uint128_t& eventType );
+
+/** Deserialize the given request event into a uint128_t.
+ *
+ * @param event the zeq EVENT_REQUEST.
+ * @return an uint128_t to identify the zeq event that should be published.
+ */
+ZEQ_API uint128_t deserializeRequest( const Event& event );
+
+
 /** Serialize an event from JSON to a zeq::Event.
  *
  * The JSON must exactly match the schema of the given event type. The type to
@@ -55,6 +73,7 @@ ZEQ_API EventDescriptors deserializeVocabulary( const Event& event );
  * @param json JSON-formatted string containing the values for schema-defined
  *             keys
  * @return the serialized zeq::Event from the given JSON string.
+ * @throw std::runtime_error when the parsing of the given JSON fails
  */
 ZEQ_API Event serializeJSON( const uint128_t& type, const std::string& json );
 
@@ -81,8 +100,11 @@ ZEQ_API void registerEvent( const uint128_t& type, const std::string& schema );
 }
 }
 
+// must be after the declaration of registerEvent()
 #include <zeq/echo_zeq_generated.h>
 #include <zeq/exit_zeq_generated.h>
+#include <zeq/heartbeat_zeq_generated.h>
+#include <zeq/request_zeq_generated.h>
 #include <zeq/vocabulary_zeq_generated.h>
 
 #endif

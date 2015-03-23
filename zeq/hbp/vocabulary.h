@@ -12,10 +12,8 @@
 #include <zeq/api.h>
 
 #include <zeq/hbp/camera_zeq_generated.h>
-#include <zeq/hbp/heartbeat_zeq_generated.h>
 #include <zeq/hbp/imageJPEG_zeq_generated.h>
 #include <zeq/hbp/lookupTable1D_zeq_generated.h>
-#include <zeq/hbp/request_zeq_generated.h>
 #include <zeq/hbp/selections_zeq_generated.h>
 
 namespace zeq
@@ -60,23 +58,6 @@ ZEQ_API Event serializeImageJPEG( const data::ImageJPEG& image );
  * @return the jpeg image.
  */
 ZEQ_API data::ImageJPEG deserializeImageJPEG( const Event& event );
-
-/**
- * Serialize the given event type into an Event of type EVENT_REQUEST.
- * Based on the type, the target application is responsible to send back
- * the requested event.
- * @param type the type of event that the application should send back.
- * @return the serialized event.
- */
-ZEQ_API Event serializeRequest( const lunchbox::uint128_t& eventType );
-
-/**
- * Deserialize the given request event into a uint128_t.
- * The uint128_t received is a zeq event.
- * @param event the zeq EVENT_REQUEST.
- * @return an uint128_t to identify the zeq event to be created.
- */
-ZEQ_API lunchbox::uint128_t deserializeRequest( const Event& event );
 
 /**
  * Serialize the given camera matrix into an Event of type EVENT_CAMERA.

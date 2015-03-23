@@ -27,7 +27,10 @@ class Event : public boost::noncopyable
 public:
     /**
      * Construct a new event of the given type
+     *
      * @param type the desired event type
+     * @throw std::runtime_error when an invalid schema is registered
+     * @sa vocabulary::registerEvent
      */
     ZEQ_API explicit Event( const uint128_t& type );
 

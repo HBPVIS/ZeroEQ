@@ -19,6 +19,10 @@ Event serializeVocabulary( const EventDescriptors& vocabulary );
 
 EventDescriptors deserializeVocabulary( const Event& event );
 
+Event serializeRequest( const uint128_t& eventType );
+
+uint128_t deserializeRequest( const Event& event );
+
 zeq::Event serializeEcho( const std::string& msg );
 
 std::string deserializeEcho( const zeq::Event& event );

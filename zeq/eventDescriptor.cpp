@@ -9,7 +9,8 @@
 namespace zeq
 {
 
-EventDescriptor::EventDescriptor( const std::string& restName, const lunchbox::uint128_t& eventType,
+EventDescriptor::EventDescriptor( const std::string& restName,
+                                  const uint128_t& eventType,
                                   const std::string& schema )
     : _impl( new detail::EventDescriptor( restName, eventType, schema ))
 {}
@@ -30,7 +31,7 @@ const std::string& EventDescriptor::getRestName() const
     return _impl->getRestName();
 }
 
-const lunchbox::uint128_t& EventDescriptor::getEventType() const
+const uint128_t& EventDescriptor::getEventType() const
 {
     return _impl->getEventType();
 }
