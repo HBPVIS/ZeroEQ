@@ -30,6 +30,7 @@ set(ZEQ_HEADERS
   detail/broker.h
   detail/event.h
   detail/eventDescriptor.h
+  detail/port.h
   detail/socket.h
   detail/vocabulary.h)
 

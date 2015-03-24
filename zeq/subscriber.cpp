@@ -56,6 +56,8 @@ public:
             if ( socket.second )
                 zmq_close( socket.second );
         }
+        if( _service.isBrowsing( ))
+            _service.endBrowsing();
     }
 
     bool registerHandler( const uint128_t& event, const EventFunc& func )
@@ -106,7 +108,8 @@ public:
 
     void update( void* context )
     {
-        _service.browse( 0 );
+        if( _service.isBrowsing( ))
+            _service.browse( 0 );
         const lunchbox::Strings& instances = _service.getInstances();
 
         BOOST_FOREACH( const std::string& instance, instances )
