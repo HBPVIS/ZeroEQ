@@ -4,10 +4,11 @@
  *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  */
 
-#include "detail/vocabulary.h"
+#include "vocabulary.h"
 
+#include "detail/vocabulary.h"
 #include "event.h"
-#include <zeq/eventDescriptor.h>
+#include "eventDescriptor.h"
 
 namespace zeq
 {

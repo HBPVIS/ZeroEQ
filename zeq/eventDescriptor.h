@@ -36,7 +36,7 @@ struct EventDescriptor : public boost::noncopyable
     /** Move ctor @internal */
     ZEQ_API EventDescriptor( EventDescriptor&& rhs );
 
-    ~EventDescriptor();
+    ZEQ_API ~EventDescriptor();
 
     /** @return the REST command string of this event */
     ZEQ_API const std::string& getRestName() const;
