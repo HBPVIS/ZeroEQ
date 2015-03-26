@@ -11,8 +11,9 @@ namespace zeq
 
 EventDescriptor::EventDescriptor( const std::string& restName,
                                   const uint128_t& eventType,
-                                  const std::string& schema )
-    : _impl( new detail::EventDescriptor( restName, eventType, schema ))
+                                  const std::string& schema,
+                                  const EventDirection eventDirection )
+    : _impl( new detail::EventDescriptor( restName, eventType, schema, eventDirection ))
 {}
 
 EventDescriptor::EventDescriptor( EventDescriptor&& rhs )
@@ -28,17 +29,22 @@ EventDescriptor::~EventDescriptor()
 
 const std::string& EventDescriptor::getRestName() const
 {
-    return _impl->getRestName();
+    return _impl->restName;
 }
 
 const uint128_t& EventDescriptor::getEventType() const
 {
-    return _impl->getEventType();
+    return _impl->eventType;
 }
 
 const std::string& EventDescriptor::getSchema() const
 {
-    return _impl->getSchema();
+    return _impl->schema;
+}
+
+EventDirection EventDescriptor::getEventDirection() const
+{
+    return _impl->eventDirection;
 }
 
 }

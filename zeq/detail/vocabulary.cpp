@@ -41,6 +41,7 @@ Event serializeVocabulary( const EventDescriptors& vocabulary )
     std::vector< uint64_t > eventTypeLows;
     std::vector< uint64_t > eventTypeHighs;
     std::vector< flatbuffers::Offset<flatbuffers::String> > schemas;
+    std::vector< uint8_t > eventDirections;
 
     BOOST_FOREACH( const EventDescriptor& eventDescriptor, vocabulary )
     {
@@ -48,6 +49,7 @@ Event serializeVocabulary( const EventDescriptors& vocabulary )
         eventTypeHighs.push_back( eventDescriptor.getEventType().high( ));
         eventTypeLows.push_back( eventDescriptor.getEventType().low( ));
         schemas.push_back( fbb.CreateString( eventDescriptor.getSchema( )));
+        eventDirections.push_back( uint8_t( eventDescriptor.getEventDirection()));
     }
 
     const auto& restNamesForZeq = fbb.CreateVector( &restNames[0],
@@ -57,12 +59,15 @@ Event serializeVocabulary( const EventDescriptors& vocabulary )
     const auto& eventTypeLowsForZeq = fbb.CreateVector( &eventTypeLows[0],
                                                          eventTypeLows.size( ));
     const auto& schemasForZeq = fbb.CreateVector( &schemas[0], schemas.size( ));
+    const auto& eventDirectionsForZeq = fbb.CreateVector( &eventDirections[0],
+                                        eventDirections.size() );
 
     VocabularyBuilder builder( fbb );
     builder.add_restNames( restNamesForZeq );
     builder.add_eventHighs( eventTypeHighsForZeq );
     builder.add_eventLows( eventTypeLowsForZeq );
     builder.add_schemas( schemasForZeq );
+    builder.add_eventDirections( eventDirectionsForZeq );
 
     fbb.Finish( builder.Finish() );
     return event;
@@ -81,7 +86,8 @@ EventDescriptors deserializeVocabulary( const Event& event )
                                    data->eventLows()->Get(i));
         EventDescriptor restZeqEvent( data->restNames()->Get(i)->c_str(),
                                       eventType,
-                                      data->schemas()->Get(i)->c_str( ));
+                                      data->schemas()->Get(i)->c_str(),
+                                      zeq::EventDirection(data->eventDirections()->Get(i) ) );
         vocabulary.push_back( std::move( restZeqEvent ));
     }
 

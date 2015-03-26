@@ -21,15 +21,15 @@ BOOST_AUTO_TEST_CASE(vocabulary_serialization)
 {
     zeq::EventDescriptors vocabulary;
 
-    zeq::EventDescriptor eventDescriptor1( "testName01", zeq::uint128_t( 1 ),
-                                           "testSchema01" );
-    zeq::EventDescriptor eventDescriptor2( "testName02", zeq::uint128_t( 2 ),
-                                           "testSchema02" );
-    zeq::EventDescriptor eventDescriptor3( "testName03",  zeq::uint128_t( 3 ),
-                                           "testSchema03" );
-    vocabulary.push_back( std::move(eventDescriptor1) );
-    vocabulary.push_back( std::move(eventDescriptor2) );
-    vocabulary.push_back( std::move(eventDescriptor3) );
+    zeq::EventDescriptor onlySubscribedEvent( "testName01", zeq::uint128_t( 1 ),
+                                           "testSchema01", zeq::SUBSCRIBER );
+    zeq::EventDescriptor onlyPublishedEvent( "testName02", zeq::uint128_t( 2 ),
+                                           "testSchema02", zeq::PUBLISHER );
+    zeq::EventDescriptor bidirectionalEvent( "testName03",  zeq::uint128_t( 3 ),
+                                           "testSchema03", zeq::BIDIRECTIONAL );
+    vocabulary.push_back( std::move(onlySubscribedEvent) );
+    vocabulary.push_back( std::move(onlyPublishedEvent) );
+    vocabulary.push_back( std::move(bidirectionalEvent) );
 
     const zeq::Event& event = zeq::vocabulary::serializeVocabulary( vocabulary);
 
@@ -40,16 +40,22 @@ BOOST_AUTO_TEST_CASE(vocabulary_serialization)
     BOOST_CHECK_EQUAL( deserialized_vocabulary[0].getEventType(),
                        zeq::uint128_t( 1 ));
     BOOST_CHECK_EQUAL( deserialized_vocabulary[0].getSchema(), "testSchema01" );
+    BOOST_CHECK_EQUAL( deserialized_vocabulary[0].getEventDirection(),
+                       zeq::SUBSCRIBER );
 
     BOOST_CHECK_EQUAL( deserialized_vocabulary[1].getRestName(), "testName02" );
     BOOST_CHECK_EQUAL( deserialized_vocabulary[1].getEventType(),
                        zeq::uint128_t( 2 ));
     BOOST_CHECK_EQUAL( deserialized_vocabulary[1].getSchema(), "testSchema02" );
+    BOOST_CHECK_EQUAL( deserialized_vocabulary[1].getEventDirection(),
+                       zeq::PUBLISHER );
 
     BOOST_CHECK_EQUAL( deserialized_vocabulary[2].getRestName(), "testName03" );
     BOOST_CHECK_EQUAL( deserialized_vocabulary[2].getEventType(),
                        zeq::uint128_t( 3 ));
     BOOST_CHECK_EQUAL( deserialized_vocabulary[2].getSchema(), "testSchema03" );
+    BOOST_CHECK_EQUAL( deserialized_vocabulary[2].getEventDirection(),
+                       zeq::BIDIRECTIONAL );
 }
 
 BOOST_AUTO_TEST_CASE(test_requestEvent)

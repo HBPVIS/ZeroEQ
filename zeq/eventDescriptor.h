@@ -17,6 +17,17 @@ namespace zeq
 namespace detail { struct EventDescriptor; }
 
 /**
+ * This enum holds information about the Event "direction" (only Published,
+ * only Subscribed or Bidirectional) from the application point of view.
+ */
+enum EventDirection
+{
+    SUBSCRIBER = 0,
+    PUBLISHER,
+    BIDIRECTIONAL
+};
+
+/**
  * This structure holds informations about an Event from a vocabulary.
  * It contains the REST api name, the 128bit zeq event id and the schema
  * needed for automatic JSON serialization/deserialization.
@@ -31,7 +42,8 @@ struct EventDescriptor : public boost::noncopyable
      */
     ZEQ_API EventDescriptor( const std::string& restName,
                              const uint128_t& eventType,
-                             const std::string& schema );
+                             const std::string& schema,
+                             const EventDirection eventDirection);
 
     /** Move ctor @internal */
     ZEQ_API EventDescriptor( EventDescriptor&& rhs );
@@ -46,6 +58,9 @@ struct EventDescriptor : public boost::noncopyable
 
     /** @return the flatbuffers schema string*/
     ZEQ_API const std::string& getSchema() const;
+
+    /** @return the zeq event's direction (Subscribed, Pulished or both)*/
+    ZEQ_API EventDirection getEventDirection() const;
 private:
 
     EventDescriptor& operator=( EventDescriptor&& rhs );

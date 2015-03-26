@@ -17,20 +17,17 @@ namespace detail
 
 struct EventDescriptor : public boost::noncopyable
 {
-    EventDescriptor( const std::string& restName, const uint128_t& eventType,
-                     const std::string& schema )
-        : _restName( restName )
-        , _eventType( eventType )
-        , _schema( schema )
+    EventDescriptor( const std::string& restName_, const uint128_t& eventType_,
+                     const std::string& schema_, const EventDirection eventDirection_ )
+        : restName( restName_ )
+        , eventType( eventType_ )
+        , schema( schema_ )
+        , eventDirection( eventDirection_ )
     {}
-    const std::string& getRestName() const { return _restName; }
-    const uint128_t& getEventType() const { return _eventType; }
-    const std::string& getSchema() const { return _schema; }
-
-private:
-    const std::string _restName;
-    const uint128_t _eventType;
-    const std::string _schema;
+    const std::string restName;
+    const uint128_t eventType;
+    const std::string schema;
+    const EventDirection eventDirection;
 };
 
 }

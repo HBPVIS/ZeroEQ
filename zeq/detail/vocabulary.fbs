@@ -3,13 +3,16 @@
 
 namespace zeq.vocabulary;
 
-//A struct containing restNames, eventHighs, eventLows, schemas would be more
-//clear but flatbuffers does not support strings in structures.
+enum EventDirection : ubyte { Subscriber, Publisher, Both }
+
+//A struct containing restNames, eventHighs, eventLows, schemas, eventDirections
+//would be more clear but flatbuffers does not support strings in structures.
 table Vocabulary
 {
   restNames:[string];
   eventHighs:[ulong];
   eventLows:[ulong];
+  eventDirections:[EventDirection];
   schemas:[string];
 }
 
