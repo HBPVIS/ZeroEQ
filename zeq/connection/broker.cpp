@@ -4,12 +4,14 @@
  */
 
 #include "broker.h"
-#include "../detail/socket.h"
-#include "../receiver.h"
+#include <zeq/detail/port.h>
+#include <zeq/detail/socket.h>
+#include <zeq/receiver.h>
 
-#include <boost/foreach.hpp>
 #include <lunchbox/log.h>
 #include <lunchbox/servus.h>
+#include <boost/foreach.hpp>
+#include <boost/lexical_cast.hpp>
 #include <map>
 
 namespace zeq
@@ -18,22 +20,29 @@ namespace connection
 {
 namespace detail
 {
+using boost::lexical_cast;
+
 class Broker
 {
 public:
+    Broker( const std::string& name, Receiver& receiver,
+            const connection::Broker::PortSelection mode, void* context )
+        : _receiver( receiver )
+        , _socket( zmq_socket( context, ZMQ_REP ))
+    {
+        const std::string zmqAddr( std::string( "tcp://*:" ) +
+                    lexical_cast< std::string >( zeq::detail::getPort( name )));
+
+        _listen( zmqAddr, mode ) ||
+            _listen( "tcp://*:0", connection::Broker::PORT_FIXED );
+    }
+
     Broker( Receiver& receiver, const std::string& address, void* context )
         : _receiver( receiver )
         , _socket( zmq_socket( context, ZMQ_REP ))
     {
-        const std::string zmqAddr( std::string( "tcp://" ) + address );
-        if( zmq_bind( _socket, zmqAddr.c_str( )) == -1 )
-        {
-            zmq_close( _socket );
-            LBTHROW( std::runtime_error(
-                         "Cannot connect broker to " + zmqAddr + ": " +
-                         zmq_strerror( zmq_errno( ))));
-        }
-        LBINFO << "Bound broker to " << zmqAddr << std::endl;
+        _listen( std::string( "tcp://" ) + address,
+                 connection::Broker::PORT_FIXED );
     }
 
     ~Broker()
@@ -66,7 +75,33 @@ public:
 private:
     zeq::Receiver& _receiver;
     void* _socket;
+
+    bool _listen( const std::string address,
+                  const connection::Broker::PortSelection mode )
+    {
+        if( zmq_bind( _socket, address.c_str( )) == -1 )
+        {
+            if( mode == connection::Broker::PORT_FIXED )
+            {
+                zmq_close( _socket );
+                LBTHROW( std::runtime_error(
+                             "Cannot connect broker to " + address + ": " +
+                              zmq_strerror( zmq_errno( ))));
+            }
+            return false;
+        }
+
+        LBINFO << "Bound broker to " << address << std::endl;
+        return true;
+    }
 };
+}
+
+Broker::Broker( const std::string& name, Receiver& receiver,
+                const PortSelection mode )
+    : Receiver( receiver )
+    , _impl( new detail::Broker( name, receiver, mode, getZMQContext( )))
+{
 }
 
 Broker::Broker( const std::string& address, Receiver& receiver )

@@ -5,14 +5,18 @@
 
 #include "service.h"
 #include <zeq/publisher.h>
+#include <zeq/detail/port.h>
 #include <lunchbox/log.h>
 #include <lunchbox/sleep.h>
 #include <zmq.h>
+#include <boost/lexical_cast.hpp>
 
 namespace zeq
 {
 namespace connection
 {
+using boost::lexical_cast;
+
 bool Service::subscribe( const std::string& brokerAddress,
                          const Publisher& publisher )
 {
@@ -61,6 +65,16 @@ bool Service::subscribe( const std::string& brokerAddress,
     zmq_ctx_destroy( context );
 
     return address == std::string( result );
+}
+
+bool Service::subscribe( const std::string& brokerAddress,
+                         const std::string& name,
+                         const Publisher& publisher )
+{
+    const std::string address( brokerAddress + ":" +
+                         lexical_cast< std::string >( detail::getPort( name )));
+    return subscribe( address, publisher );
+
 }
 
 }

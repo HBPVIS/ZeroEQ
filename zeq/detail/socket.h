@@ -4,8 +4,8 @@
  */
 
 
-#ifndef ZEQ_DETAIL_SOCKETS_H
-#define ZEQ_DETAIL_SOCKETS_H
+#ifndef ZEQ_DETAIL_SOCKET_H
+#define ZEQ_DETAIL_SOCKET_H
 
 #include <zmq.h>
 
