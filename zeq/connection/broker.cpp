@@ -76,7 +76,7 @@ private:
     zeq::Receiver& _receiver;
     void* _socket;
 
-    bool _listen( const std::string address,
+    bool _listen( const std::string& address,
                   const connection::Broker::PortSelection mode )
     {
         if( zmq_bind( _socket, address.c_str( )) == -1 )

@@ -96,9 +96,10 @@ class NamedSubscriber : public Subscriber
                 return BrokerPtr(
                     new zeq::connection::Broker(
                       "zeq::connection::test_named_broker", subscriber, mode ));
-                lunchbox::sleep( 100 );
             }
             catch( ... ) {}
+
+            lunchbox::sleep( 100 /*ms*/ );
         }
         return BrokerPtr();
     }
