@@ -4,9 +4,8 @@
 cmake_minimum_required(VERSION 2.8)
 project(zeq)
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
-  ${PROJECT_SOURCE_DIR}/CMake/common)
+  ${CMAKE_SOURCE_DIR}/CMake/common)
 include(GitExternal)
-include(SubProject)
 
 set(VERSION_MAJOR "0")
 set(VERSION_MINOR "1")
