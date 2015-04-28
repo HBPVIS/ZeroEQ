@@ -1,3 +1,3 @@
 # -*- mode: cmake -*-
-git_subproject(Lunchbox https://github.com/Eyescale/Lunchbox.git 52528af)
+git_subproject(Lunchbox https://github.com/Eyescale/Lunchbox.git 9df4555)
 git_subproject(FlatBuffers https://github.com/Bluebrain/flatbuffers.git b5721cf)
