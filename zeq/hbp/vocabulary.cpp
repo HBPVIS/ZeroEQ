@@ -13,7 +13,7 @@
 #include <zeq/event.h>
 #include <zeq/vocabulary.h>
 
-#include <lunchbox/debug.h>
+#include <cassert>
 
 namespace zeq
 {
@@ -57,7 +57,7 @@ std::vector< T > deserializeVector(
 
 zeq::Event serializeCamera( const std::vector< float >& matrix )
 {
-    LBASSERT( matrix.size() == 16 )
+    assert( matrix.size() == 16 );
     zeq::Event event( EVENT_CAMERA );
     BUILD_VECTOR_ONLY_BUFFER( event, Camera, matrix );
     return event;
@@ -66,7 +66,7 @@ zeq::Event serializeCamera( const std::vector< float >& matrix )
 std::vector< float > deserializeCamera( const Event& event )
 {
     auto data = GetCamera( event.getData( ));
-    LBASSERT( data->matrix()->Length() == 16 );
+    assert( data->matrix()->Length() == 16 );
     return deserializeVector( data->matrix( ));
 }
 
@@ -116,7 +116,7 @@ uints deserializeToggleIDRequest( const zeq::Event& event )
 
 zeq::Event serializeLookupTable1D( const std::vector< uint8_t >& lut )
 {
-    LBASSERT( lut.size() == 1024 )
+    assert( lut.size() == 1024 );
     zeq::Event event( EVENT_LOOKUPTABLE1D );
     BUILD_VECTOR_ONLY_BUFFER( event, LookupTable1D, lut );
     return event;
@@ -125,7 +125,7 @@ zeq::Event serializeLookupTable1D( const std::vector< uint8_t >& lut )
 std::vector< uint8_t > deserializeLookupTable1D( const Event& event )
 {
     auto data = GetLookupTable1D( event.getData( ));
-    LBASSERT( data->lut()->Length() == 1024 );
+    assert( data->lut()->Length() == 1024 );
     return deserializeVector( data->lut( ));
 }
 

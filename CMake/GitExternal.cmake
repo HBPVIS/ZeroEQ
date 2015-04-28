@@ -8,7 +8,7 @@
 #    update target to bump the tag to the master revision by
 #    recreating .gitexternals.
 #  * Provides function
-#      git_external(<directory> <giturl> <gittag> [NO_UPDATE, VERBOSE]
+#      git_external(<directory> <giturl> <gittag> [VERBOSE]
 #        [RESET <files>])
 #    which will check out directory in CMAKE_SOURCE_DIR (if relative)
 #    or in the given absolute path using the given repository and tag
@@ -81,7 +81,7 @@ function(GIT_EXTERNAL DIR REPO TAG)
   if(NOT EXISTS "${DIR}")
     message(STATUS "git clone ${REPO} ${DIR}")
     execute_process(
-      COMMAND "${GIT_EXECUTABLE}" clone "${REPO}" "${DIR}"
+      COMMAND "${GIT_EXECUTABLE}" clone --recursive "${REPO}" "${DIR}"
       RESULT_VARIABLE nok ERROR_VARIABLE error
       WORKING_DIRECTORY "${GIT_EXTERNAL_DIR}")
     if(nok)

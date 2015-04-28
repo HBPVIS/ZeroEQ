@@ -4,7 +4,8 @@
  *                     Stefan.Eilemann@epfl.ch
  */
 
-#include <lunchbox/uri.h>
+#include <servus/uri.h>
+
 #include <sstream>
 
 namespace
@@ -24,8 +25,9 @@ std::string buildZmqURI( const std::string& host, const uint16_t port )
     return zmqURI.str();
 }
 
-std::string buildZmqURI( const lunchbox::URI& uri )
+std::string buildZmqURI( const servus::URI& uri )
 {
     return buildZmqURI( uri.getHost(), uri.getPort( ));
 }
+
 }

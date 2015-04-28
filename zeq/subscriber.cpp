@@ -7,14 +7,16 @@
 #include "subscriber.h"
 
 #include "event.h"
+#include "log.h"
 #include "detail/broker.h"
 #include "detail/socket.h"
+#include "detail/byteswap.h"
 
-#include <lunchbox/bitOperation.h>
-#include <lunchbox/debug.h>
-#include <lunchbox/log.h>
-#include <lunchbox/servus.h>
+#include <servus/servus.h>
+
+#include <cassert>
 #include <map>
+#include <string.h>
 
 namespace zeq
 {
@@ -23,21 +25,21 @@ namespace detail
 class Subscriber
 {
 public:
-    Subscriber( const lunchbox::URI& uri, void* context )
+    Subscriber( const servus::URI& uri, void* context )
         : _service( std::string( "_" ) + uri.getScheme() + "._tcp" )
     {
         if( uri.getScheme().empty( ))
-            LBTHROW( std::runtime_error(
-                         boost::lexical_cast< std::string >( uri ) +
-                         " is not a valid URI (scheme is missing)."));
+            ZEQTHROW( std::runtime_error(
+                          std::to_string( uri ) +
+                          " is not a valid URI (scheme is missing)."));
 
         if( uri.getHost().empty() || uri.getPort() == 0 )
         {
-            if( !lunchbox::Servus::isAvailable( ))
-                LBTHROW( std::runtime_error(
-                             std::string( "Empty servus implementation" )));
+            if( !servus::Servus::isAvailable( ))
+                ZEQTHROW( std::runtime_error(
+                              std::string( "Empty servus implementation" )));
 
-            _service.beginBrowsing( lunchbox::Servus::IF_ALL );
+            _service.beginBrowsing( servus::Servus::IF_ALL );
             update( context );
         }
         else
@@ -111,8 +113,8 @@ public:
 
         uint128_t type;
         memcpy( &type, zmq_msg_data( &msg ), sizeof(type) );
-#ifdef LB_BIGEENDIAN
-        lunchbox::byteswap( type ); // convert from little endian wire
+#ifndef ZEQ_LITTLEENDIAN
+        detail::byteswap( type ); // convert from little endian wire
 #endif
         const bool payload = zmq_msg_more( &msg );
         zmq_msg_close( &msg );
@@ -122,8 +124,12 @@ public:
         {
             zmq_msg_init( &msg );
             zmq_msg_recv( &msg, socket.socket, 0 );
-            event.setData( zmq_msg_data( &msg ), zmq_msg_size( &msg ));
-            LBASSERT( event.getSize() == zmq_msg_size( &msg ));
+            const size_t size = zmq_msg_size( &msg );
+            ConstByteArray data( new uint8_t[size],
+                                 std::default_delete< uint8_t[] >( ));
+            memcpy( (void*)data.get(), zmq_msg_data( &msg ), size );
+            event.setData( data, size );
+            assert( event.getSize() == size );
             zmq_msg_close( &msg );
         }
 
@@ -135,7 +141,7 @@ public:
             // Note eile: The topic filtering in the handler registration should
             // ensure that we don't get messages we haven't handlers. If this
             // throws, something does not work.
-            LBTHROW( std::runtime_error( "Got unsubscribed event" ));
+            ZEQTHROW( std::runtime_error( "Got unsubscribed event" ));
         }
 #endif
     }
@@ -144,7 +150,7 @@ public:
     {
         if( _service.isBrowsing( ))
             _service.browse( 0 );
-        const lunchbox::Strings& instances = _service.getInstances();
+        const servus::Strings& instances = _service.getInstances();
 
         for( const std::string& instance : instances )
         {
@@ -164,9 +170,9 @@ public:
         {
             zmq_close( _subscribers[zmqURI] );
             _subscribers.erase( zmqURI );
-            LBTHROW( std::runtime_error(
-                         "Cannot connect subscriber to " + zmqURI + ": " +
-                         zmq_strerror( zmq_errno( ))));
+            ZEQTHROW( std::runtime_error(
+                          "Cannot connect subscriber to " + zmqURI + ": " +
+                          zmq_strerror( zmq_errno( ))));
         }
 
         // Add existing subscriptions to socket
@@ -185,7 +191,7 @@ public:
         entry.socket = _subscribers[zmqURI];
         entry.events = ZMQ_POLLIN;
         _entries.push_back( entry );
-        LBINFO << "Subscribed to " << zmqURI << std::endl;
+        ZEQINFO << "Subscribed to " << zmqURI << std::endl;
     }
 
 private:
@@ -203,18 +209,18 @@ private:
 
     SocketMap _subscribers;
     EventFuncs _eventFuncs;
-    lunchbox::Servus _service;
+    servus::Servus _service;
     std::vector< Socket > _entries;
 };
 }
 
-Subscriber::Subscriber( const lunchbox::URI& uri )
+Subscriber::Subscriber( const servus::URI& uri )
     : Receiver()
     , _impl( new detail::Subscriber( uri, getZMQContext( )))
 {
 }
 
-Subscriber::Subscriber( const lunchbox::URI& uri, Receiver& shared )
+Subscriber::Subscriber( const servus::URI& uri, Receiver& shared )
     : Receiver( shared )
     , _impl( new detail::Subscriber( uri, getZMQContext( )))
 {

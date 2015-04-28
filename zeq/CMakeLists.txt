@@ -20,6 +20,7 @@ set(ZEQ_PUBLIC_HEADERS
   connection/service.h
   event.h
   eventDescriptor.h
+  log.h
   publisher.h
   receiver.h
   subscriber.h
@@ -38,6 +39,7 @@ set(ZEQ_SOURCES
   ${COMMON_SOURCES}
   connection/broker.cpp
   connection/service.cpp
+  detail/port.cpp
   detail/vocabulary.cpp
   event.cpp
   eventDescriptor.cpp
@@ -46,7 +48,7 @@ set(ZEQ_SOURCES
   subscriber.cpp
   vocabulary.cpp)
 
-set(ZEQ_LINK_LIBRARIES ${LUNCHBOX_LIBRARIES} ${LIBZMQ_LIBRARIES} ${FLATBUFFERS_LIBRARY})
+set(ZEQ_LINK_LIBRARIES ${LIBZMQ_LIBRARIES} ${FLATBUFFERS_LIBRARY} ${SERVUS_LIBRARIES})
 if(MSVC)
   list(APPEND ZEQ_LINK_LIBRARIES Ws2_32)
 endif()

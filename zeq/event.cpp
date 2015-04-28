@@ -39,11 +39,6 @@ const void* Event::getData() const
     return _impl->getData();
 }
 
-void Event::setData( const void* data, const size_t size )
-{
-    _impl->setData( data, size );
-}
-
 flatbuffers::FlatBufferBuilder& Event::getFBB()
 {
     return _impl->parser.builder_;
@@ -52,6 +47,11 @@ flatbuffers::FlatBufferBuilder& Event::getFBB()
 flatbuffers::Parser& Event::getParser()
 {
     return _impl->parser;
+}
+
+void Event::setData( const ConstByteArray& data, const size_t size )
+{
+    _impl->setData( data, size );
 }
 
 }

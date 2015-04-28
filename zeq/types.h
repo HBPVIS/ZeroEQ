@@ -1,14 +1,16 @@
 
 /* Copyright (c) 2014-2015, Human Brain Project
  *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
+ *                          Juan Hernando <jhernando@fi.upm.es>
  */
 
 #ifndef ZEQ_TYPES_H
 #define ZEQ_TYPES_H
 
-#include <lunchbox/types.h>
-#include <lunchbox/uint128_t.h>
+#include <servus/types.h>
+
 #include <functional>
+#include <memory>
 
 /**
  * Publish-subscribe classes for typed events.
@@ -29,16 +31,22 @@
 namespace zeq
 {
 
+using servus::uint128_t;
 class Event;
 class Publisher;
 class Subscriber;
 struct EventDescriptor;
 
+typedef std::shared_ptr< const uint8_t > ConstByteArray;
+
 typedef std::vector< EventDescriptor > EventDescriptors;
 typedef std::function< void( const Event& ) > EventFunc;
 
-using lunchbox::uint128_t;
-using lunchbox::make_uint128;
+/** Constant defining 'wait forever' in methods with wait parameters. */
+// Attn: identical to Win32 INFINITE!
+static const uint32_t TIMEOUT_INDEFINITE = 0xffffffffu;
+
+using servus::make_uint128;
 
 namespace detail { struct Socket; }
 
@@ -52,6 +60,7 @@ enum AnnounceMode //!< Network presence announcements
 
 }
 // internal
+
 namespace flatbuffers { class FlatBufferBuilder; class Parser; }
 
 #endif

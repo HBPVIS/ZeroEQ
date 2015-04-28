@@ -9,6 +9,8 @@
 
 #include <zeq/receiver.h> // base class
 
+#include <vector>
+
 namespace zeq
 {
 
@@ -33,7 +35,7 @@ public:
      * @param uri publishing URI in the format scheme://[*|host|IP|IF][:port]
      * @throw std::runtime_error when the subscription failed.
      */
-    ZEQ_API explicit Subscriber( const lunchbox::URI& uri );
+    ZEQ_API explicit Subscriber( const servus::URI& uri );
 
     /*
      * Create a shared subscription to one or more publishers.
@@ -46,7 +48,7 @@ public:
      * @param shared another receiver to share data reception with.
      * @throw std::runtime_error when the subscription failed.
      */
-    ZEQ_API Subscriber( const lunchbox::URI& uri, Receiver& shared );
+    ZEQ_API Subscriber( const servus::URI& uri, Receiver& shared );
 
     /** Destroy this subscriber and withdraw any subscriptions. */
     ZEQ_API ~Subscriber();

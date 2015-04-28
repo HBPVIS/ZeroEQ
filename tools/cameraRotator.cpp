@@ -31,14 +31,17 @@
 
 #include <zeq/zeq.h>
 #include <zeq/hbp/hbp.h>
-#include <lunchbox/lunchbox.h>
+#include <servus/servus.h>
+
+#include <cmath>
+#include <thread>
 
 int main( const int argc, char** argv )
 {
     const int time = (argc > 1) ? ::atoi( argv[1] ) : 50;
     const float angle = (argc > 2) ? ::atof( argv[2] ) : 0.1f;
 
-    zeq::Publisher publisher( lunchbox::URI( "hbp://" ));
+    zeq::Publisher publisher( servus::URI( "hbp://" ));
     std::vector< float > matrix( 16, 0 );
     matrix[ 0 ] = 1;
     matrix[ 5 ] = 1;
@@ -66,7 +69,7 @@ int main( const int argc, char** argv )
         matrix[ 12 ] = matrix[ 12 ] * cos - matrix[ 14 ] * sin;
         matrix[ 14 ] = tmp * sin + matrix[ 14 ] * cos;
 
-        lunchbox::sleep( time );
+        std::this_thread::sleep_for( std::chrono::milliseconds( time ));
     }
 
     return EXIT_SUCCESS;

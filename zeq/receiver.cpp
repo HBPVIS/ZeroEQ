@@ -7,11 +7,11 @@
 #define NOMINMAX // otherwise std::min/max below don't work on VS
 
 #include "receiver.h"
+#include "log.h"
 #include "detail/socket.h"
 
-#include <lunchbox/clock.h>
-#include <lunchbox/log.h>
 #include <algorithm>
+#include <chrono>
 #include <deque>
 
 namespace zeq
@@ -43,21 +43,24 @@ public:
 
     bool receive( const uint32_t timeout )
     {
-        if( timeout == LB_TIMEOUT_INDEFINITE )
+        if( timeout == TIMEOUT_INDEFINITE )
             return _receive();
 
         // Never fully block. Give receivers a chance to update, e.g., to check
         // for new connections from zeroconf (#20)
         const uint32_t block = std::min( 1000u, timeout / 10 );
 
-        lunchbox::Clock timer;
+        const auto startTime = std::chrono::high_resolution_clock::now();
         while( true )
         {
             for( ::zeq::Receiver* receiver : _shared )
                 receiver->update();
 
-            const uint64_t elapsed = timer.getTime64();
-            long wait = 0;
+            const auto endTime = std::chrono::high_resolution_clock::now();
+            const uint32_t elapsed =
+                std::chrono::nanoseconds( endTime - startTime ).count() /
+                1000000;
+            uint32_t wait = 0;
             if( elapsed < timeout )
                 wait = std::min( timeout - uint32_t( elapsed ), block );
 
@@ -104,11 +107,11 @@ private:
         }
 
         switch( zmq_poll( sockets.data(), int( sockets.size( )),
-                          timeout == LB_TIMEOUT_INDEFINITE ? -1 : timeout ))
+                          timeout == TIMEOUT_INDEFINITE ? -1 : timeout ))
         {
         case -1: // error
-            LBTHROW( std::runtime_error( std::string( "Poll error: " ) +
-                                         zmq_strerror( zmq_errno( ))));
+            ZEQTHROW( std::runtime_error( std::string( "Poll error: " ) +
+                                          zmq_strerror( zmq_errno( ))));
         case 0: // timeout; no events signaled during poll
             return false;
 
