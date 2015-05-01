@@ -8,9 +8,9 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
 include(GitExternal)
 
 set(VERSION_MAJOR "0")
-set(VERSION_MINOR "1")
+set(VERSION_MINOR "2")
 set(VERSION_PATCH "0")
-set(VERSION_ABI 1)
+set(VERSION_ABI 2)
 
 include(Common)
 

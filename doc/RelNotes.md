@@ -9,54 +9,37 @@ Welcome to ZeroEQ, a cross-platform C++ library to publish and subscribe for
 events.
 
 ZeroEQ 0.1 is a prototype version. It can be retrieved by cloning the
-[source code](https://github.com/HBPVIS/zeq).
+[source code](https://github.com/HBPVIS/zeq). Please file a
+[Bug Report](https://github.com/HBPVis/zeq/issues) if you find any
+issues with this release.
 
 ## Features {#Features}
 
 ZeroEQ provides the following major features:
 
-* Publish events using zeq::Broker
-* Subscribe to events using zeq::Broker
+* Publish events using zeq::Publisher
+* Subscribe to events using zeq::Subscriber
 * Asynchronous, reliable transport using ZMQ
-* Discovery using Zeroconf
+* Automatic publisher discovery using Zeroconf
 * Serialization of events using flatbuffers
 
 - - -
 
-# New in this release {#New}
+## Changes {#Changes}
 
-ZeroEQ 0.1 provides the following features:
+### git master
 
-## New Features {#NewFeatures}
+### Version 0.2
 
-* Prototype API
+* zeq::connection::Broker and zeq::connection::Service for subscription
+  from a remote publisher.
+* Concurrently dispatch events for multiple zeq::Subscriber and
+  zeq::connection::Broker using shared zeq::Receiver groups.
 
-## Enhancements {#Enhancements}
+### Version 0.1
 
-* No enhancements
-
-## Optimizations {#Optimizations}
-
-* No optimizations
-
-## Documentation {#Documentation}
-
-* No new documentation
-
-## Bug Fixes {#Fixes}
-
-ZeroEQ 0.1 includes various bugfixes over the last release, including the
-following:
-
-* No bugs
-
-## Known Bugs {#Bugs}
-
-The following bugs were known at release time. Please file a
-[Bug Report](https://github.com/HBPVis/zeq/issues) if you find any
-other issue with this release.
-
-* No known bugs
+* zeq::Publisher, zeq::Subscriber and zeq::Event for publish-subcribe
+  event driven architectures.
 
 - - -
 
@@ -67,7 +50,14 @@ system, including all Unix variants. ZeroEQ uses CMake to create a
 platform-specific build environment. The following platforms and build
 environments are tested:
 
-* Linux: Ubuntu 14.04
+* Linux: Ubuntu 14.04, RHEL 6 using gcc 4.8
+* Windows: 8 using Visual Studio 12
+* Mac OS X: 10.9 and 10.10 using clang 6
+
+ZeroEQ requires the following external, pre-installed dependencies:
+
+* ZeroMQ 4.0 or later
+* Boost (tested with 1.54)
 
 - - -
 
