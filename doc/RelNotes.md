@@ -29,8 +29,17 @@ ZeroEQ provides the following major features:
 
 ### git master
 
+### Version 0.2
+
 * zeq::connection::Broker and zeq::connection::Service for subscription
   from a remote publisher.
+* Concurrently dispatch events for multiple zeq::Subscriber and
+  zeq::connection::Broker using shared zeq::Receiver groups.
+
+### Version 0.1
+
+* zeq::Publisher, zeq::Subscriber and zeq::Event for publish-subcribe
+  event driven architectures.
 
 - - -
 

@@ -39,6 +39,7 @@ struct EventDescriptor : public boost::noncopyable
      * @param restName the string used for REST command
      * @param eventType the zeq event's uint128
      * @param schema the flatbuffers schema as string
+     * @param eventDirection receiving, sending, or both
      */
     ZEQ_API EventDescriptor( const std::string& restName,
                              const uint128_t& eventType,
