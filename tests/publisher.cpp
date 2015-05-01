@@ -42,8 +42,8 @@ BOOST_AUTO_TEST_CASE(test_multiple_publisher_on_same_host)
         return;
 
     const lunchbox::uint128_t uuid = lunchbox::make_UUID();
-    const std::string scheme = boost::lexical_cast< std::string >( uuid.high( )) +
-                               boost::lexical_cast< std::string >( uuid.low( ));
+    const std::string scheme = std::to_string( uuid.high( )) +
+                               std::to_string( uuid.low( ));
     const lunchbox::URI uri( scheme + "://*:0" );
 
     const zeq::Publisher publisher1( uri );

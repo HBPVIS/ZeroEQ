@@ -7,7 +7,6 @@
 #ifndef ZEQ_PUBLISHER_H
 #define ZEQ_PUBLISHER_H
 
-#include <boost/noncopyable.hpp>
 #include <zeq/api.h>
 #include <zeq/types.h>
 
@@ -21,7 +20,7 @@ namespace detail { class Publisher; }
  *
  * Example: @include tests/publisher.cpp
  */
-class Publisher : public boost::noncopyable
+class Publisher
 {
 public:
     /**
@@ -46,6 +45,9 @@ public:
     const std::string& getAddress() const; //!< @internal
 
 private:
+    Publisher( const Publisher& ) = delete;
+    Publisher& operator=( const Publisher& ) = delete;
+
     detail::Publisher* const _impl;
 };
 

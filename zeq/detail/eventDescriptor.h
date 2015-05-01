@@ -8,14 +8,13 @@
 #define ZEQ_DETAIL_EVENTDESCRIPTOR_H
 
 #include <zeq/types.h>
-#include <boost/noncopyable.hpp>
 
 namespace zeq
 {
 namespace detail
 {
 
-struct EventDescriptor : public boost::noncopyable
+struct EventDescriptor
 {
     EventDescriptor( const std::string& restName_, const uint128_t& eventType_,
                      const std::string& schema_, const EventDirection eventDirection_ )
@@ -28,6 +27,10 @@ struct EventDescriptor : public boost::noncopyable
     const uint128_t eventType;
     const std::string schema;
     const EventDirection eventDirection;
+
+private:
+    EventDescriptor( const EventDescriptor& ) = delete;
+    EventDescriptor& operator=( const EventDescriptor& ) = delete;
 };
 
 }

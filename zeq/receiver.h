@@ -9,13 +9,12 @@
 #include <zeq/api.h>
 #include <zeq/types.h>
 
-#include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace zeq
 {
 namespace detail { class Receiver; }
-namespace connection{ namespace detail{ class Broker; }}
+namespace connection { namespace detail{ class Broker; }}
 
 /**
  * Base class for entities receiving data.
@@ -28,7 +27,7 @@ namespace connection{ namespace detail{ class Broker; }}
  *
  * Example: @include tests/receiver.cpp
  */
-class Receiver : public boost::noncopyable
+class Receiver
 {
 public:
     /** Create a new standalone receiver. */
@@ -89,7 +88,10 @@ protected:
     void* getZMQContext(); //!< @internal returns the ZeroMQ context
 
 private:
-    boost::shared_ptr< detail::Receiver > const _impl;
+    Receiver( const Receiver& ) = delete;
+    Receiver& operator=( const Receiver& ) = delete;
+
+    std::shared_ptr< detail::Receiver > const _impl;
 };
 
 }

@@ -10,8 +10,6 @@
 #include "detail/broker.h"
 #include "detail/socket.h"
 
-#include <boost/foreach.hpp>
-#include <boost/lexical_cast.hpp>
 #include <lunchbox/bitOperation.h>
 #include <lunchbox/debug.h>
 #include <lunchbox/log.h>
@@ -51,7 +49,7 @@ public:
 
     ~Subscriber()
     {
-        BOOST_FOREACH( SocketType socket, _subscribers )
+        for( const auto& socket : _subscribers )
         {
             if ( socket.second )
                 zmq_close( socket.second );
@@ -112,7 +110,7 @@ public:
             _service.browse( 0 );
         const lunchbox::Strings& instances = _service.getInstances();
 
-        BOOST_FOREACH( const std::string& instance, instances )
+        for( const std::string& instance : instances )
         {
             const std::string& zmqURI = _getZmqURI( instance );
 
@@ -158,11 +156,10 @@ private:
         const std::string& host = instance.substr( 0, pos );
         const std::string& port = instance.substr( pos + 1 );
 
-        return buildZmqURI( host, boost::lexical_cast< uint16_t >( port ));
+        return buildZmqURI( host, std::stoi( port ));
     }
 
     typedef std::map< uint128_t, EventFunc > EventFuncs;
-    typedef std::pair< std::string, void* > SocketType;
     typedef std::map< std::string, void* > SocketMap;
 
     SocketMap _subscribers;

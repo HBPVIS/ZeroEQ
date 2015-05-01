@@ -8,7 +8,6 @@
 
 #include <zeq/api.h>
 #include <zeq/types.h>
-#include <boost/noncopyable.hpp>
 #include <string>
 
 namespace zeq
@@ -21,7 +20,7 @@ namespace connection
  *
  * Example: @include tests/connection/broker.cpp
  */
-class Service : public boost::noncopyable
+class Service
 {
 public:
     /**
@@ -54,6 +53,10 @@ public:
     ZEQ_API static bool subscribe( const std::string& brokerAddress,
                                    const std::string& name,
                                    const Publisher& publisher );
+
+private:
+    Service( const Service& ) = delete;
+    Service& operator=( const Service& ) = delete;
 };
 
 }

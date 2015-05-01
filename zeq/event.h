@@ -8,7 +8,6 @@
 
 #include <zeq/api.h>
 #include <zeq/types.h>
-#include <boost/noncopyable.hpp>
 
 namespace zeq
 {
@@ -22,7 +21,7 @@ namespace detail { class Subscriber; class Event; }
  *
  * Example: @include tests/serialization.cpp
  */
-class Event : public boost::noncopyable
+class Event
 {
 public:
     /**
@@ -56,6 +55,9 @@ public:
     ZEQ_API const flatbuffers::Parser& getParser() const;
 
 private:
+    Event( const Event& ) = delete;
+    Event& operator=( const Event& ) = delete;
+
     friend class detail::Subscriber;
     void setData( const void* data, const size_t size );
 

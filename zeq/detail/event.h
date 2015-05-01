@@ -20,7 +20,7 @@ namespace zeq
 namespace detail
 {
 
-class Event : public boost::noncopyable
+class Event
 {
 public:
     Event( const uint128_t& type_ )
@@ -60,6 +60,10 @@ public:
 
     /** setData() uses this instead of fbb during deserialization */
     lunchbox::Bufferb data;
+
+private:
+    Event( const Event& ) = delete;
+    Event& operator=( const Event& ) = delete;
 };
 
 }
