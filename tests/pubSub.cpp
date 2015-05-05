@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(test_subscribe_to_different_schema)
         zeq::Subscriber subscriber( lunchbox::URI( uriSubscriber.str( ))));
 }
 
-BOOST_AUTO_TEST_CASE(test_subscribe_to_same_schema_zeroconf )
+BOOST_AUTO_TEST_CASE(test_subscribe_to_same_schema_zeroconf)
 {
     if( !lunchbox::Servus::isAvailable() || getenv("TRAVIS"))
         return;
@@ -159,6 +159,33 @@ BOOST_AUTO_TEST_CASE(test_publish_receive_zeroconf)
         }
     }
     BOOST_CHECK( received );
+}
+
+BOOST_AUTO_TEST_CASE(test_publish_receive_zeroconf_disabled)
+{
+    if( getenv("TRAVIS"))
+        return;
+
+    zeq::Publisher publisher( lunchbox::URI( "foo://" ), zeq::ANNOUNCE_NONE );
+    zeq::Subscriber subscriber( lunchbox::URI( "foo://" ));
+
+    BOOST_CHECK( subscriber.registerHandler(
+                     EVENT_ECHO, std::bind( &test::onEchoEvent,
+                                            std::placeholders::_1 )));
+
+    bool received = false;
+    for( size_t i = 0; i < 20; ++i )
+    {
+        BOOST_CHECK( publisher.publish(
+                         zeq::vocabulary::serializeEcho( test::echoMessage )));
+
+        if( subscriber.receive( 100 ))
+        {
+            received = true;
+            break;
+        }
+    }
+    BOOST_CHECK( !received );
 }
 
 BOOST_AUTO_TEST_CASE(test_publish_blocking_receive_zeroconf)

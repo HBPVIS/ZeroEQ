@@ -13,6 +13,8 @@ set(VERSION_PATCH "0")
 set(VERSION_ABI 2)
 
 include(Common)
+include(CTest)
+enable_testing()
 
 set(COMMON_PROJECT_DOMAIN eu.humanbrainproject)
 set(ZEQ_DESCRIPTION "ZeroEQ - Zero Event Queue")

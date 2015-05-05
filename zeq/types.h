@@ -41,8 +41,16 @@ using lunchbox::uint128_t;
 using lunchbox::make_uint128;
 
 namespace detail { struct Socket; }
-}
 
+enum AnnounceMode //!< Network presence announcements
+{
+    ANNOUNCE_NONE = 0x0u, //!< Do not announce presence on the network
+    ANNOUNCE_REQUIRED = 0x1u, //!< Chosen protocols are mandatory
+    ANNOUNCE_ZEROCONF = 0x2u, //!< Force announcement using zeroconf
+    ANNOUNCE_ALL = ANNOUNCE_ZEROCONF //!< Force announcement using all protocols
+};
+
+}
 // internal
 namespace flatbuffers { class FlatBufferBuilder; class Parser; }
 

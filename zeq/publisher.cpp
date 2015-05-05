@@ -29,8 +29,9 @@ namespace detail
 class Publisher
 {
 public:
-    Publisher( const lunchbox::URI& uri )
-        : _context( zmq_ctx_new( ))
+    Publisher( const lunchbox::URI& uri_, const uint32_t announceMode )
+        : uri( uri_ )
+        , _context( zmq_ctx_new( ))
         , _publisher( zmq_socket( _context, ZMQ_PUB ))
         , _service( std::string( "_" ) + uri.getScheme() + "._tcp" )
     {
@@ -46,7 +47,7 @@ public:
                          zmqURI + "': " + zmq_strerror( zmq_errno( ))));
         }
 
-        _initService( uri.getHost(), uri.getPort( ));
+        _initService( announceMode, uri.getHost(), uri.getPort( ));
     }
 
     ~Publisher()
@@ -94,13 +95,32 @@ public:
     }
 
     const std::string& getAddress() const { return _address; }
+    const lunchbox::URI uri;
 
 private:
-    void _initService( std::string host, uint16_t port )
+    void _initService( const uint32_t announceMode, std::string host,
+                       uint16_t port )
     {
         _initAddress( host, port );
-        if( lunchbox::Servus::isAvailable( ))
-            _service.announce( port, _address );
+        if( announceMode == ANNOUNCE_NONE || !(announceMode&ANNOUNCE_ZEROCONF) )
+            return;
+
+        const bool required = (announceMode & ANNOUNCE_REQUIRED);
+        if( !lunchbox::Servus::isAvailable( ))
+        {
+            if( required )
+                LBTHROW( std::runtime_error(
+                             "No zeroconf implementation available" ));
+            return;
+        }
+
+        const lunchbox::Servus::Result& result = _service.announce( port,
+                                                                    _address );
+        if( required && !result )
+        {
+            LBTHROW( std::runtime_error( "Zeroconf announce failed: " +
+                                         result.getString( )));
+        }
     }
 
     void _initAddress( std::string& host, uint16_t& port )
@@ -156,8 +176,8 @@ private:
 };
 }
 
-Publisher::Publisher( const lunchbox::URI& uri )
-    : _impl( new detail::Publisher( uri ))
+Publisher::Publisher( const lunchbox::URI& uri, const uint32_t announceMode )
+    : _impl( new detail::Publisher( uri, announceMode ))
 {
 }
 
@@ -174,6 +194,11 @@ bool Publisher::publish( const Event& event )
 const std::string& Publisher::getAddress() const
 {
     return _impl->getAddress();
+}
+
+const lunchbox::URI& Publisher::getURI() const
+{
+    return _impl->uri;
 }
 
 }

@@ -12,7 +12,6 @@
 
 namespace zeq
 {
-
 namespace detail { class Publisher; }
 
 /**
@@ -27,8 +26,10 @@ public:
      * Create a publisher on the given URI.
      *
      * @param uri publishing URI in the format scheme://[*|host|IP|IF][:port]
+     * @param announceMode bitwise combination of AnnounceMode network protocols
      */
-    ZEQ_API explicit Publisher( const lunchbox::URI& uri );
+    ZEQ_API Publisher( const lunchbox::URI& uri,
+                       uint32_t announceMode = ANNOUNCE_ALL );
 
     ZEQ_API ~Publisher();
 
@@ -43,6 +44,9 @@ public:
     ZEQ_API bool publish( const Event& event );
 
     const std::string& getAddress() const; //!< @internal
+
+    /** @return the publisher URI given in the constructor. */
+    ZEQ_API const lunchbox::URI& getURI() const;
 
 private:
     Publisher( const Publisher& ) = delete;
