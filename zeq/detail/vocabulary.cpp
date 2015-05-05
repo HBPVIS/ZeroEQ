@@ -15,8 +15,6 @@
 #include <lunchbox/debug.h>
 #include <lunchbox/stdExt.h>
 
-#include <boost/foreach.hpp>
-
 namespace zeq
 {
 namespace vocabulary

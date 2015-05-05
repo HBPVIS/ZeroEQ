@@ -10,8 +10,6 @@
 
 #include <lunchbox/log.h>
 #include <lunchbox/servus.h>
-#include <boost/foreach.hpp>
-#include <boost/lexical_cast.hpp>
 #include <map>
 
 namespace zeq
@@ -20,8 +18,6 @@ namespace connection
 {
 namespace detail
 {
-using boost::lexical_cast;
-
 class Broker
 {
 public:
@@ -31,7 +27,7 @@ public:
         , _socket( zmq_socket( context, ZMQ_REP ))
     {
         const std::string zmqAddr( std::string( "tcp://*:" ) +
-                    lexical_cast< std::string >( zeq::detail::getPort( name )));
+                       std::to_string( uint32_t(zeq::detail::getPort( name ))));
 
         _listen( zmqAddr, mode ) ||
             _listen( "tcp://*:0", connection::Broker::PORT_FIXED );

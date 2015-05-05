@@ -37,8 +37,6 @@
 #include <tests/newEvent_generated.h>
 #include <tests/newEvent_zeq_generated.h>
 
-#include <boost/bind.hpp>
-
 namespace zeqtest
 {
 static const std::string message( "So long, and thanks for all the fish" );
@@ -74,10 +72,10 @@ BOOST_AUTO_TEST_CASE(test_new_event)
 {
     lunchbox::RNG rng;
     const unsigned short port = (rng.get<uint16_t>() % 60000) + 1024;
-    const std::string& portStr = boost::lexical_cast< std::string >( port );
+    const std::string& portStr = std::to_string( uint32_t(port));
     zeq::Subscriber subscriber( lunchbox::URI( "foo://localhost:" + portStr ));
     BOOST_CHECK( subscriber.registerHandler( zeqtest::EVENT_NEWEVENT,
-                                  boost::bind( &zeqtest::onMessageEvent, _1 )));
+                 std::bind( &zeqtest::onMessageEvent, std::placeholders::_1 )));
 
     zeq::Publisher publisher( lunchbox::URI( "foo://*:" + portStr ));
 

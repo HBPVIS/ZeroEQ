@@ -8,7 +8,7 @@
 
 #include <lunchbox/types.h>
 #include <lunchbox/uint128_t.h>
-#include <boost/function/function1.hpp>
+#include <functional>
 
 /**
  * Publish-subscribe classes for typed events.
@@ -35,7 +35,7 @@ class Subscriber;
 struct EventDescriptor;
 
 typedef std::vector< EventDescriptor > EventDescriptors;
-typedef boost::function< void( const Event& ) > EventFunc;
+typedef std::function< void( const Event& ) > EventFunc;
 
 using lunchbox::uint128_t;
 using lunchbox::make_uint128;

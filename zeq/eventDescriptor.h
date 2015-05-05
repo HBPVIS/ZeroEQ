@@ -10,7 +10,6 @@
 #include <zeq/api.h>
 
 #include <zeq/types.h>
-#include <boost/noncopyable.hpp>
 
 namespace zeq
 {
@@ -32,7 +31,7 @@ enum EventDirection
  * It contains the REST api name, the 128bit zeq event id and the schema
  * needed for automatic JSON serialization/deserialization.
  */
-struct EventDescriptor : public boost::noncopyable
+struct EventDescriptor
 {
     /**
      * Create an EventDescriptor.
@@ -44,7 +43,7 @@ struct EventDescriptor : public boost::noncopyable
     ZEQ_API EventDescriptor( const std::string& restName,
                              const uint128_t& eventType,
                              const std::string& schema,
-                             const EventDirection eventDirection);
+                             const EventDirection eventDirection );
 
     /** Move ctor @internal */
     ZEQ_API EventDescriptor( EventDescriptor&& rhs );
@@ -63,6 +62,8 @@ struct EventDescriptor : public boost::noncopyable
     /** @return the zeq event's direction (Subscribed, Pulished or both)*/
     ZEQ_API EventDirection getEventDirection() const;
 private:
+    EventDescriptor( const EventDescriptor& ) = delete;
+    EventDescriptor& operator=( const EventDescriptor& ) = delete;
 
     EventDescriptor& operator=( EventDescriptor&& rhs );
 

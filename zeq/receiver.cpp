@@ -9,7 +9,6 @@
 #include "receiver.h"
 #include "detail/socket.h"
 
-#include <boost/foreach.hpp>
 #include <lunchbox/clock.h>
 #include <lunchbox/log.h>
 #include <algorithm>
@@ -54,7 +53,7 @@ public:
         lunchbox::Clock timer;
         while( true )
         {
-            BOOST_FOREACH( ::zeq::Receiver* receiver, _shared )
+            for( ::zeq::Receiver* receiver : _shared )
                 receiver->update();
 
             const uint64_t elapsed = timer.getTime64();
@@ -83,7 +82,7 @@ private:
     {
         while( true )
         {
-            BOOST_FOREACH( ::zeq::Receiver* receiver, _shared )
+            for( ::zeq::Receiver* receiver : _shared )
                 receiver->update();
 
             // Never fully block. Give receivers a chance to update, e.g., to
@@ -97,7 +96,7 @@ private:
     {
         std::vector< Socket > sockets;
         std::deque< size_t > intervals;
-        BOOST_FOREACH( ::zeq::Receiver* receiver, _shared )
+        for( ::zeq::Receiver* receiver : _shared )
         {
             const size_t before = sockets.size();
             receiver->addSockets( sockets );
@@ -123,7 +122,7 @@ private:
             size_t interval = intervals.front();
             intervals.pop_front();
 
-            BOOST_FOREACH( Socket& socket, sockets )
+            for( Socket& socket : sockets )
             {
                 while( interval == 0 || interval-- == 0 )
                 {
@@ -149,8 +148,7 @@ Receiver::Receiver()
 }
 
 Receiver::Receiver( Receiver& shared )
-    : boost::noncopyable()
-    , _impl( shared._impl )
+    : _impl( shared._impl )
 {
     _impl->add( this );
 }

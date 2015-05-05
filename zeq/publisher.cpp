@@ -8,8 +8,6 @@
 #include "event.h"
 #include "detail/broker.h"
 
-#include <boost/foreach.hpp>
-#include <boost/lexical_cast.hpp>
 #include <lunchbox/bitOperation.h>
 #include <lunchbox/log.h>
 #include <lunchbox/servus.h>
@@ -22,8 +20,6 @@
 #else
 #  include <netdb.h>
 #endif
-
-using boost::lexical_cast;
 
 namespace zeq
 {
@@ -129,7 +125,7 @@ private:
             {
                 const std::string portStr =
                     endPointStr.substr( endPointStr.find_last_of( ":" ) + 1 );
-                port = lexical_cast< uint16_t >( portStr );
+                port = std::stoi( portStr );
             }
 
             if( host.empty( ))
@@ -150,7 +146,7 @@ private:
                    << ":" << port << std::endl;
         }
 
-        _address = host + ":" + lexical_cast< std::string >( port );
+        _address = host + ":" + std::to_string( uint32_t(port));
     }
 
     void* _context;

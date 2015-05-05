@@ -12,8 +12,6 @@
 #include <lunchbox/thread.h>
 #include <lunchbox/servus.h>
 
-#include <boost/bind.hpp>
-
 using namespace zeq::vocabulary;
 
 namespace
@@ -96,10 +94,10 @@ BOOST_AUTO_TEST_CASE(test_publish_receive)
 {
     lunchbox::RNG rng;
     const unsigned short port = (rng.get<uint16_t>() % 60000) + 1024;
-    const std::string& portStr = boost::lexical_cast< std::string >( port );
+    const std::string& portStr = std::to_string( port );
     zeq::Subscriber subscriber( lunchbox::URI( "foo://localhost:" + portStr ));
-    BOOST_CHECK( subscriber.registerHandler(
-                     EVENT_ECHO, boost::bind( &test::onEchoEvent, _1 )));
+    BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
+                       std::bind( &test::onEchoEvent, std::placeholders::_1 )));
 
     zeq::Publisher publisher( lunchbox::URI( "foo://*:" + portStr ));
 
@@ -145,8 +143,8 @@ BOOST_AUTO_TEST_CASE(test_publish_receive_zeroconf)
     zeq::Publisher publisher( lunchbox::URI( "foo://" ));
     zeq::Subscriber subscriber( lunchbox::URI( "foo://" ));
 
-    BOOST_CHECK( subscriber.registerHandler(
-                     EVENT_ECHO, boost::bind( &test::onEchoEvent, _1 )));
+    BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
+                       std::bind( &test::onEchoEvent, std::placeholders::_1 )));
 
     bool received = false;
     for( size_t i = 0; i < 20; ++i )
@@ -169,8 +167,8 @@ BOOST_AUTO_TEST_CASE(test_publish_blocking_receive_zeroconf)
         return;
 
     zeq::Subscriber subscriber( lunchbox::URI( "foo://" ));
-    BOOST_CHECK( subscriber.registerHandler(
-                     EVENT_ECHO, boost::bind( &test::onEchoEvent, _1 )));
+    BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
+                       std::bind( &test::onEchoEvent, std::placeholders::_1 )));
 
     Publisher publisher;
     publisher.start();
@@ -188,8 +186,8 @@ BOOST_AUTO_TEST_CASE(test_publish_receive_late_zeroconf)
     zeq::Subscriber subscriber( lunchbox::URI( "foo://" ));
     zeq::Publisher publisher( lunchbox::URI( "foo://" ));
 
-    BOOST_CHECK( subscriber.registerHandler(
-                     EVENT_ECHO, boost::bind( &test::onEchoEvent, _1 )));
+    BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
+                       std::bind( &test::onEchoEvent, std::placeholders::_1 )));
     bool received = false;
     for( size_t i = 0; i < 20; ++i )
     {
@@ -213,8 +211,8 @@ BOOST_AUTO_TEST_CASE(test_publish_receive_empty_event_zeroconf)
     zeq::Publisher publisher( lunchbox::URI( "foo://" ));
     zeq::Subscriber subscriber( lunchbox::URI( "foo://" ));
 
-    BOOST_CHECK( subscriber.registerHandler(
-                     EVENT_EXIT, boost::bind( &test::onExitEvent, _1 )));
+    BOOST_CHECK( subscriber.registerHandler( EVENT_EXIT,
+                       std::bind( &test::onExitEvent, std::placeholders::_1 )));
     bool received = false;
     const zeq::Event event( EVENT_EXIT );
     for( size_t i = 0; i < 20; ++i )
