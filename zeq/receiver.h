@@ -88,7 +88,6 @@ protected:
     void* getZMQContext(); //!< @internal returns the ZeroMQ context
 
 private:
-    Receiver( const Receiver& ) = delete;
     Receiver& operator=( const Receiver& ) = delete;
 
     std::shared_ptr< detail::Receiver > const _impl;
