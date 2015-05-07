@@ -43,10 +43,17 @@ public:
      */
     ZEQ_API bool publish( const Event& event );
 
-    const std::string& getAddress() const; //!< @internal
-
-    /** @return the publisher URI given in the constructor. */
+    /**
+     * Get the publisher URI.
+     *
+     * Contains the used hostname and port, if none where given in the
+     * constructor uri.
+     *
+     * @return the publisher URI.
+     */
     ZEQ_API const lunchbox::URI& getURI() const;
+
+    std::string getAddress() const; //!< @internal
 
 private:
     Publisher( const Publisher& ) = delete;
