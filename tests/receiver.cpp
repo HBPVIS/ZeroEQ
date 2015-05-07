@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(test_two_subscribers)
 {
     lunchbox::RNG rng;
     const unsigned short port = (rng.get<uint16_t>() % 60000) + 1024;
-    const std::string& portStr = std::to_string( port );
+    const std::string& portStr = std::to_string( ( unsigned int ) port );
     zeq::Subscriber subscriber1( lunchbox::URI( "foo://localhost:" + portStr ));
     zeq::Subscriber subscriber2( lunchbox::URI( "foo://localhost:" + portStr ),
                                  subscriber1 );
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(test_publisher_routing)
 {
     lunchbox::RNG rng;
     const unsigned short port = (rng.get<uint16_t>() % 60000) + 1024;
-    const std::string& portStr = std::to_string( port );
+    const std::string& portStr = std::to_string( ( unsigned int ) port );
     zeq::Subscriber* subscriber1 =
         new zeq::Subscriber( lunchbox::URI( "foo://localhost:1000" ));
     zeq::Subscriber subscriber2( lunchbox::URI( "foo://localhost:" + portStr ),
