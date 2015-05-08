@@ -29,8 +29,9 @@ namespace detail
 class Publisher
 {
 public:
-    Publisher( const lunchbox::URI& uri )
-        : _context( zmq_ctx_new( ))
+    Publisher( const lunchbox::URI& uri_, const uint32_t announceMode )
+        : uri( uri_ )
+        , _context( zmq_ctx_new( ))
         , _publisher( zmq_socket( _context, ZMQ_PUB ))
         , _service( std::string( "_" ) + uri.getScheme() + "._tcp" )
     {
@@ -46,7 +47,7 @@ public:
                          zmqURI + "': " + zmq_strerror( zmq_errno( ))));
         }
 
-        _initService( uri.getHost(), uri.getPort( ));
+        _initService( announceMode );
     }
 
     ~Publisher()
@@ -93,21 +94,46 @@ public:
         return true;
     }
 
-    const std::string& getAddress() const { return _address; }
-
-private:
-    void _initService( std::string host, uint16_t port )
+    std::string getAddress() const
     {
-        _initAddress( host, port );
-        if( lunchbox::Servus::isAvailable( ))
-            _service.announce( port, _address );
+        return uri.getHost() + ":" + std::to_string( uint32_t( uri.getPort( )));
     }
 
-    void _initAddress( std::string& host, uint16_t& port )
+    lunchbox::URI uri;
+
+private:
+    void _initService( const uint32_t announceMode )
     {
+        _initAddress();
+        if( !(announceMode&ANNOUNCE_ZEROCONF) )
+            return;
+
+        const bool required = (announceMode & ANNOUNCE_REQUIRED);
+        if( !lunchbox::Servus::isAvailable( ))
+        {
+            if( required )
+                LBTHROW( std::runtime_error(
+                             "No zeroconf implementation available" ));
+            return;
+        }
+
+        const lunchbox::Servus::Result& result = _service.announce(
+            uri.getPort(), getAddress( ));
+
+        if( required && !result )
+        {
+            LBTHROW( std::runtime_error( "Zeroconf announce failed: " +
+                                         result.getString( )));
+        }
+    }
+
+    void _initAddress()
+    {
+        std::string host = uri.getHost();
         if( host == "*" )
             host.clear();
 
+        uint16_t port = uri.getPort();
         if( host.empty() || port == 0 )
         {
             char endPoint[1024];
@@ -126,6 +152,7 @@ private:
                 const std::string portStr =
                     endPointStr.substr( endPointStr.find_last_of( ":" ) + 1 );
                 port = std::stoi( portStr );
+                uri.setPort( port );
             }
 
             if( host.empty( ))
@@ -140,24 +167,22 @@ private:
                     hostname[NI_MAXHOST] = '\0';
                     host = hostname;
                 }
+                uri.setHost( host );
             }
 
             LBINFO << "Bound " << _service.getName() << " publisher to " << host
                    << ":" << port << std::endl;
         }
-
-        _address = host + ":" + std::to_string( uint32_t(port));
     }
 
     void* _context;
     void* _publisher;
     lunchbox::Servus _service;
-    std::string _address;
 };
 }
 
-Publisher::Publisher( const lunchbox::URI& uri )
-    : _impl( new detail::Publisher( uri ))
+Publisher::Publisher( const lunchbox::URI& uri, const uint32_t announceMode )
+    : _impl( new detail::Publisher( uri, announceMode ))
 {
 }
 
@@ -171,9 +196,14 @@ bool Publisher::publish( const Event& event )
     return _impl->publish( event );
 }
 
-const std::string& Publisher::getAddress() const
+std::string Publisher::getAddress() const
 {
     return _impl->getAddress();
+}
+
+const lunchbox::URI& Publisher::getURI() const
+{
+    return _impl->uri;
 }
 
 }

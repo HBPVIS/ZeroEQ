@@ -29,6 +29,8 @@ ZeroEQ provides the following major features:
 
 ### git master
 
+* Allow specification of network announce protocols in zeq::Publisher
+
 ### Version 0.2
 
 * zeq::connection::Broker and zeq::connection::Service for subscription

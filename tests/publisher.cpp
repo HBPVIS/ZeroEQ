@@ -13,6 +13,11 @@
 BOOST_AUTO_TEST_CASE(test_create_uri_publisher)
 {
     zeq::Publisher publisher( lunchbox::URI( "foo://" ));
+
+    const lunchbox::URI& uri = publisher.getURI();
+    BOOST_CHECK_EQUAL( uri.getScheme(), std::string( "foo" ));
+    BOOST_CHECK( !uri.getHost().empty( ));
+    BOOST_CHECK( uri.getPort() > 1024 );
 }
 
 BOOST_AUTO_TEST_CASE(test_create_invalid_uri_publisher)
