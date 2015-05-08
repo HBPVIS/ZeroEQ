@@ -62,13 +62,26 @@ public:
     {
         if( _eventFuncs.count( event ) != 0 )
             return false;
+        for( const auto& socket : _subscribers )
+        {
+            zmq_setsockopt( socket.second, ZMQ_SUBSCRIBE,
+                            &event, sizeof( event ));
+        }
         _eventFuncs[event] = func;
         return true;
     }
 
     bool deregisterHandler( const uint128_t& event )
     {
-        return _eventFuncs.erase( event ) > 0;
+        if( _eventFuncs.erase( event ) == 0 )
+            return false;
+
+        for( const auto& socket : _subscribers )
+        {
+            zmq_setsockopt( socket.second, ZMQ_UNSUBSCRIBE,
+                            &event, sizeof( event ));
+        }
+        return true;
     }
 
     void addSockets( std::vector< detail::Socket >& entries )

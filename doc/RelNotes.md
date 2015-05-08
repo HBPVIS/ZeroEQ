@@ -29,6 +29,7 @@ ZeroEQ provides the following major features:
 
 ### git master
 
+* Filter messages basec on registered handlers (Optimization)
 * Allow specification of network announce protocols in zeq::Publisher
 
 ### Version 0.2
