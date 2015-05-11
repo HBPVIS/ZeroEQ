@@ -63,8 +63,8 @@ BOOST_AUTO_TEST_CASE(test_broker)
     subscriber.start();
 
     // Using a different scheme so zeroconf resolution does not work
-    zeq::Publisher publisher( lunchbox::URI( "bar://*:" +
-                                             std::to_string( port )));
+    zeq::Publisher publisher(
+        lunchbox::URI( "bar://*:" + std::to_string( ( unsigned int ) port )));
     BOOST_CHECK( zeq::connection::Service::subscribe( brokerAddress,
                                                       publisher ));
     for( size_t i = 0; i < 100 && !subscriber.received; ++i )
@@ -116,8 +116,8 @@ BOOST_AUTO_TEST_CASE(test_named_broker)
     subscriber2.start();
 
     // Using a different scheme so zeroconf resolution does not work
-    zeq::Publisher publisher( lunchbox::URI( "bar://*:" +
-                                             std::to_string( port )));
+    zeq::Publisher publisher(
+        lunchbox::URI( "bar://*:" + std::to_string( ( unsigned int ) port )));
     BOOST_CHECK( zeq::connection::Service::subscribe(
                      "127.0.0.1", "zeq::connection::test_named_broker",
                      publisher ));
@@ -167,8 +167,9 @@ BOOST_AUTO_TEST_CASE(test_named_broker_port_used)
 
 BOOST_AUTO_TEST_CASE(test_invalid_broker)
 {
-    zeq::Subscriber subscriber( lunchbox::URI( "foo://127.0.0.1:" +
-                                               std::to_string( port )));
+    zeq::Subscriber subscriber(
+        lunchbox::URI( "foo://127.0.0.1:" +
+                       std::to_string( ( unsigned ) port )));
     BOOST_CHECK_THROW( zeq::connection::Broker( std::string( "invalidIP" ),
                                                 subscriber ),
                        std::runtime_error );

@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(test_publish_receive)
 {
     lunchbox::RNG rng;
     const unsigned short port = (rng.get<uint16_t>() % 60000) + 1024;
-    const std::string& portStr = std::to_string( port );
+    const std::string& portStr = std::to_string( ( unsigned int ) port );
     zeq::Subscriber subscriber( lunchbox::URI( "foo://localhost:" + portStr ));
     BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
                        std::bind( &test::onEchoEvent, std::placeholders::_1 )));
