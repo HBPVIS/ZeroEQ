@@ -8,10 +8,10 @@
 
 #include "broker.h"
 
-#include <lunchbox/clock.h>
 #include <lunchbox/servus.h>
 #include <lunchbox/sleep.h>
 #include <lunchbox/thread.h>
+#include <chrono>
 
 using namespace zeq::vocabulary;
 
@@ -217,10 +217,6 @@ BOOST_AUTO_TEST_CASE(test_publish_receive_filters)
     zeq::Subscriber subscriber( publisher.getURI( ));
     const std::string message( 60000, 'a' );
 
-    // Add unused handler to enable filtering
-    BOOST_CHECK( subscriber.registerHandler( EVENT_EXIT,
-                       std::bind( &test::onExitEvent, std::placeholders::_1 )));
-
     // Make sure we're connected
     BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
                        std::bind( &test::onEchoEvent, std::placeholders::_1 )));
@@ -235,29 +231,31 @@ BOOST_AUTO_TEST_CASE(test_publish_receive_filters)
 
     // benchmark with no data to be transmitted
     const zeq::Event& event = serializeEcho( message );
-    lunchbox::Clock clock;
+    auto startTime = std::chrono::high_resolution_clock::now();
     for( size_t i = 0; i < 1000; ++i )
     {
         BOOST_CHECK( publisher.publish( event ));
-        subscriber.receive( 0 );
+        while( subscriber.receive( 0 )) /* NOP to drain */;
     }
-    while( subscriber.receive( 0 )) /* NOP to drain */;
-    const float noEchoTime = clock.getTimef();
+    const auto& noEchoTime = std::chrono::high_resolution_clock::now() -
+                             startTime;
 
     // Benchmark with echo handler, now should send data
     BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
                        std::bind( &onLargeEcho, std::placeholders::_1 )));
 
-    clock.reset();
+    startTime = std::chrono::high_resolution_clock::now();
     for( size_t i = 0; i < 1000; ++i )
     {
         BOOST_CHECK( publisher.publish( event ));
-        subscriber.receive( 0 );
+        while( subscriber.receive( 0 )) /* NOP to drain */;
     }
-    while( subscriber.receive( 0 )) /* NOP to drain */;
-    const float echoTime = clock.getTimef();
+    const auto& echoTime = std::chrono::high_resolution_clock::now() -
+                           startTime;
 
-    BOOST_CHECK( noEchoTime < echoTime );
+    BOOST_CHECK_MESSAGE( noEchoTime < echoTime,
+                         std::chrono::nanoseconds( noEchoTime ).count() << ", "
+                         << std::chrono::nanoseconds( echoTime ).count( ));
 }
 
 BOOST_AUTO_TEST_CASE(test_publish_receive_late_zeroconf)
