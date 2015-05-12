@@ -62,13 +62,40 @@ public:
     {
         if( _eventFuncs.count( event ) != 0 )
             return false;
+
+        // Add subscription to existing sockets
+        for( const auto& socket : _subscribers )
+        {
+            if( zmq_setsockopt( socket.second, ZMQ_SUBSCRIBE,
+                                &event, sizeof( event )) == -1 )
+            {
+                throw std::runtime_error(
+                    std::string( "Cannot update topic filter: " ) +
+                    zmq_strerror( zmq_errno( )));
+            }
+        }
+
         _eventFuncs[event] = func;
         return true;
     }
 
     bool deregisterHandler( const uint128_t& event )
     {
-        return _eventFuncs.erase( event ) > 0;
+        if( _eventFuncs.erase( event ) == 0 )
+            return false;
+
+        for( const auto& socket : _subscribers )
+        {
+            if( zmq_setsockopt( socket.second, ZMQ_UNSUBSCRIBE,
+                                &event, sizeof( event )) == -1 )
+            {
+                throw std::runtime_error(
+                    std::string( "Cannot update topic filter: " ) +
+                    zmq_strerror( zmq_errno( )));
+            }
+        }
+
+        return true;
     }
 
     void addSockets( std::vector< detail::Socket >& entries )
@@ -102,6 +129,15 @@ public:
 
         if( _eventFuncs.count( type ) != 0 )
             _eventFuncs[type]( event );
+#ifndef NDEBUG
+        else
+        {
+            // Note eile: The topic filtering in the handler registration should
+            // ensure that we don't get messages we haven't handlers. If this
+            // throws, something does not work.
+            LBTHROW( std::runtime_error( "Got unsubscribed event" ));
+        }
+#endif
     }
 
     void update( void* context )
@@ -129,17 +165,20 @@ public:
             zmq_close( _subscribers[zmqURI] );
             _subscribers.erase( zmqURI );
             LBTHROW( std::runtime_error(
-                         "Cannot connect subscriber to " + zmqURI + ", got " +
+                         "Cannot connect subscriber to " + zmqURI + ": " +
                          zmq_strerror( zmq_errno( ))));
         }
 
-        if( zmq_setsockopt( _subscribers[zmqURI], ZMQ_SUBSCRIBE, "", 0 ) == -1 )
+        // Add existing subscriptions to socket
+        for( const auto& i : _eventFuncs )
         {
-            zmq_close( _subscribers[zmqURI] );
-            _subscribers.erase( zmqURI );
-            LBTHROW( std::runtime_error(
-                         std::string( "Cannot set subscriber, got " ) +
-                         zmq_strerror( zmq_errno( ))));
+            if( zmq_setsockopt( _subscribers[zmqURI], ZMQ_SUBSCRIBE,
+                                &i.first, sizeof( uint128_t )) == -1 )
+            {
+                throw std::runtime_error(
+                    std::string( "Cannot update topic filter: " ) +
+                    zmq_strerror( zmq_errno( )));
+            }
         }
 
         Socket entry;

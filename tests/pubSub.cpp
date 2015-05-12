@@ -1,16 +1,17 @@
 
-/* Copyright (c) 2014, Human Brain Project
- *                     Daniel Nachbaur <daniel.nachbaur@epfl.ch>
- *                     Stefan.Eilemann@epfl.ch
+/* Copyright (c) 2014-2015, Human Brain Project
+ *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
+ *                          Stefan.Eilemann@epfl.ch
  */
 
 #define BOOST_TEST_MODULE zeq_pub_sub
 
 #include "broker.h"
 
+#include <lunchbox/servus.h>
 #include <lunchbox/sleep.h>
 #include <lunchbox/thread.h>
-#include <lunchbox/servus.h>
+#include <chrono>
 
 using namespace zeq::vocabulary;
 
@@ -205,6 +206,58 @@ BOOST_AUTO_TEST_CASE(test_publish_blocking_receive_zeroconf)
     BOOST_CHECK( publisher.join( ));
 }
 
+void onLargeEcho( const zeq::Event& event )
+{
+    BOOST_CHECK( event.getType() == zeq::vocabulary::EVENT_ECHO );
+}
+
+BOOST_AUTO_TEST_CASE(test_publish_receive_filters)
+{
+    zeq::Publisher publisher( lunchbox::URI( "foo://" ), zeq::ANNOUNCE_NONE );
+    zeq::Subscriber subscriber( publisher.getURI( ));
+    const std::string message( 60000, 'a' );
+
+    // Make sure we're connected
+    BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
+                       std::bind( &test::onEchoEvent, std::placeholders::_1 )));
+    for( size_t i = 0; i < 20; ++i )
+    {
+        BOOST_CHECK( publisher.publish(
+                         zeq::vocabulary::serializeEcho( test::echoMessage )));
+        if( subscriber.receive( 100 ))
+            break;
+    }
+    BOOST_CHECK( subscriber.deregisterHandler( EVENT_ECHO ));
+
+    // benchmark with no data to be transmitted
+    const zeq::Event& event = serializeEcho( message );
+    auto startTime = std::chrono::high_resolution_clock::now();
+    for( size_t i = 0; i < 1000; ++i )
+    {
+        BOOST_CHECK( publisher.publish( event ));
+        while( subscriber.receive( 0 )) /* NOP to drain */;
+    }
+    const auto& noEchoTime = std::chrono::high_resolution_clock::now() -
+                             startTime;
+
+    // Benchmark with echo handler, now should send data
+    BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
+                       std::bind( &onLargeEcho, std::placeholders::_1 )));
+
+    startTime = std::chrono::high_resolution_clock::now();
+    for( size_t i = 0; i < 1000; ++i )
+    {
+        BOOST_CHECK( publisher.publish( event ));
+        while( subscriber.receive( 0 )) /* NOP to drain */;
+    }
+    const auto& echoTime = std::chrono::high_resolution_clock::now() -
+                           startTime;
+
+    BOOST_CHECK_MESSAGE( noEchoTime < echoTime,
+                         std::chrono::nanoseconds( noEchoTime ).count() << ", "
+                         << std::chrono::nanoseconds( echoTime ).count( ));
+}
+
 BOOST_AUTO_TEST_CASE(test_publish_receive_late_zeroconf)
 {
     if( !lunchbox::Servus::isAvailable() || getenv("TRAVIS"))
@@ -228,7 +281,6 @@ BOOST_AUTO_TEST_CASE(test_publish_receive_late_zeroconf)
     }
     BOOST_CHECK( received );
 }
-
 
 BOOST_AUTO_TEST_CASE(test_publish_receive_empty_event_zeroconf)
 {
