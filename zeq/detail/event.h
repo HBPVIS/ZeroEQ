@@ -1,12 +1,10 @@
 
-/* Copyright (c) 2014-2015, Human Brain Project
- *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
+/* Copyright (c) 2014, Human Brain Project
+ *                     Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  */
 
 #ifndef ZEQ_DETAIL_EVENT_H
 #define ZEQ_DETAIL_EVENT_H
-
-#include "vocabulary.h"
 
 #include <zeq/types.h>
 #include <zeq/event.h>
@@ -25,13 +23,7 @@ class Event
 public:
     Event( const uint128_t& type_ )
         : type( type_ )
-    {
-        const std::string& schema = vocabulary::detail::getSchema( type );
-
-        // populate parser with schema from type
-        if( !schema.empty() && !parser.Parse( schema.c_str( )))
-            LBTHROW( std::runtime_error( parser.error_ ));
-    }
+    {}
 
     size_t getSize() const
     {

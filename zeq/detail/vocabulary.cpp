@@ -12,6 +12,7 @@
 #include <zeq/request_generated.h>
 #include <zeq/vocabulary_generated.h>
 
+#include <flatbuffers/idl.h>
 #include <lunchbox/debug.h>
 #include <lunchbox/stdExt.h>
 
@@ -23,10 +24,20 @@ namespace detail
 {
 namespace
 {
-stde::hash_map< uint128_t, std::string >& getRegistry()
+typedef stde::hash_map< uint128_t, std::string > EventRegistry;
+
+EventRegistry& getRegistry()
 {
-    static stde::hash_map< uint128_t, std::string > _eventRegistry;
+    static EventRegistry _eventRegistry;
     return _eventRegistry;
+}
+
+const std::string& getSchema( const uint128_t& type )
+{
+    static const std::string nullString;
+    const EventRegistry& registry = getRegistry();
+    EventRegistry::const_iterator i = registry.find( type );
+    return ( i == registry.end( )) ? nullString : i->second;
 }
 }
 
@@ -132,8 +143,13 @@ std::string deserializeEcho( const zeq::Event& event )
 zeq::Event serializeJSON( const uint128_t& type, const std::string& json )
 {
     zeq::Event event( type );
+
+    const std::string& schema = getSchema( type );
+    if( schema.empty( ))
+        LBTHROW( std::runtime_error( "JSON schema for event not registered" ));
+
     flatbuffers::Parser& parser = event.getParser();
-    if( !parser.Parse( json.c_str( )))
+    if( !parser.Parse( schema.c_str( )) || !parser.Parse( json.c_str( )))
         LBTHROW( std::runtime_error( parser.error_ ));
     return event;
 }
@@ -144,18 +160,22 @@ std::string deserializeJSON( const zeq::Event& event )
     flatbuffers::GeneratorOptions opts;
     opts.base64_byte_array = true;
     opts.strict_json = true;
-    GenerateText( event.getParser(), event.getData(), opts, &json );
+
+    const std::string& schema = getSchema( event.getType( ));
+    if( schema.empty( ))
+        LBTHROW( std::runtime_error( "JSON schema for event not registered" ));
+
+    flatbuffers::Parser parser;
+    if( !parser.Parse( schema.c_str( )))
+        LBTHROW( std::runtime_error( parser.error_ ));
+
+    GenerateText( parser, event.getData(), opts, &json );
     return json;
 }
 
 void registerEvent( const uint128_t& type, const std::string& schema )
 {
     getRegistry()[type] = schema;
-}
-
-const std::string& getSchema( const uint128_t& type )
-{
-    return getRegistry()[type];
 }
 
 }

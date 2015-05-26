@@ -25,6 +25,8 @@ namespace zeq
 namespace vocabulary
 {
 
+/** @name Builtin Events */
+//@{
 ZEQ_API Event serializeEcho( const std::string& message );
 ZEQ_API std::string deserializeEcho( const Event& event );
 
@@ -59,7 +61,22 @@ ZEQ_API Event serializeRequest( const uint128_t& eventType );
  * @return an uint128_t to identify the zeq event that should be published.
  */
 ZEQ_API uint128_t deserializeRequest( const Event& event );
+//@}
 
+/**
+ * @name JSON/binary event translation.
+ *
+ * These functions are not thread-safe, that is, calling registerEvent()
+ * concurrently with any of the other functions in this group needs external
+ * serialization.
+ */
+//@{
+/** Establish a type to schema mapping for (de)serialization from/to JSON.
+ *
+ * @param type the type of the event.
+ * @param schema the schema as string of the event.
+ */
+ZEQ_API void registerEvent( const uint128_t& type, const std::string& schema );
 
 /** Serialize an event from JSON to a zeq::Event.
  *
@@ -73,7 +90,8 @@ ZEQ_API uint128_t deserializeRequest( const Event& event );
  * @param json JSON-formatted string containing the values for schema-defined
  *             keys
  * @return the serialized zeq::Event from the given JSON string.
- * @throw std::runtime_error when the parsing of the given JSON fails
+ * @throw std::runtime_error when the parsing of the given JSON fails or the
+ *        given event is not registered.
  */
 ZEQ_API Event serializeJSON( const uint128_t& type, const std::string& json );
 
@@ -87,15 +105,10 @@ ZEQ_API Event serializeJSON( const uint128_t& type, const std::string& json );
  * @sa serializeJSON
  * @param event the zeq::Event to deserialize into JSON.
  * @return the deserialized JSON string from the given zeq::Event.
+ * @throw std::runtime_error when the given event is not registered.
  */
 ZEQ_API std::string deserializeJSON( const Event& event );
-
-/** Establish a type to schema mapping for (de)serialization from/to JSON.
- *
- * @param type the type of the event.
- * @param schema the schema as string of the event.
- */
-ZEQ_API void registerEvent( const uint128_t& type, const std::string& schema );
+//@}
 
 }
 }
