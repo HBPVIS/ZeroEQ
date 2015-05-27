@@ -11,7 +11,7 @@
 
 namespace zeq
 {
-namespace detail { class Subscriber; class Event; }
+namespace detail{ class Subscriber; class Event; }
 
 /**
  * An event is emitted by a Publisher to notify Subscriber of a change.
@@ -28,7 +28,6 @@ public:
      * Construct a new event of the given type
      *
      * @param type the desired event type
-     * @throw std::runtime_error when an invalid schema is registered
      * @sa vocabulary::registerEvent
      */
     ZEQ_API explicit Event( const uint128_t& type );
@@ -52,7 +51,6 @@ public:
 
     /** @internal @return serialization specific implementation */
     ZEQ_API flatbuffers::Parser& getParser();
-    ZEQ_API const flatbuffers::Parser& getParser() const;
 
 private:
     Event( const Event& ) = delete;

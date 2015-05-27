@@ -88,7 +88,9 @@ BOOST_AUTO_TEST_CASE(test_invalid_event_registration)
     const zeq::uint128_t eventType( 42 );
     zeq::vocabulary::registerEvent( eventType, schema );
 
-    BOOST_CHECK_THROW( zeq::Event( zeq::uint128_t( 42 )), std::runtime_error );
+    zeq::Event event( zeq::uint128_t( 42 ));
+    BOOST_CHECK_THROW( zeq::vocabulary::deserializeJSON( event ),
+                       std::runtime_error );
 }
 
 BOOST_AUTO_TEST_CASE(test_serialization)

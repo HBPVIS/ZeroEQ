@@ -33,8 +33,6 @@ std::string deserializeJSON( const zeq::Event& event );
 
 void registerEvent( const uint128_t& type, const std::string& schema );
 
-const std::string& getSchema( const uint128_t& type );
-
 }
 }
 }

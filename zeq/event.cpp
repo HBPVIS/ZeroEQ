@@ -54,9 +54,4 @@ flatbuffers::Parser& Event::getParser()
     return _impl->parser;
 }
 
-const flatbuffers::Parser& Event::getParser() const
-{
-    return _impl->parser;
-}
-
 }
