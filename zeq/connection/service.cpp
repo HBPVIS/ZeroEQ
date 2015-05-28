@@ -6,10 +6,11 @@
 #include "service.h"
 #include <zeq/publisher.h>
 #include <zeq/detail/port.h>
-#include <lunchbox/log.h>
-#include <lunchbox/sleep.h>
-#include <string.h>
+#include <zeq/log.h>
+
 #include <zmq.h>
+
+#include <string.h>
 
 namespace zeq
 {
@@ -23,8 +24,8 @@ bool Service::subscribe( const std::string& brokerAddress,
     const std::string zmqAddress = std::string("tcp://" ) + brokerAddress;
     if( zmq_connect( socket, zmqAddress.c_str( )) == -1 )
     {
-        LBINFO << "Can't reach connection broker at " << brokerAddress
-               << std::endl;
+        ZEQINFO << "Can't reach connection broker at " << brokerAddress
+                << std::endl;
         zmq_close( socket );
         zmq_ctx_destroy( context );
         return false;
@@ -38,9 +39,9 @@ bool Service::subscribe( const std::string& brokerAddress,
     if( zmq_msg_send( &request, socket, 0 ) == -1 )
     {
         zmq_msg_close( &request );
-        LBINFO << "Can't send connection request " << address << " to "
-               << brokerAddress << ": " << zmq_strerror( zmq_errno( ))
-               << std::endl;
+        ZEQINFO << "Can't send connection request " << address << " to "
+                << brokerAddress << ": " << zmq_strerror( zmq_errno( ))
+                << std::endl;
         return false;
     }
     zmq_msg_close( &request );
@@ -50,8 +51,8 @@ bool Service::subscribe( const std::string& brokerAddress,
     if( zmq_msg_recv( &reply, socket, 0 )  == -1 )
     {
         zmq_msg_close( &reply );
-        LBINFO << "Can't receive connection reply from " << brokerAddress
-               << std::endl;
+        ZEQINFO << "Can't receive connection reply from " << brokerAddress
+                << std::endl;
         return false;
     }
 

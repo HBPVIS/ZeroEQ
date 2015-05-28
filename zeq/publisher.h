@@ -28,7 +28,7 @@ public:
      * @param uri publishing URI in the format scheme://[*|host|IP|IF][:port]
      * @param announceMode bitwise combination of AnnounceMode network protocols
      */
-    ZEQ_API Publisher( const lunchbox::URI& uri,
+    ZEQ_API Publisher( const servus::URI& uri,
                        uint32_t announceMode = ANNOUNCE_ALL );
 
     ZEQ_API ~Publisher();
@@ -51,7 +51,7 @@ public:
      *
      * @return the publisher URI.
      */
-    ZEQ_API const lunchbox::URI& getURI() const;
+    ZEQ_API const servus::URI& getURI() const;
 
     std::string getAddress() const; //!< @internal
 

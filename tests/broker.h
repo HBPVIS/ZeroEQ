@@ -1,23 +1,49 @@
 
-/* Copyright (c) 2014, Human Brain Project
- *                     Daniel Nachbaur <daniel.nachbaur@epfl.ch>
- *                     Stefan.Eilemann@epfl.ch
+/* Copyright (c) 2014-2015, Human Brain Project
+ *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
+ *                          Stefan.Eilemann@epfl.ch
+ *                          Juan Hernando <jhernando@fi.upm.es>
  */
 
+#include <zeq/detail/port.h>
 #include <zeq/zeq.h>
-#include <lunchbox/rng.h>
-#include <lunchbox/uri.h>
 
+#include <servus/uri.h>
 #include <boost/test/unit_test.hpp>
+#include <string>
 
 namespace test
 {
-lunchbox::URI buildURI( const std::string& hostname = std::string( ))
+
+servus::URI buildPublisherURI( const std::string& schema )
 {
-    std::ostringstream uri;
-    uri << "foo://" << (hostname.empty() ? "localhost" : hostname)
-        << ":" << (lunchbox::RNG().get<uint16_t>() % 60000) + 1024;
-    return lunchbox::URI( uri.str( ));
+    return servus::URI( schema + ":" );
+}
+
+servus::URI buildPublisherURI( const std::string& schema,
+                               const unsigned int port )
+{
+    return servus::URI( schema + "://*:" +
+                          std::to_string( port ));
+}
+
+servus::URI buildURI( const std::string& schema,
+                        const std::string& hostname )
+{
+    std::stringstream uri;
+    uri << schema << "://" << hostname;
+    return servus::URI( uri.str( ));
+}
+
+servus::URI buildURI( const std::string& schema,
+                        const std::string& hostname,
+                        const unsigned int port )
+{
+    std::stringstream uri;
+    uri << schema << "://";
+    if( !hostname.empty( ))
+        uri << hostname << ":" << std::to_string( port );
+    return servus::URI( uri.str( ));
 }
 
 const std::string echoMessage( "echo_event" );
@@ -34,4 +60,5 @@ void onExitEvent( const zeq::Event& event )
     BOOST_CHECK_EQUAL( event.getType(), zeq::vocabulary::EVENT_EXIT );
     BOOST_CHECK_EQUAL( event.getSize(), 0 );
 }
+
 }

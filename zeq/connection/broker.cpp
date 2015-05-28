@@ -4,12 +4,12 @@
  */
 
 #include "broker.h"
+
 #include <zeq/detail/port.h>
 #include <zeq/detail/socket.h>
 #include <zeq/receiver.h>
+#include <zeq/log.h>
 
-#include <lunchbox/log.h>
-#include <lunchbox/servus.h>
 #include <map>
 
 namespace zeq
@@ -80,14 +80,14 @@ private:
             if( mode == connection::Broker::PORT_FIXED )
             {
                 zmq_close( _socket );
-                LBTHROW( std::runtime_error(
-                             "Cannot connect broker to " + address + ": " +
+                ZEQTHROW( std::runtime_error(
+                              "Cannot connect broker to " + address + ": " +
                               zmq_strerror( zmq_errno( ))));
             }
             return false;
         }
 
-        LBINFO << "Bound broker to " << address << std::endl;
+        ZEQINFO << "Bound broker to " << address << std::endl;
         return true;
     }
 };

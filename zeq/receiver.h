@@ -11,6 +11,9 @@
 
 #include <memory>
 
+#include <vector>
+#include <string>
+
 namespace zeq
 {
 namespace detail { class Receiver; }
@@ -54,7 +57,7 @@ public:
      * @return true if at least one event was received
      * @throw std::runtime_error when polling failed.
      */
-    ZEQ_API bool receive( const uint32_t timeout = LB_TIMEOUT_INDEFINITE );
+    ZEQ_API bool receive( const uint32_t timeout = TIMEOUT_INDEFINITE );
 
 protected:
     friend class detail::Receiver;

@@ -11,7 +11,11 @@
 
 namespace zeq
 {
-namespace detail{ class Subscriber; class Event; }
+namespace detail
+{
+    class Subscriber;
+    class Event;
+}
 
 /**
  * An event is emitted by a Publisher to notify Subscriber of a change.
@@ -57,7 +61,9 @@ private:
     Event& operator=( const Event& ) = delete;
 
     friend class detail::Subscriber;
-    void setData( const void* data, const size_t size );
+
+    /** Set a raw buffer as event data. */
+    void setData( const ConstByteArray& data, const size_t size );
 
     Event& operator=( Event&& rhs );
 

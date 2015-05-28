@@ -13,8 +13,7 @@
 #include <zeq/vocabulary_generated.h>
 
 #include <flatbuffers/idl.h>
-#include <lunchbox/debug.h>
-#include <lunchbox/stdExt.h>
+#include <unordered_map>
 
 namespace zeq
 {
@@ -22,9 +21,10 @@ namespace vocabulary
 {
 namespace detail
 {
+
 namespace
 {
-typedef stde::hash_map< uint128_t, std::string > EventRegistry;
+typedef std::unordered_map< uint128_t, std::string > EventRegistry;
 
 EventRegistry& getRegistry()
 {
@@ -52,14 +52,13 @@ Event serializeVocabulary( const EventDescriptors& vocabulary )
     std::vector< flatbuffers::Offset<flatbuffers::String> > schemas;
     std::vector< uint8_t > eventDirections;
 
-    for( EventDescriptors::const_iterator eventDescriptor = vocabulary.begin();
-         eventDescriptor != vocabulary.end(); ++eventDescriptor)
+    for( const auto& eventDescriptor : vocabulary )
     {
-        restNames.push_back( fbb.CreateString( eventDescriptor->getRestName( )));
-        eventTypeHighs.push_back( eventDescriptor->getEventType().high( ));
-        eventTypeLows.push_back( eventDescriptor->getEventType().low( ));
-        schemas.push_back( fbb.CreateString( eventDescriptor->getSchema( )));
-        eventDirections.push_back( uint8_t( eventDescriptor->getEventDirection()));
+        restNames.push_back( fbb.CreateString( eventDescriptor.getRestName( )));
+        eventTypeHighs.push_back( eventDescriptor.getEventType().high( ));
+        eventTypeLows.push_back( eventDescriptor.getEventType().low( ));
+        schemas.push_back( fbb.CreateString( eventDescriptor.getSchema( )));
+        eventDirections.push_back( uint8_t( eventDescriptor.getEventDirection()));
     }
 
     const auto& restNamesForZeq = fbb.CreateVector( &restNames[0],
@@ -146,11 +145,11 @@ zeq::Event serializeJSON( const uint128_t& type, const std::string& json )
 
     const std::string& schema = getSchema( type );
     if( schema.empty( ))
-        LBTHROW( std::runtime_error( "JSON schema for event not registered" ));
+        ZEQTHROW( std::runtime_error( "JSON schema for event not registered" ));
 
     flatbuffers::Parser& parser = event.getParser();
     if( !parser.Parse( schema.c_str( )) || !parser.Parse( json.c_str( )))
-        LBTHROW( std::runtime_error( parser.error_ ));
+        ZEQTHROW( std::runtime_error( parser.error_ ));
     return event;
 }
 
@@ -163,11 +162,11 @@ std::string deserializeJSON( const zeq::Event& event )
 
     const std::string& schema = getSchema( event.getType( ));
     if( schema.empty( ))
-        LBTHROW( std::runtime_error( "JSON schema for event not registered" ));
+        ZEQTHROW( std::runtime_error( "JSON schema for event not registered" ));
 
     flatbuffers::Parser parser;
     if( !parser.Parse( schema.c_str( )))
-        LBTHROW( std::runtime_error( parser.error_ ));
+        ZEQTHROW( std::runtime_error( parser.error_ ));
 
     GenerateText( parser, event.getData(), opts, &json );
     return json;

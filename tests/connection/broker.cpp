@@ -1,6 +1,7 @@
 
 /* Copyright (c) 2014-2015, Human Brain Project
  *                          Stefan.Eilemann@epfl.ch
+ *                          Juan Hernando <jhernando@fi.upm.es>
  */
 
 #define BOOST_TEST_MODULE zeq_connection_broker
@@ -8,26 +9,31 @@
 #include "../broker.h"
 #include <zeq/connection/broker.h>
 
-#include <lunchbox/monitor.h>
-#include <lunchbox/thread.h>
-#include <lunchbox/servus.h>
-#include <lunchbox/sleep.h>
-#include <memory>
+#include <servus/servus.h>
 
-const unsigned short port = (lunchbox::RNG().get<uint16_t>() % 60000) + 1024;
+#include <condition_variable>
+#include <memory>
+#include <mutex>
+#include <thread>
+
+const unsigned int port = zeq::detail::getRandomPort();
 const std::string brokerAddress = std::string( "127.0.0.1:" ) +
                                   std::to_string( port + 1 );
 typedef std::unique_ptr< zeq::connection::Broker > BrokerPtr;
 
-class Subscriber : public lunchbox::Thread
+class Subscriber
 {
 public:
-    Subscriber() : received( false ) {}
+    Subscriber()
+        : received( false )
+        , _started( false )
+    {}
 
-    void run() final
+    virtual ~Subscriber() {}
+
+    void run()
     {
-        zeq::Subscriber subscriber( lunchbox::URI( "foo://127.0.0.1:" +
-                                    std::to_string( uint32_t(port))));
+        zeq::Subscriber subscriber( test::buildURI( "foo", "127.0.0.1", port ));
         BOOST_CHECK( subscriber.registerHandler( zeq::vocabulary::EVENT_ECHO,
                        std::bind( &test::onEchoEvent, std::placeholders::_1 )));
 
@@ -37,19 +43,33 @@ public:
         if( !broker )
             return;
 
-        running = true;
+        {
+            std::unique_lock< std::mutex > lock( _mutex );
+            _started = true;
+            _condition.notify_all();
+        }
+
         for( size_t i = 0; i < 100 && !received ; ++i )
         {
             if( subscriber.receive( 100 ))
                 received = true;
         }
-        running = false;
+    }
+
+    void waitStarted() const
+    {
+        std::unique_lock< std::mutex > lock( _mutex );
+        while( !_started )
+            _condition.wait( lock );
     }
 
     bool received;
-    lunchbox::Monitorb running;
 
 protected:
+    mutable std::condition_variable _condition;
+    mutable std::mutex _mutex;
+    bool _started;
+
     virtual BrokerPtr createBroker( zeq::Subscriber& subscriber )
     {
         return BrokerPtr(
@@ -60,21 +80,20 @@ protected:
 BOOST_AUTO_TEST_CASE(test_broker)
 {
     Subscriber subscriber;
-    subscriber.start();
+    std::thread thread( std::bind( &Subscriber::run, &subscriber ));
 
     // Using a different scheme so zeroconf resolution does not work
-    zeq::Publisher publisher(
-        lunchbox::URI( "bar://*:" + std::to_string( ( unsigned int ) port )));
+    zeq::Publisher publisher( test::buildURI( "bar", "*", port ));
     BOOST_CHECK( zeq::connection::Service::subscribe( brokerAddress,
                                                       publisher ));
     for( size_t i = 0; i < 100 && !subscriber.received; ++i )
     {
         BOOST_CHECK( publisher.publish(
                          zeq::vocabulary::serializeEcho( test::echoMessage )));
-        lunchbox::sleep( 100 );
+        std::this_thread::sleep_for( std::chrono::milliseconds( 100 ));
     }
 
-    subscriber.join();
+    thread.join();
     BOOST_CHECK( subscriber.received );
 }
 
@@ -96,7 +115,7 @@ class NamedSubscriber : public Subscriber
             }
             catch( ... ) {}
 
-            lunchbox::sleep( 100 /*ms*/ );
+            std::this_thread::sleep_for( std::chrono::milliseconds( 100 ));
         }
         return BrokerPtr();
     }
@@ -110,14 +129,14 @@ typedef NamedSubscriber< zeq::connection::Broker::PORT_FIXED_OR_RANDOM >
 BOOST_AUTO_TEST_CASE(test_named_broker)
 {
     FixedNamedSubscriber subscriber1;
-    subscriber1.start();
+    std::thread thread1( std::bind( &Subscriber::run, &subscriber1 ));
+
     RandomNamedSubscriber subscriber2;
     subscriber2.received = true;
-    subscriber2.start();
+    std::thread thread2( std::bind( &Subscriber::run, &subscriber2 ));
 
     // Using a different scheme so zeroconf resolution does not work
-    zeq::Publisher publisher(
-        lunchbox::URI( "bar://*:" + std::to_string( ( unsigned int ) port )));
+    zeq::Publisher publisher( test::buildURI( "bar", "*", port ));
     BOOST_CHECK( zeq::connection::Service::subscribe(
                      "127.0.0.1", "zeq::connection::test_named_broker",
                      publisher ));
@@ -125,11 +144,11 @@ BOOST_AUTO_TEST_CASE(test_named_broker)
     {
         BOOST_CHECK( publisher.publish(
                          zeq::vocabulary::serializeEcho( test::echoMessage )));
-        lunchbox::sleep( 100 );
+        std::this_thread::sleep_for( std::chrono::milliseconds( 100 ));
     }
 
-    subscriber2.join();
-    subscriber1.join();
+    thread2.join();
+    thread1.join();
     BOOST_CHECK( subscriber1.received );
 }
 
@@ -153,23 +172,23 @@ class FailingNamedSubscriber : public Subscriber
 BOOST_AUTO_TEST_CASE(test_named_broker_port_used)
 {
     FixedNamedSubscriber subscriber1;
-    subscriber1.start();
-    subscriber1.running.waitEQ( true );
+
+    std::thread thread1( std::bind( &Subscriber::run, &subscriber1 ));
+
+    subscriber1.waitStarted();
 
     FailingNamedSubscriber subscriber2;
     subscriber2.received = true;
-    subscriber2.start();
+    std::thread thread2( std::bind( &Subscriber::run, &subscriber2 ));
 
     subscriber1.received = true;
-    subscriber2.join();
-    subscriber1.join();
+    thread2.join();
+    thread1.join();
 }
 
 BOOST_AUTO_TEST_CASE(test_invalid_broker)
 {
-    zeq::Subscriber subscriber(
-        lunchbox::URI( "foo://127.0.0.1:" +
-                       std::to_string( ( unsigned ) port )));
+    zeq::Subscriber subscriber( test::buildURI( "foo", "127.0.0.1", port ));
     BOOST_CHECK_THROW( zeq::connection::Broker( std::string( "invalidIP" ),
                                                 subscriber ),
                        std::runtime_error );

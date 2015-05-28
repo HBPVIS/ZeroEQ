@@ -6,18 +6,21 @@
 
 #include "publisher.h"
 #include "event.h"
+#include "log.h"
 #include "detail/broker.h"
+#include "detail/byteswap.h"
 
-#include <lunchbox/bitOperation.h>
-#include <lunchbox/log.h>
-#include <lunchbox/servus.h>
+#include <servus/servus.h>
+
 #include <zmq.h>
 #include <map>
+#include <string.h>
 
 // for NI_MAXHOST
 #ifdef _WIN32
 #  include <Ws2tcpip.h>
 #else
+#  include <unistd.h>
 #  include <netdb.h>
 #endif
 
@@ -29,7 +32,7 @@ namespace detail
 class Publisher
 {
 public:
-    Publisher( const lunchbox::URI& uri_, const uint32_t announceMode )
+    Publisher( const servus::URI& uri_, const uint32_t announceMode )
         : uri( uri_ )
         , _context( zmq_ctx_new( ))
         , _publisher( zmq_socket( _context, ZMQ_PUB ))
@@ -42,9 +45,9 @@ public:
             zmq_ctx_destroy( _context );
             _publisher = 0;
 
-            LBTHROW( std::runtime_error(
-                         std::string( "Cannot bind publisher socket '" ) +
-                         zmqURI + "': " + zmq_strerror( zmq_errno( ))));
+            ZEQTHROW( std::runtime_error(
+                          std::string( "Cannot bind publisher socket '" ) +
+                          zmqURI + "': " + zmq_strerror( zmq_errno( ))));
         }
 
         _initService( announceMode );
@@ -58,11 +61,11 @@ public:
 
     bool publish( const zeq::Event& event )
     {
-#ifdef LB_LITTLEENDIAN
+#ifdef ZEQ_LITTLEENDIAN
         const uint128_t& type = event.getType();
 #else
         uint128_t type = event.getType();
-        lunchbox::byteswap( type ); // convert to little endian wire protocol
+        detail::byteswap( type ); // convert to little endian wire protocol
 #endif
         zmq_msg_t msgHeader;
         zmq_msg_init_size( &msgHeader, sizeof( type ));
@@ -72,7 +75,7 @@ public:
         zmq_msg_close( &msgHeader );
         if( ret == -1 )
         {
-            LBWARN << "Cannot publish message header, got "
+            ZEQWARN << "Cannot publish message header, got "
                    << zmq_strerror( zmq_errno( )) << std::endl;
             return false;
         }
@@ -87,8 +90,8 @@ public:
         zmq_msg_close( &msg );
         if( ret  == -1 )
         {
-            LBWARN << "Cannot publish message data, got "
-                   << zmq_strerror( zmq_errno( )) << std::endl;
+            ZEQWARN << "Cannot publish message data, got "
+                    << zmq_strerror( zmq_errno( )) << std::endl;
             return false;
         }
         return true;
@@ -99,31 +102,56 @@ public:
         return uri.getHost() + ":" + std::to_string( uint32_t( uri.getPort( )));
     }
 
-    lunchbox::URI uri;
+    servus::URI uri;
 
 private:
     void _initService( const uint32_t announceMode )
     {
         _initAddress();
-        if( !(announceMode&ANNOUNCE_ZEROCONF) )
+        if( !( announceMode & ANNOUNCE_ZEROCONF ))
             return;
 
-        const bool required = (announceMode & ANNOUNCE_REQUIRED);
-        if( !lunchbox::Servus::isAvailable( ))
+        const bool required = announceMode & ANNOUNCE_REQUIRED;
+        if( !servus::Servus::isAvailable( ))
         {
             if( required )
-                LBTHROW( std::runtime_error(
-                             "No zeroconf implementation available" ));
+                ZEQTHROW( std::runtime_error(
+                              "No zeroconf implementation available" ));
             return;
         }
 
-        const lunchbox::Servus::Result& result = _service.announce(
-            uri.getPort(), getAddress( ));
+        const servus::Servus::Result& result =
+            _service.announce( uri.getPort(), getAddress( ));
 
         if( required && !result )
         {
-            LBTHROW( std::runtime_error( "Zeroconf announce failed: " +
-                                         result.getString( )));
+            ZEQTHROW( std::runtime_error( "Zeroconf announce failed: " +
+                                          result.getString( )));
+        }
+    }
+
+    void _getEndPoint( std::string& host, std::string& port ) const
+    {
+        char buffer[1024];
+        size_t size = sizeof( buffer );
+        if( zmq_getsockopt(
+                _publisher, ZMQ_LAST_ENDPOINT, &buffer, &size ) == -1 )
+        {
+            ZEQTHROW( std::runtime_error(
+                          "Cannot determine port of publisher" ));
+        }
+        const std::string endPoint( buffer );
+
+        port = endPoint.substr( endPoint.find_last_of( ":" ) + 1 );
+        const size_t start = endPoint.find_last_of( "/" ) + 1;
+        const size_t end = endPoint.find_last_of( ":" );
+        host = endPoint.substr( start, end - start );
+        if( host == "0.0.0.0" )
+        {
+            char hostname[NI_MAXHOST+1] = {0};
+            gethostname( hostname, NI_MAXHOST );
+            hostname[NI_MAXHOST] = '\0';
+            host = hostname;
         }
     }
 
@@ -136,52 +164,31 @@ private:
         uint16_t port = uri.getPort();
         if( host.empty() || port == 0 )
         {
-            char endPoint[1024];
-            size_t size = sizeof( endPoint );
-            if( zmq_getsockopt( _publisher, ZMQ_LAST_ENDPOINT, &endPoint,
-                                &size ) == -1 )
-            {
-                LBTHROW( std::runtime_error(
-                             "Cannot determine port of publisher" ));
-            }
-
-            const std::string endPointStr( endPoint );
+            std::string hostStr, portStr;
+            _getEndPoint( hostStr, portStr );
 
             if( port == 0 )
             {
-                const std::string portStr =
-                    endPointStr.substr( endPointStr.find_last_of( ":" ) + 1 );
+                // No overflow is possible unless ZMQ reports bad port number.
                 port = std::stoi( portStr );
                 uri.setPort( port );
             }
 
             if( host.empty( ))
-            {
-                const size_t start = endPointStr.find_last_of( "/" ) + 1;
-                const size_t end = endPointStr.find_last_of( ":" );
-                host = endPointStr.substr( start, end - start );
-                if( host == "0.0.0.0" )
-                {
-                    char hostname[NI_MAXHOST+1] = {0};
-                    gethostname( hostname, NI_MAXHOST );
-                    hostname[NI_MAXHOST] = '\0';
-                    host = hostname;
-                }
-                uri.setHost( host );
-            }
+                uri.setHost( hostStr );
 
-            LBINFO << "Bound " << _service.getName() << " publisher to " << host
-                   << ":" << port << std::endl;
+            ZEQINFO << "Bound " << _service.getName() << " publisher to "
+                    << host << ":" << port << std::endl;
         }
     }
 
     void* _context;
     void* _publisher;
-    lunchbox::Servus _service;
+    servus::Servus _service;
 };
 }
 
-Publisher::Publisher( const lunchbox::URI& uri, const uint32_t announceMode )
+Publisher::Publisher( const servus::URI& uri, const uint32_t announceMode )
     : _impl( new detail::Publisher( uri, announceMode ))
 {
 }
@@ -201,7 +208,7 @@ std::string Publisher::getAddress() const
     return _impl->getAddress();
 }
 
-const lunchbox::URI& Publisher::getURI() const
+const servus::URI& Publisher::getURI() const
 {
     return _impl->uri;
 }

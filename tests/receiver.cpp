@@ -7,10 +7,6 @@
 
 #include "broker.h"
 
-#include <lunchbox/sleep.h>
-#include <lunchbox/thread.h>
-#include <lunchbox/servus.h>
-
 bool gotOne = false;
 bool gotTwo = false;
 
@@ -46,11 +42,9 @@ void testReceive( zeq::Publisher& publisher, zeq::Receiver& receiver,
 
 BOOST_AUTO_TEST_CASE(test_two_subscribers)
 {
-    lunchbox::RNG rng;
-    const unsigned short port = (rng.get<uint16_t>() % 60000) + 1024;
-    const std::string& portStr = std::to_string( ( unsigned int ) port );
-    zeq::Subscriber subscriber1( lunchbox::URI( "foo://localhost:" + portStr ));
-    zeq::Subscriber subscriber2( lunchbox::URI( "foo://localhost:" + portStr ),
+    const unsigned short port = zeq::detail::getRandomPort();
+    zeq::Subscriber subscriber1( test::buildURI( "foo", "localhost", port ));
+    zeq::Subscriber subscriber2( test::buildURI( "foo", "localhost", port ),
                                  subscriber1 );
 
     BOOST_CHECK( subscriber1.registerHandler( zeq::vocabulary::EVENT_ECHO,
@@ -58,7 +52,7 @@ BOOST_AUTO_TEST_CASE(test_two_subscribers)
     BOOST_CHECK( subscriber2.registerHandler( zeq::vocabulary::EVENT_ECHO,
                                 std::bind( &onEvent2, std::placeholders::_1 )));
 
-    zeq::Publisher publisher( lunchbox::URI( "foo://*:" + portStr ));
+    zeq::Publisher publisher( test::buildPublisherURI( "foo", port ));
 
     testReceive( publisher, subscriber1, gotOne, gotTwo, __LINE__ );
     testReceive( publisher, subscriber2, gotOne, gotTwo, __LINE__ );
@@ -66,12 +60,10 @@ BOOST_AUTO_TEST_CASE(test_two_subscribers)
 
 BOOST_AUTO_TEST_CASE(test_publisher_routing)
 {
-    lunchbox::RNG rng;
-    const unsigned short port = (rng.get<uint16_t>() % 60000) + 1024;
-    const std::string& portStr = std::to_string( ( unsigned int ) port );
+    const unsigned short port = zeq::detail::getRandomPort();
     zeq::Subscriber* subscriber1 =
-        new zeq::Subscriber( lunchbox::URI( "foo://localhost:1000" ));
-    zeq::Subscriber subscriber2( lunchbox::URI( "foo://localhost:" + portStr ),
+        new zeq::Subscriber( test::buildURI( "foo", "localhost", 1000 ));
+    zeq::Subscriber subscriber2( test::buildURI( "foo", "localhost", port ),
                                  *subscriber1 );
 
     BOOST_CHECK( subscriber1->registerHandler( zeq::vocabulary::EVENT_ECHO,
@@ -79,7 +71,7 @@ BOOST_AUTO_TEST_CASE(test_publisher_routing)
     BOOST_CHECK( subscriber2.registerHandler( zeq::vocabulary::EVENT_ECHO,
                                 std::bind( &onEvent2, std::placeholders::_1 )));
 
-    zeq::Publisher publisher( lunchbox::URI( "foo://*:" + portStr ));
+    zeq::Publisher publisher( test::buildPublisherURI( "foo", port ));
 
     testReceive( publisher, *subscriber1, gotTwo, __LINE__ );
     BOOST_CHECK( !gotOne );

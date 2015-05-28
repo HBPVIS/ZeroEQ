@@ -8,99 +8,39 @@
 
 #include "broker.h"
 
-#include <lunchbox/servus.h>
-#include <lunchbox/sleep.h>
-#include <lunchbox/thread.h>
+#include <servus/servus.h>
+
+#include <thread>
 #include <chrono>
 
 using namespace zeq::vocabulary;
 
-namespace
-{
-class Publisher : public lunchbox::Thread
-{
-public:
-    Publisher()
-        : running( true )
-        , _publisher( lunchbox::URI( "foo://" ))
-    {}
-
-    void run() override
-    {
-        running = true;
-        size_t i = 0;
-        while( running )
-        {
-            BOOST_CHECK(
-                _publisher.publish( serializeEcho( test::echoMessage )));
-            lunchbox::sleep( 100 );
-            ++i;
-
-            if( i > 200 )
-                LBTHROW( std::runtime_error( "Publisher giving up after 20s" ));
-        }
-    }
-
-    bool running;
-
-private:
-    zeq::Publisher _publisher;
-};
-}
-
 BOOST_AUTO_TEST_CASE(test_subscribe_to_same_schema)
 {
-    std::stringstream uri;
-    uri << "foo://127.0.0.1:"
-        << (lunchbox::RNG().get<uint16_t>() % 60000) + 1024;
-
-    zeq::Publisher publisher( lunchbox::URI( "foo://" ));
-    BOOST_CHECK_NO_THROW(
-        zeq::Subscriber subscriber( lunchbox::URI( uri.str() )));
+    zeq::Publisher publisher( test::buildPublisherURI( "foo" ));
+    BOOST_CHECK_NO_THROW( zeq::Subscriber subscriber(
+                              test::buildURI( "foo", "localhost",
+                                              zeq::detail::getRandomPort( ))));
 }
 
 BOOST_AUTO_TEST_CASE(test_subscribe_to_different_schema)
 {
-    zeq::Publisher publisher( lunchbox::URI( "bar://" ));
-
-    std::stringstream uriSubscriber;
-    uriSubscriber << "bar://127.0.0.1:"
-                  << (lunchbox::RNG().get<uint16_t>() % 60000) + 1024;
-
-    BOOST_CHECK_NO_THROW(
-        zeq::Subscriber subscriber( lunchbox::URI( uriSubscriber.str( ))));
-}
-
-BOOST_AUTO_TEST_CASE(test_subscribe_to_same_schema_zeroconf)
-{
-    if( !lunchbox::Servus::isAvailable() || getenv("TRAVIS"))
-        return;
-
-    zeq::Publisher publisher( lunchbox::URI( "foo://" ));
-    BOOST_CHECK_NO_THROW(
-        zeq::Subscriber subscriber( lunchbox::URI( "foo://" )));
-}
-
-BOOST_AUTO_TEST_CASE(test_subscribe_to_different_schema_zeroconf)
-{
-    if( !lunchbox::Servus::isAvailable() || getenv("TRAVIS"))
-        return;
-
-    zeq::Publisher publisher( lunchbox::URI( "foo://" ));
-    BOOST_CHECK_NO_THROW(
-        zeq::Subscriber subscriber( lunchbox::URI( "bar://" )));
+    zeq::Publisher publisher( test::buildPublisherURI( "foo" ));
+    BOOST_CHECK_NO_THROW( zeq::Subscriber subscriber(
+                              test::buildURI( "bar", "localhost",
+                                              zeq::detail::getRandomPort( ))));
 }
 
 BOOST_AUTO_TEST_CASE(test_publish_receive)
 {
-    lunchbox::RNG rng;
-    const unsigned short port = (rng.get<uint16_t>() % 60000) + 1024;
-    const std::string& portStr = std::to_string( ( unsigned int ) port );
-    zeq::Subscriber subscriber( lunchbox::URI( "foo://localhost:" + portStr ));
+    const unsigned short port = zeq::detail::getRandomPort();
+    const servus::URI uri = test::buildURI( "foo", "localhost", port );
+
+    zeq::Subscriber subscriber( uri );
     BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
                        std::bind( &test::onEchoEvent, std::placeholders::_1 )));
 
-    zeq::Publisher publisher( lunchbox::URI( "foo://*:" + portStr ));
+    zeq::Publisher publisher( test::buildURI( "foo", "*", port ));
 
     bool received = false;
     for( size_t i = 0; i < 10; ++i )
@@ -118,31 +58,47 @@ BOOST_AUTO_TEST_CASE(test_publish_receive)
 
 BOOST_AUTO_TEST_CASE(test_no_receive)
 {
-    std::stringstream uri;
-    uri << "foo://127.0.0.1:"
-        << (lunchbox::RNG().get<uint16_t>() % 60000) + 1024;
-
-    zeq::Subscriber subscriber( lunchbox::URI( uri.str() ));
+    zeq::Subscriber subscriber( test::buildURI( "foo", "127.0.0.1",
+                                                zeq::detail::getRandomPort( )));
     BOOST_CHECK( !subscriber.receive( 100 ));
 }
 
+BOOST_AUTO_TEST_CASE(test_subscribe_to_same_schema_zeroconf )
+{
+    if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
+        return;
+
+    zeq::Publisher publisher( servus::URI( "foo://" ));
+    BOOST_CHECK_NO_THROW(
+        zeq::Subscriber subscriber( servus::URI( "foo://" )));
+}
+
+BOOST_AUTO_TEST_CASE(test_subscribe_to_different_schema_zeroconf)
+{
+    if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
+        return;
+
+    zeq::Publisher publisher( servus::URI( "foo://" ));
+    BOOST_CHECK_NO_THROW(
+        zeq::Subscriber subscriber( servus::URI( "bar://" )));
+}
 
 BOOST_AUTO_TEST_CASE(test_no_receive_zeroconf)
 {
-    if( !lunchbox::Servus::isAvailable() || getenv("TRAVIS"))
+    if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
         return;
 
-    zeq::Subscriber subscriber( lunchbox::URI( "foo://" ));
+    zeq::Subscriber subscriber( servus::URI( "foo://" ));
     BOOST_CHECK( !subscriber.receive( 100 ));
 }
 
 BOOST_AUTO_TEST_CASE(test_publish_receive_zeroconf)
 {
-    if( !lunchbox::Servus::isAvailable() || getenv("TRAVIS"))
+    if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
         return;
 
-    zeq::Publisher publisher( lunchbox::URI( "foo://" ));
-    zeq::Subscriber subscriber( lunchbox::URI( "foo://" ));
+    zeq::Publisher publisher( servus::URI( "foo://" ));
+    zeq::Subscriber subscriber( servus::URI( "foo://" ));
 
     BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
                        std::bind( &test::onEchoEvent, std::placeholders::_1 )));
@@ -167,8 +123,8 @@ BOOST_AUTO_TEST_CASE(test_publish_receive_zeroconf_disabled)
     if( getenv("TRAVIS"))
         return;
 
-    zeq::Publisher publisher( lunchbox::URI( "foo://" ), zeq::ANNOUNCE_NONE );
-    zeq::Subscriber subscriber( lunchbox::URI( "foo://" ));
+    zeq::Publisher publisher( servus::URI( "foo://" ), zeq::ANNOUNCE_NONE );
+    zeq::Subscriber subscriber( servus::URI( "foo://" ));
 
     BOOST_CHECK( subscriber.registerHandler(
                      EVENT_ECHO, std::bind( &test::onEchoEvent,
@@ -189,23 +145,6 @@ BOOST_AUTO_TEST_CASE(test_publish_receive_zeroconf_disabled)
     BOOST_CHECK( !received );
 }
 
-BOOST_AUTO_TEST_CASE(test_publish_blocking_receive_zeroconf)
-{
-    if( !lunchbox::Servus::isAvailable() || getenv("TRAVIS"))
-        return;
-
-    zeq::Subscriber subscriber( lunchbox::URI( "foo://" ));
-    BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
-                       std::bind( &test::onEchoEvent, std::placeholders::_1 )));
-
-    Publisher publisher;
-    publisher.start();
-    BOOST_CHECK( subscriber.receive( ));
-
-    publisher.running = false;
-    BOOST_CHECK( publisher.join( ));
-}
-
 void onLargeEcho( const zeq::Event& event )
 {
     BOOST_CHECK( event.getType() == zeq::vocabulary::EVENT_ECHO );
@@ -213,7 +152,7 @@ void onLargeEcho( const zeq::Event& event )
 
 BOOST_AUTO_TEST_CASE(test_publish_receive_filters)
 {
-    zeq::Publisher publisher( lunchbox::URI( "foo://" ), zeq::ANNOUNCE_NONE );
+    zeq::Publisher publisher( servus::URI( "foo://" ), zeq::ANNOUNCE_NONE );
     zeq::Subscriber subscriber( publisher.getURI( ));
     const std::string message( 60000, 'a' );
 
@@ -260,11 +199,11 @@ BOOST_AUTO_TEST_CASE(test_publish_receive_filters)
 
 BOOST_AUTO_TEST_CASE(test_publish_receive_late_zeroconf)
 {
-    if( !lunchbox::Servus::isAvailable() || getenv("TRAVIS"))
+    if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
         return;
 
-    zeq::Subscriber subscriber( lunchbox::URI( "foo://" ));
-    zeq::Publisher publisher( lunchbox::URI( "foo://" ));
+    zeq::Subscriber subscriber( servus::URI( "foo://" ));
+    zeq::Publisher publisher( servus::URI( "foo://" ));
 
     BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
                        std::bind( &test::onEchoEvent, std::placeholders::_1 )));
@@ -284,11 +223,11 @@ BOOST_AUTO_TEST_CASE(test_publish_receive_late_zeroconf)
 
 BOOST_AUTO_TEST_CASE(test_publish_receive_empty_event_zeroconf)
 {
-    if( !lunchbox::Servus::isAvailable() || getenv("TRAVIS"))
+    if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
         return;
 
-    zeq::Publisher publisher( lunchbox::URI( "foo://" ));
-    zeq::Subscriber subscriber( lunchbox::URI( "foo://" ));
+    zeq::Publisher publisher( servus::URI( "foo://" ));
+    zeq::Subscriber subscriber( servus::URI( "foo://" ));
 
     BOOST_CHECK( subscriber.registerHandler( EVENT_EXIT,
                        std::bind( &test::onExitEvent, std::placeholders::_1 )));
@@ -305,4 +244,56 @@ BOOST_AUTO_TEST_CASE(test_publish_receive_empty_event_zeroconf)
         }
     }
     BOOST_CHECK( received );
+}
+
+namespace
+{
+class Publisher
+{
+public:
+    Publisher()
+        : running( true )
+        , _publisher( servus::URI( "foo://" ))
+    {}
+
+    void run()
+    {
+        running = true;
+        size_t i = 0;
+        while( running )
+        {
+            BOOST_CHECK(
+                _publisher.publish( serializeEcho( test::echoMessage )));
+            std::this_thread::sleep_for( std::chrono::milliseconds( 100 ));
+            ++i;
+
+            if( i > 200 )
+                ZEQTHROW( std::runtime_error(
+                              "Publisher giving up after 20s" ));
+        }
+    }
+
+    bool running;
+
+private:
+    zeq::Publisher _publisher;
+};
+}
+
+
+BOOST_AUTO_TEST_CASE(test_publish_blocking_receive_zeroconf)
+{
+    if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
+        return;
+
+    zeq::Subscriber subscriber( servus::URI( "foo://" ));
+    BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
+                       std::bind( &test::onEchoEvent, std::placeholders::_1 )));
+
+    Publisher publisher;
+    std::thread thread( std::bind( &Publisher::run, &publisher ));
+    BOOST_CHECK( subscriber.receive( ));
+
+    publisher.running = false;
+    thread.join( );
 }

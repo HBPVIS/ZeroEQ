@@ -70,14 +70,12 @@ void onMessageEvent( const zeq::Event& event )
 
 BOOST_AUTO_TEST_CASE(test_new_event)
 {
-    lunchbox::RNG rng;
-    const unsigned short port = (rng.get<uint16_t>() % 60000) + 1024;
-    const std::string& portStr = std::to_string( uint32_t(port));
-    zeq::Subscriber subscriber( lunchbox::URI( "foo://localhost:" + portStr ));
+    const unsigned short port = zeq::detail::getRandomPort();
+    zeq::Subscriber subscriber( test::buildURI( "foo", "localhost", port ));
     BOOST_CHECK( subscriber.registerHandler( zeqtest::EVENT_NEWEVENT,
                  std::bind( &zeqtest::onMessageEvent, std::placeholders::_1 )));
 
-    zeq::Publisher publisher( lunchbox::URI( "foo://*:" + portStr ));
+    zeq::Publisher publisher( test::buildPublisherURI( "foo", port ));
 
     bool received = false;
     for( size_t i = 0; i < 10; ++i )
