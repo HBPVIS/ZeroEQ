@@ -8,6 +8,7 @@
 #define ZEQ_TYPES_H
 
 #include <servus/types.h>
+#include <servus/uint128_t.h>
 
 #include <functional>
 #include <memory>
