@@ -8,6 +8,7 @@
 #ifndef ZEQ_DETAIL_PORT_H
 #define ZEQ_DETAIL_PORT_H
 
+#include <zeq/api.h>
 #include <zeq/types.h>
 
 namespace zeq
@@ -19,7 +20,7 @@ namespace detail
 uint16_t getPort( const std::string& name );
 
 /** @return a random port number. */
-uint16_t getRandomPort();
+ZEQ_API uint16_t getRandomPort();
 
 }
 }

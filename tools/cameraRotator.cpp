@@ -31,7 +31,7 @@
 
 #include <zeq/zeq.h>
 #include <zeq/hbp/hbp.h>
-#include <servus/servus.h>
+#include <servus/uri.h>
 
 #include <cmath>
 #include <thread>
