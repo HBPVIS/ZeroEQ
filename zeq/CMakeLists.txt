@@ -48,7 +48,10 @@ set(ZEQ_SOURCES
   subscriber.cpp
   vocabulary.cpp)
 
-set(ZEQ_LINK_LIBRARIES ${LIBZMQ_LIBRARIES} ${FLATBUFFERS_LIBRARY} ${SERVUS_LIBRARIES})
+set(ZEQ_LINK_LIBRARIES ${CMAKE_THREAD_LIBS_INIT}
+                       ${LIBZMQ_LIBRARIES}
+                       ${FLATBUFFERS_LIBRARY}
+                       ${SERVUS_LIBRARIES})
 if(MSVC)
   list(APPEND ZEQ_LINK_LIBRARIES Ws2_32)
 endif()

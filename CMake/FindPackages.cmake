@@ -10,9 +10,13 @@ list(APPEND FIND_PACKAGES_DEFINES ${SYSTEM})
 # does only implement the version, REQUIRED and QUIET find_package
 # arguments (e.g. no COMPONENTS)
 
-find_package(PkgConfig)
+if(NOT PKGCONFIG_FOUND)
+  find_package(PkgConfig QUIET)
+endif()
 set(ENV{PKG_CONFIG_PATH}
   "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
+
+option(COMMON_PACKAGE_QUIET "Use QUIET for common_package command" ON)
 
 macro(COMMON_PACKAGE Name)
   string(TOUPPER ${Name} COMMON_PACKAGE_NAME)
@@ -28,37 +32,64 @@ macro(COMMON_PACKAGE Name)
     endif()
   endif()
 
-  list(FIND COMMON_PACKAGE_ARGS "QUIET" COMMON_PACKAGE_QUIET_POS)
-  if(COMMON_PACKAGE_QUIET_POS EQUAL -1)
-    set(COMMON_PACKAGE_QUIET)
+  if(COMMON_PACKAGE_QUIET)
+    set(COMMON_PACKAGE_FIND_QUIET "QUIET")
   else()
-    set(COMMON_PACKAGE_QUIET "QUIET")
+    list(FIND COMMON_PACKAGE_ARGS "QUIET" COMMON_PACKAGE_QUIET_POS)
+    if(COMMON_PACKAGE_QUIET_POS EQUAL -1)
+      set(COMMON_PACKAGE_FIND_QUIET)
+    else()
+      set(COMMON_PACKAGE_FIND_QUIET "QUIET")
+    endif()
   endif()
 
   list(FIND COMMON_PACKAGE_ARGS "REQUIRED" COMMON_PACKAGE_REQUIRED_POS)
   if(COMMON_PACKAGE_REQUIRED_POS EQUAL -1) # Optional find
-    find_package(${Name} ${COMMON_PACKAGE_ARGS}) # try standard cmake way
+    find_package(${Name} ${COMMON_PACKAGE_FIND_QUIET} ${COMMON_PACKAGE_ARGS}) # try standard cmake way
     if((NOT ${Name}_FOUND) AND (NOT ${COMMON_PACKAGE_NAME}_FOUND) AND PKG_CONFIG_EXECUTABLE)
       pkg_check_modules(${Name} ${Name}${COMMON_PACKAGE_VERSION}
-        ${COMMON_PACKAGE_QUIET}) # try pkg_config way
+        ${COMMON_PACKAGE_FIND_QUIET}) # try pkg_config way
     endif()
   else() # required find
     list(REMOVE_AT COMMON_PACKAGE_ARGS ${COMMON_PACKAGE_REQUIRED_POS})
-    find_package(${Name} ${COMMON_PACKAGE_ARGS}) # try standard cmake way
+    find_package(${Name} ${COMMON_PACKAGE_FIND_QUIET} ${COMMON_PACKAGE_ARGS}) # try standard cmake way
     if((NOT ${Name}_FOUND) AND (NOT ${COMMON_PACKAGE_NAME}_FOUND) AND PKG_CONFIG_EXECUTABLE)
       pkg_check_modules(${Name} REQUIRED ${Name}${COMMON_PACKAGE_VERSION}
-        ${COMMON_PACKAGE_QUIET}) # try pkg_config way (and fail if needed)
+        ${COMMON_PACKAGE_FIND_QUIET}) # try pkg_config way (and fail if needed)
     endif()
   endif()
 endmacro()
 
+common_package(Threads   REQUIRED )
 common_package(libzmq 4.0  REQUIRED )
 common_package(FlatBuffers   REQUIRED )
-common_package(Boost 1.41  REQUIRED COMPONENTS unit_test_framework)
-common_package(Servus 1.0 REQUIRED )
+common_package(Boost 1.41.0  REQUIRED COMPONENTS unit_test_framework)
+common_package(Servus 1.0  REQUIRED )
 
 if(EXISTS ${PROJECT_SOURCE_DIR}/CMake/FindPackagesPost.cmake)
   include(${PROJECT_SOURCE_DIR}/CMake/FindPackagesPost.cmake)
+endif()
+
+if(THREADS_FOUND)
+  set(Threads_name THREADS)
+  set(Threads_FOUND TRUE)
+elseif(Threads_FOUND)
+  set(Threads_name Threads)
+  set(THREADS_FOUND TRUE)
+endif()
+if(Threads_name)
+  list(APPEND FIND_PACKAGES_DEFINES ZEQ_USE_THREADS)
+  if(NOT COMMON_LIBRARY_TYPE MATCHES "SHARED")
+    list(APPEND ZEQ_DEPENDENT_LIBRARIES Threads)
+  endif()
+  set(FIND_PACKAGES_FOUND "${FIND_PACKAGES_FOUND} Threads")
+  link_directories(${${Threads_name}_LIBRARY_DIRS})
+  if(NOT "${${Threads_name}_INCLUDE_DIRS}" MATCHES "-NOTFOUND")
+    include_directories(${${Threads_name}_INCLUDE_DIRS})
+  endif()
+  if(NOT "${${Threads_name}_INCLUDE_DIR}" MATCHES "-NOTFOUND")
+    include_directories(${${Threads_name}_INCLUDE_DIR})
+  endif()
 endif()
 
 if(LIBZMQ_FOUND)
@@ -77,6 +108,9 @@ if(libzmq_name)
   link_directories(${${libzmq_name}_LIBRARY_DIRS})
   if(NOT "${${libzmq_name}_INCLUDE_DIRS}" MATCHES "-NOTFOUND")
     include_directories(${${libzmq_name}_INCLUDE_DIRS})
+  endif()
+  if(NOT "${${libzmq_name}_INCLUDE_DIR}" MATCHES "-NOTFOUND")
+    include_directories(${${libzmq_name}_INCLUDE_DIR})
   endif()
 endif()
 
@@ -97,6 +131,9 @@ if(FlatBuffers_name)
   if(NOT "${${FlatBuffers_name}_INCLUDE_DIRS}" MATCHES "-NOTFOUND")
     include_directories(BEFORE SYSTEM ${${FlatBuffers_name}_INCLUDE_DIRS})
   endif()
+  if(NOT "${${FlatBuffers_name}_INCLUDE_DIR}" MATCHES "-NOTFOUND")
+    include_directories(BEFORE SYSTEM ${${FlatBuffers_name}_INCLUDE_DIR})
+  endif()
 endif()
 
 if(BOOST_FOUND)
@@ -115,6 +152,9 @@ if(Boost_name)
   link_directories(${${Boost_name}_LIBRARY_DIRS})
   if(NOT "${${Boost_name}_INCLUDE_DIRS}" MATCHES "-NOTFOUND")
     include_directories(SYSTEM ${${Boost_name}_INCLUDE_DIRS})
+  endif()
+  if(NOT "${${Boost_name}_INCLUDE_DIR}" MATCHES "-NOTFOUND")
+    include_directories(SYSTEM ${${Boost_name}_INCLUDE_DIR})
   endif()
 endif()
 
@@ -135,11 +175,14 @@ if(Servus_name)
   if(NOT "${${Servus_name}_INCLUDE_DIRS}" MATCHES "-NOTFOUND")
     include_directories(${${Servus_name}_INCLUDE_DIRS})
   endif()
+  if(NOT "${${Servus_name}_INCLUDE_DIR}" MATCHES "-NOTFOUND")
+    include_directories(${${Servus_name}_INCLUDE_DIR})
+  endif()
 endif()
 
-set(ZEQ_BUILD_DEBS autoconf;automake;avahi-daemon;cmake;doxygen;git;git-review;libavahi-client-dev;libboost-filesystem-dev;libboost-regex-dev;libboost-serialization-dev;libboost-system-dev;libboost-test-dev;libboost-thread-dev;libhwloc-dev;libleveldb-dev;libopenmpi-dev;libzmq3-dev;openmpi-bin;pkg-config;subversion)
+set(ZEQ_BUILD_DEBS autoconf;automake;avahi-daemon;cmake;doxygen;git;git-review;libavahi-client-dev;libboost-test-dev;libzmq3-dev;pkg-config;subversion)
 
-set(ZEQ_DEPENDS libzmq;FlatBuffers;Boost;Servus)
+set(ZEQ_DEPENDS Threads;libzmq;FlatBuffers;Boost;Servus)
 
 # Write defines.h and options.cmake
 if(NOT PROJECT_INCLUDE_NAME)
