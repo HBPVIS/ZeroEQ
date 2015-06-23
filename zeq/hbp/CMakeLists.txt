@@ -20,6 +20,7 @@ endif()
 list(APPEND CPPCHECK_EXTRA_ARGS
   --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/*_generated.h)
 
-set(PROJECT_INCLUDE_NAME zeq/hbp)
+set(ZEQHBP_INCLUDE_NAME zeq/hbp)
+set(ZEQHBP_NAMESPACE zeqhbp)
 add_definitions(-DZEQ_SHARED)
 common_library(zeqHBP)

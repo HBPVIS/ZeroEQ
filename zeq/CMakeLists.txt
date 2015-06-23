@@ -14,7 +14,6 @@ list(APPEND CPPCHECK_EXTRA_ARGS
   --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/*_generated.h)
 
 set(ZEQ_PUBLIC_HEADERS
-  ${COMMON_INCLUDES}
   ${ZEQ_FBS_ZEQ_OUTPUTS}
   connection/broker.h
   connection/service.h
@@ -36,7 +35,6 @@ set(ZEQ_HEADERS
   detail/vocabulary.h)
 
 set(ZEQ_SOURCES
-  ${COMMON_SOURCES}
   connection/broker.cpp
   connection/service.cpp
   detail/port.cpp

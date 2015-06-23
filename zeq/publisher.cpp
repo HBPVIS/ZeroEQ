@@ -61,7 +61,7 @@ public:
 
     bool publish( const zeq::Event& event )
     {
-#ifdef ZEQ_LITTLEENDIAN
+#ifdef COMMON_LITTLEENDIAN
         const uint128_t& type = event.getType();
 #else
         uint128_t type = event.getType();
