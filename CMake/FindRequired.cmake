@@ -9,9 +9,13 @@ set(FIND_REQUIRED_FAILED)
 # does only implement the version, REQUIRED and QUIET find_package
 # arguments (e.g. no COMPONENTS)
 
-find_package(PkgConfig)
+if(NOT PKGCONFIG_FOUND)
+  find_package(PkgConfig QUIET)
+endif()
 set(ENV{PKG_CONFIG_PATH}
   "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
+
+option(COMMON_PACKAGE_QUIET "Use QUIET for common_package command" ON)
 
 macro(COMMON_PACKAGE Name)
   string(TOUPPER ${Name} COMMON_PACKAGE_NAME)
@@ -27,30 +31,38 @@ macro(COMMON_PACKAGE Name)
     endif()
   endif()
 
-  list(FIND COMMON_PACKAGE_ARGS "QUIET" COMMON_PACKAGE_QUIET_POS)
-  if(COMMON_PACKAGE_QUIET_POS EQUAL -1)
-    set(COMMON_PACKAGE_QUIET)
+  if(COMMON_PACKAGE_QUIET)
+    set(COMMON_PACKAGE_FIND_QUIET "QUIET")
   else()
-    set(COMMON_PACKAGE_QUIET "QUIET")
+    list(FIND COMMON_PACKAGE_ARGS "QUIET" COMMON_PACKAGE_QUIET_POS)
+    if(COMMON_PACKAGE_QUIET_POS EQUAL -1)
+      set(COMMON_PACKAGE_FIND_QUIET)
+    else()
+      set(COMMON_PACKAGE_FIND_QUIET "QUIET")
+    endif()
   endif()
 
   list(FIND COMMON_PACKAGE_ARGS "REQUIRED" COMMON_PACKAGE_REQUIRED_POS)
   if(COMMON_PACKAGE_REQUIRED_POS EQUAL -1) # Optional find
-    find_package(${Name} ${COMMON_PACKAGE_ARGS}) # try standard cmake way
+    find_package(${Name} ${COMMON_PACKAGE_FIND_QUIET} ${COMMON_PACKAGE_ARGS}) # try standard cmake way
     if((NOT ${Name}_FOUND) AND (NOT ${COMMON_PACKAGE_NAME}_FOUND) AND PKG_CONFIG_EXECUTABLE)
       pkg_check_modules(${Name} ${Name}${COMMON_PACKAGE_VERSION}
-        ${COMMON_PACKAGE_QUIET}) # try pkg_config way
+        ${COMMON_PACKAGE_FIND_QUIET}) # try pkg_config way
     endif()
   else() # required find
     list(REMOVE_AT COMMON_PACKAGE_ARGS ${COMMON_PACKAGE_REQUIRED_POS})
-    find_package(${Name} ${COMMON_PACKAGE_ARGS}) # try standard cmake way
+    find_package(${Name} ${COMMON_PACKAGE_FIND_QUIET} ${COMMON_PACKAGE_ARGS}) # try standard cmake way
     if((NOT ${Name}_FOUND) AND (NOT ${COMMON_PACKAGE_NAME}_FOUND) AND PKG_CONFIG_EXECUTABLE)
       pkg_check_modules(${Name} REQUIRED ${Name}${COMMON_PACKAGE_VERSION}
-        ${COMMON_PACKAGE_QUIET}) # try pkg_config way (and fail if needed)
+        ${COMMON_PACKAGE_FIND_QUIET}) # try pkg_config way (and fail if needed)
     endif()
   endif()
 endmacro()
 
+common_package(Threads   QUIET)
+if(NOT Threads_FOUND AND NOT THREADS_FOUND)
+  set(FIND_REQUIRED_FAILED "${FIND_REQUIRED_FAILED} Threads")
+endif()
 common_package(libzmq 4.0  QUIET)
 if(NOT libzmq_FOUND AND NOT LIBZMQ_FOUND)
   set(FIND_REQUIRED_FAILED "${FIND_REQUIRED_FAILED} libzmq")
@@ -59,11 +71,11 @@ common_package(FlatBuffers   QUIET)
 if(NOT FlatBuffers_FOUND AND NOT FLATBUFFERS_FOUND)
   set(FIND_REQUIRED_FAILED "${FIND_REQUIRED_FAILED} FlatBuffers")
 endif()
-common_package(Boost 1.41 COMPONENTS unit_test_framework QUIET)
+common_package(Boost 1.41.0 COMPONENTS unit_test_framework QUIET)
 if(NOT Boost_FOUND AND NOT BOOST_FOUND)
   set(FIND_REQUIRED_FAILED "${FIND_REQUIRED_FAILED} Boost")
 endif()
-common_package(Servus 1.0 QUIET)
+common_package(Servus 1.0  QUIET)
 if(NOT Servus_FOUND AND NOT SERVUS_FOUND)
   set(FIND_REQUIRED_FAILED "${FIND_REQUIRED_FAILED} Servus")
 endif()
