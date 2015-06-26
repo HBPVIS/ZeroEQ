@@ -7,6 +7,7 @@
 #include "vocabulary.h"
 
 #include <zeq/hbp/camera_generated.h>
+#include <zeq/hbp/frame_generated.h>
 #include <zeq/hbp/imageJPEG_generated.h>
 #include <zeq/hbp/lookupTable1D_generated.h>
 #include <zeq/hbp/selections_generated.h>
@@ -68,6 +69,30 @@ std::vector< float > deserializeCamera( const Event& event )
     auto data = GetCamera( event.getData( ));
     assert( data->matrix()->Length() == 16 );
     return deserializeVector( data->matrix( ));
+}
+
+ZEQ_API Event serializeFrame( const data::Frame& frame )
+{
+    ::zeq::Event event( ::zeq::hbp::EVENT_FRAME );
+    flatbuffers::FlatBufferBuilder& fbb = event.getFBB();
+
+    FrameBuilder builder( fbb );
+    builder.add_start( frame.start );
+    const uint32_t current = frame.current > frame.start ?
+                                 frame.current : frame.start;
+    builder.add_current( current );
+    builder.add_end( frame.end > current ? frame.end : current );
+    builder.add_delta( frame.delta );
+
+    fbb.Finish( builder.Finish( ));
+    return event;
+}
+
+ZEQ_API data::Frame deserializeFrame( const Event& event )
+{
+    auto data = GetFrame( event.getData( ));
+    return data::Frame( data->start(), data->current(), data->end(),
+                        data->delta( ));
 }
 
 ::zeq::Event serializeImageJPEG( const data::ImageJPEG& image )

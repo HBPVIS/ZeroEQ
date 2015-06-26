@@ -12,6 +12,7 @@
 #include <zeq/api.h>
 
 #include <zeq/hbp/camera_zeq_generated.h>
+#include <zeq/hbp/frame_zeq_generated.h>
 #include <zeq/hbp/imageJPEG_zeq_generated.h>
 #include <zeq/hbp/lookupTable1D_zeq_generated.h>
 #include <zeq/hbp/selections_zeq_generated.h>
@@ -22,9 +23,34 @@ namespace hbp
 {
 namespace data
 {
+/** Rendering frame information. */
+struct Frame
+{
+    Frame() : start(0), current(0), end( 0xFFFFFFFFu ), delta(0) {}
+    Frame( const uint32_t s, const uint32_t c, const uint32_t e, const int d )
+        : start(s), current(c), end(e), delta(d) {}
+    bool operator == ( const zeq::hbp::data::Frame& rhs ) const
+    {
+        return start == rhs.start && current == rhs.current &&
+               end == rhs.end && delta == rhs.delta;
+    }
+
+    uint32_t start;
+    uint32_t current;
+    uint32_t end;
+    int delta;
+};
+
+inline std::ostream& operator << ( std::ostream& os, const Frame& f )
+{
+    return os << f.start << ", " << f.current << ", " << f.end << ", "
+              << f.delta;
+}
+
 
 /**
- * This structure holds informations about JPEG images.
+ * Holds informations about JPEG images.
+ *
  * It has the size infomations and the image data, data is a pointer
  * to avoid copy. The data pointer is only valid as long as the zeq Event
  * or rendering resource internal event with image data stays alive.
@@ -46,21 +72,8 @@ private:
 }
 
 /**
- * Serialize the given JPEG image into an Event of type EVENT_IMAGEJPEG.
- * @param image the JPEG image.
- * @return the serialized event.
- */
-ZEQ_API Event serializeImageJPEG( const data::ImageJPEG& image );
-
-/**
- * Deserialize the given EVENT_IMAGEJPEG event into an JPEG image.
- * @param event the zeq EVENT_IMAGEJPEG.
- * @return the jpeg image.
- */
-ZEQ_API data::ImageJPEG deserializeImageJPEG( const Event& event );
-
-/**
  * Serialize the given camera matrix into an Event of type EVENT_CAMERA.
+ *
  * The matrix to be serialized and sent to other instances is the one
  * used in the application to transform from world coordinate space into
  * camera space. Microns are assumed as unit and it has the BBP circuit
@@ -72,6 +85,7 @@ ZEQ_API Event serializeCamera( const std::vector< float >& matrix );
 
 /**
  * Deserialize the given camera event into the 4x4 matrix.
+ *
  * The matrix received and deserialized is the one used in the application
  * to transform from world coordinate space into camera space.
  * Microns are assumed as unit and it has the BBP circuit as reference.
@@ -79,6 +93,21 @@ ZEQ_API Event serializeCamera( const std::vector< float >& matrix );
  * @return the 4x4 camera matrix in OpenGL data layout.
  */
 ZEQ_API std::vector< float > deserializeCamera( const Event& event );
+
+/**
+ * Serialize the given frame specification
+ *
+ * If the application supports animation, it will start looping from the current
+ * frame, between start and end. Otherwise it will display the current
+ * frame. Serialization will enforce start<=current<=end.
+ *
+ * @param frame the frame specification (start, current, end).
+ * @return the serialized event.
+ */
+ZEQ_API Event serializeFrame( const data::Frame& frame );
+
+/** Deserialize the given frame event into */
+ZEQ_API data::Frame deserializeFrame( const Event& event );
 
 /**
  * Serialize the given neuron selection into an Event of type
@@ -130,6 +159,21 @@ ZEQ_API Event serializeLookupTable1D( const std::vector< uint8_t >& lut );
  * @sa serializeLookupTable1D()
  */
 ZEQ_API std::vector< uint8_t > deserializeLookupTable1D( const Event& event );
+
+/**
+ * Serialize the given JPEG image into an Event of type EVENT_IMAGEJPEG.
+ * @param image the JPEG image.
+ * @return the serialized event.
+ */
+ZEQ_API Event serializeImageJPEG( const data::ImageJPEG& image );
+
+/**
+ * Deserialize the given EVENT_IMAGEJPEG event into an JPEG image.
+ * @param event the zeq EVENT_IMAGEJPEG.
+ * @return the jpeg image.
+ */
+ZEQ_API data::ImageJPEG deserializeImageJPEG( const Event& event );
+
 
 }
 }
