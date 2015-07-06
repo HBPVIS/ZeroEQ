@@ -24,5 +24,7 @@ add_subdirectory(zeq)
 add_subdirectory(tests)
 add_subdirectory(tools)
 
+set(DOXYGEN_MAINPAGE_MD README.md)
+set(DOXYGEN_EXTRA_INPUT ${PROJECT_SOURCE_DIR}/README.md)
 include(CPackConfig)
 include(DoxygenRule)
