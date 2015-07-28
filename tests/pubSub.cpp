@@ -152,8 +152,10 @@ void onLargeEcho( const zeq::Event& event )
 
 BOOST_AUTO_TEST_CASE(test_publish_receive_filters)
 {
-    zeq::Publisher publisher( servus::URI( "foo://" ), zeq::ANNOUNCE_NONE );
-    zeq::Subscriber subscriber( publisher.getURI( ));
+    //The publisher need to be destroyed before the subscriber otherwise zmq_ctx_destroy() can 
+    //hang forever. For more details see zmq_ctx_destroy() documentation.
+    zeq::Publisher* publisher = new zeq::Publisher( servus::URI( "foo://" ), zeq::ANNOUNCE_NONE );
+    zeq::Subscriber subscriber( publisher->getURI( ));
     const std::string message( 60000, 'a' );
 
     // Make sure we're connected
@@ -161,7 +163,7 @@ BOOST_AUTO_TEST_CASE(test_publish_receive_filters)
                        std::bind( &test::onEchoEvent, std::placeholders::_1 )));
     for( size_t i = 0; i < 20; ++i )
     {
-        BOOST_CHECK( publisher.publish(
+        BOOST_CHECK( publisher->publish(
                          zeq::vocabulary::serializeEcho( test::echoMessage )));
         if( subscriber.receive( 100 ))
             break;
@@ -173,7 +175,7 @@ BOOST_AUTO_TEST_CASE(test_publish_receive_filters)
     auto startTime = std::chrono::high_resolution_clock::now();
     for( size_t i = 0; i < 1000; ++i )
     {
-        BOOST_CHECK( publisher.publish( event ));
+        BOOST_CHECK( publisher->publish( event ));
         while( subscriber.receive( 0 )) /* NOP to drain */;
     }
     const auto& noEchoTime = std::chrono::high_resolution_clock::now() -
@@ -186,15 +188,17 @@ BOOST_AUTO_TEST_CASE(test_publish_receive_filters)
     startTime = std::chrono::high_resolution_clock::now();
     for( size_t i = 0; i < 1000; ++i )
     {
-        BOOST_CHECK( publisher.publish( event ));
+        BOOST_CHECK( publisher->publish( event ));
         while( subscriber.receive( 0 )) /* NOP to drain */;
     }
+
     const auto& echoTime = std::chrono::high_resolution_clock::now() -
                            startTime;
 
     BOOST_CHECK_MESSAGE( noEchoTime < echoTime,
                          std::chrono::nanoseconds( noEchoTime ).count() << ", "
                          << std::chrono::nanoseconds( echoTime ).count( ));
+    delete publisher;
 }
 
 BOOST_AUTO_TEST_CASE(test_publish_receive_late_zeroconf)
