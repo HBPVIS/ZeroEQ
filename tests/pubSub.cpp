@@ -152,7 +152,7 @@ void onLargeEcho( const zeq::Event& event )
 
 BOOST_AUTO_TEST_CASE(test_publish_receive_filters)
 {
-    //The publisher need to be destroyed before the subscriber otherwise zmq_ctx_destroy() can 
+    //The publisher need to be destroyed before the subscriber otherwise zmq_ctx_destroy() can
     //hang forever. For more details see zmq_ctx_destroy() documentation.
     zeq::Publisher* publisher = new zeq::Publisher( servus::URI( "foo://" ), zeq::ANNOUNCE_NONE );
     zeq::Subscriber subscriber( publisher->getURI( ));
@@ -301,3 +301,34 @@ BOOST_AUTO_TEST_CASE(test_publish_blocking_receive_zeroconf)
     publisher.running = false;
     thread.join( );
 }
+
+#ifdef ZEQ_USE_ZEROBUF
+BOOST_AUTO_TEST_CASE(test_publish_receive_zerobuf)
+{
+    zeq::vocabulary::Echo echoOut;
+    zeq::vocabulary::Echo echoIn;
+
+    echoOut.setMessage( "The quick brown fox" );
+
+    const unsigned short port = zeq::detail::getRandomPort();
+    const servus::URI uri = test::buildURI( "foo", "localhost", port );
+
+    zeq::Subscriber subscriber( uri );
+    BOOST_CHECK( subscriber.subscribe( echoIn ));
+
+    zeq::Publisher publisher( test::buildURI( "foo", "*", port ));
+
+    for( size_t i = 0; i < 10; ++i )
+    {
+        BOOST_CHECK( publisher.publish( echoOut ));
+
+        if( subscriber.receive( 100 ))
+        {
+            BOOST_CHECK_EQUAL( echoIn.getMessageString(),
+                               echoOut.getMessageString( ));
+            return;
+        }
+    }
+    BOOST_CHECK( !"reachable" );
+}
+#endif

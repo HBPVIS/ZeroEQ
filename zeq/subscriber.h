@@ -73,6 +73,30 @@ public:
      */
     ZEQ_API bool deregisterHandler( const uint128_t& event );
 
+    /**
+     * Subscribe a ZeroBuf object to receive updates from any connected
+     * publisher.
+     *
+     * Every update will be directly applied on the ZeroBuf object during
+     * receive(). To track updates on the object, notifyUpdated() is called
+     * accordingly.
+     *
+     * The subscribed object instance has to be valid until unsubscribe().
+     *
+     * @param zerobuf the ZeroBuf object to update on receive()
+     * @return true if subscription was successful, false otherwise
+     */
+    ZEQ_API bool subscribe( zerobuf::Zerobuf& zerobuf );
+
+    /**
+     * Unsubscribe a ZeroBuf object to stop applying updates from any connected
+     * receiver.
+     *
+     * @param zerobuf the ZeroBuf object to stop updating on receive()
+     * @return true if removal of subscription was successful, false otherwise
+     */
+    ZEQ_API bool unsubscribe( const zerobuf::Zerobuf& zerobuf );
+
 private:
     detail::Subscriber* const _impl;
 

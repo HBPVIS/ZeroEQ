@@ -32,6 +32,9 @@ BOOST_AUTO_TEST_CASE(test_create_invalid_uri_publisher)
 BOOST_AUTO_TEST_CASE(test_publish)
 {
     zeq::Publisher publisher( test::buildPublisherURI( "foo" ));
+#ifdef ZEQ_USE_ZEROBUF
+    BOOST_CHECK( publisher.publish( test::EchoOut( )));
+#endif
     BOOST_CHECK( publisher.publish(
                      zeq::vocabulary::serializeEcho( test::echoMessage )));
 }

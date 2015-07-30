@@ -1,5 +1,10 @@
 # Changelog
 
+# Release 0.4 (git master) {#Release04}
+
+* [81](https://github.com/HBPVIS/zeq/pull/81):
+  Implement (optional) ZeroBuf support
+
 # Release 0.3 (07-07-2015) {#Release03}
 
 * [63](https://github.com/HBPVIS/zeq/pull/63):

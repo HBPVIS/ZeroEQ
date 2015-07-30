@@ -15,10 +15,10 @@ BOOST_AUTO_TEST_CASE( cameraEvent )
 {
     const std::vector< float > camera( 16, 42 );
     const zeq::Event& event = zeq::hbp::serializeCamera( camera );
-    const std::vector< float >& out =
+    const std::vector< float >& deserialized =
             zeq::hbp::deserializeCamera( event );
     BOOST_CHECK_EQUAL_COLLECTIONS( camera.begin(), camera.end(),
-                                   out.begin(), out.end( ));
+                                   deserialized.begin(), deserialized.end( ));
 }
 
 BOOST_AUTO_TEST_CASE( frameEvent )
@@ -47,11 +47,11 @@ BOOST_AUTO_TEST_CASE( selectionsEvent )
         ids, ids + sizeof(ids) / sizeof(unsigned int) );
     const zeq::Event& selectionEvent =
         zeq::hbp::serializeSelectedIDs( selection );
-    const std::vector< unsigned int >& outSelection =
+    const std::vector< unsigned int >& deserializedSelection =
             zeq::hbp::deserializeSelectedIDs( selectionEvent );
     BOOST_CHECK_EQUAL_COLLECTIONS(
         selection.begin(), selection.end(),
-        outSelection.begin(), outSelection.end( ));
+        deserializedSelection.begin(), deserializedSelection.end( ));
 }
 
 BOOST_AUTO_TEST_CASE( toggleRequestEvent )
@@ -61,21 +61,21 @@ BOOST_AUTO_TEST_CASE( toggleRequestEvent )
         ids, ids + sizeof(ids) / sizeof(unsigned int) );
     const zeq::Event& toggleRequest_event =
         zeq::hbp::serializeToggleIDRequest( selection );
-    const std::vector< unsigned int >& out_toggleRequest =
+    const std::vector< unsigned int >& deserialized_toggleRequest =
             zeq::hbp::deserializeToggleIDRequest( toggleRequest_event );
     BOOST_CHECK_EQUAL_COLLECTIONS(
         selection.begin(), selection.end(),
-        out_toggleRequest.begin(), out_toggleRequest.end( ));
+        deserialized_toggleRequest.begin(), deserialized_toggleRequest.end( ));
 }
 
 BOOST_AUTO_TEST_CASE( lookupTable1D )
 {
     const std::vector< uint8_t > lut( 1024 );
-    const zeq::Event& lookupTableEvent = zeq::hbp::serializeLookupTable1D( lut);
-    const std::vector< uint8_t >& outLut =
+    const zeq::Event& lookupTableEvent = zeq::hbp::serializeLookupTable1D( lut );
+    const std::vector< uint8_t >& deserializedLut =
             zeq::hbp::deserializeLookupTable1D( lookupTableEvent );
     BOOST_CHECK_EQUAL_COLLECTIONS(
-        lut.begin(), lut.end(), outLut.begin(), outLut.end());
+        lut.begin(), lut.end(), deserializedLut.begin(), deserializedLut.end());
 }
 
 BOOST_AUTO_TEST_CASE( imageJPEGEvent )
@@ -87,11 +87,11 @@ BOOST_AUTO_TEST_CASE( imageJPEGEvent )
     zeq::hbp::data::ImageJPEG image( size, &imageJPEGData[0] );
 
     const zeq::Event& imageEvent = zeq::hbp::serializeImageJPEG( image );
-    const zeq::hbp::data::ImageJPEG& outImage =
+    const zeq::hbp::data::ImageJPEG& deserializedImage =
             zeq::hbp::deserializeImageJPEG( imageEvent );
     BOOST_CHECK_EQUAL( image.getSizeInBytes(),
-                       outImage.getSizeInBytes( ));
+                       deserializedImage.getSizeInBytes( ));
     BOOST_CHECK_EQUAL_COLLECTIONS( imageJPEGData, imageJPEGData + size,
-                                   outImage.getDataPtr(),
-                                   outImage.getDataPtr() + size );
+                                   deserializedImage.getDataPtr(),
+                                   deserializedImage.getDataPtr() + size );
 }

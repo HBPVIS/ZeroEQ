@@ -8,6 +8,10 @@
 #include <zeq/detail/port.h>
 #include <zeq/zeq.h>
 
+#ifdef ZEQ_USE_ZEROBUF
+#  include <echo.h>
+#endif
+
 #include <servus/uri.h>
 #include <boost/test/unit_test.hpp>
 #include <string>
@@ -55,6 +59,29 @@ void onEchoEvent( const zeq::Event& event )
     BOOST_CHECK_EQUAL( echoMessage, message );
 }
 
+#ifdef ZEQ_USE_ZEROBUF
+class EchoOut : public zeq::vocabulary::Echo
+{
+public:
+    EchoOut() { setMessage( "So long, and thanks for all the fish!" ); }
+};
+
+class EchoIn : public zeq::vocabulary::Echo
+{
+    void notifyUpdated() final
+    {
+        BOOST_CHECK_EQUAL( getMessageString(),
+                           "So long, and thanks for all the fish!" );
+        gotData = true;
+    }
+
+public:
+    bool gotData;
+
+    EchoIn() : gotData( false ) {}
+};
+#endif
+
 void onExitEvent( const zeq::Event& event )
 {
     BOOST_CHECK_EQUAL( event.getType(), zeq::vocabulary::EVENT_EXIT );
@@ -62,3 +89,4 @@ void onExitEvent( const zeq::Event& event )
 }
 
 }
+
