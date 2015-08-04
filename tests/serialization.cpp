@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(vocabulary_serialization)
                        zeq::BIDIRECTIONAL );
 }
 
-BOOST_AUTO_TEST_CASE(test_requestEvent)
+BOOST_AUTO_TEST_CASE(request_serialization)
 {
     const zeq::uint128_t eventType( zeq::vocabulary::EVENT_ECHO );
     const zeq::Event& requestEvent =
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(test_requestEvent)
     BOOST_CHECK_EQUAL( eventType, deserializedEventType );
 }
 
-BOOST_AUTO_TEST_CASE(test_event_registration)
+BOOST_AUTO_TEST_CASE(event_registration)
 {
     const std::string schema = "table Test { message:string; } root_type Test;";
     const zeq::uint128_t eventType( 42 );
@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(test_event_registration)
     BOOST_CHECK_EQUAL( json, deserialized );
 }
 
-BOOST_AUTO_TEST_CASE(test_invalid_event_registration)
+BOOST_AUTO_TEST_CASE(invalid_event_registration)
 {
     const std::string schema = "wrong Test { message:string; } root_type Test;";
     const zeq::uint128_t eventType( 42 );
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(test_invalid_event_registration)
                        std::runtime_error );
 }
 
-BOOST_AUTO_TEST_CASE(test_serialization)
+BOOST_AUTO_TEST_CASE(serialization)
 {
     const std::string message("test message");
     const zeq::Event& event = zeq::vocabulary::serializeEcho( message );
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(test_serialization)
     BOOST_CHECK_EQUAL( message, deserialized );
 }
 
-BOOST_AUTO_TEST_CASE(test_json_serialization)
+BOOST_AUTO_TEST_CASE(json_serialization)
 {
     const std::string json( "{\n"
                             "  \"message\": \"test message\"\n"
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(test_json_serialization)
     BOOST_CHECK_EQUAL( json, deserialized );
 }
 
-BOOST_AUTO_TEST_CASE(test_invalid_json_serialization)
+BOOST_AUTO_TEST_CASE(invalid_json_serialization)
 {
     const std::string json( "{\n"
                             "  \"wrongkey\": \"test message\"\n"
@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE(test_invalid_json_serialization)
         std::runtime_error );
 }
 
-BOOST_AUTO_TEST_CASE(test_json_with_binary_data_serialization)
+BOOST_AUTO_TEST_CASE(json_with_binary_data_serialization)
 {
     const std::string json( "{\n"
                             "  \"data\": \"UXQgaXMgZ3JlYXQh\"\n"
@@ -148,7 +148,7 @@ zeq::Event serializeBinary( const std::string& msg )
 }
 }
 
-BOOST_AUTO_TEST_CASE(test_from_cpp_to_json_serialization)
+BOOST_AUTO_TEST_CASE(from_cpp_to_json_serialization)
 {
     const zeq::Event& event = serializeBinary( "Hello there" );
 

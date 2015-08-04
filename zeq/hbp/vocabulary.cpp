@@ -9,8 +9,8 @@
 #include <zeq/hbp/camera_generated.h>
 #include <zeq/hbp/frame_generated.h>
 #include <zeq/hbp/imageJPEG_generated.h>
-#include <zeq/hbp/lookupTable1D_generated.h>
 #include <zeq/hbp/selections_generated.h>
+#include <zeq/hbp/lookupTable1D_generated.h>
 #include <zeq/event.h>
 #include <zeq/vocabulary.h>
 

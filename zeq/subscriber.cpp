@@ -12,6 +12,9 @@
 #include "detail/socket.h"
 #include "detail/byteswap.h"
 
+#ifdef ZEQ_USE_ZEROBUF
+#  include <zerobuf/Zerobuf.h>
+#endif
 #include <servus/servus.h>
 
 #include <cassert>
@@ -107,6 +110,29 @@ public:
         return true;
     }
 
+#ifdef ZEQ_USE_ZEROBUF
+    bool subscribe( zerobuf::Zerobuf& zerobuf )
+    {
+        const uint128_t& type = zerobuf.getZerobufType();
+        if( _zerobufs.count( type ) != 0 )
+            return false;
+
+        _subscribe( type );
+        _zerobufs[ type ] = &zerobuf;
+        return true;
+    }
+
+    bool unsubscribe( const zerobuf::Zerobuf& zerobuf )
+    {
+        const uint128_t& type = zerobuf.getZerobufType();
+        if( _zerobufs.erase( type ) == 0 )
+            return false;
+
+        _unsubscribe( type );
+        return true;
+    }
+#endif
+
     void addSockets( std::vector< detail::Socket >& entries )
     {
         entries.insert( entries.end(), _entries.begin(), _entries.end( ));
@@ -126,29 +152,50 @@ public:
         const bool payload = zmq_msg_more( &msg );
         zmq_msg_close( &msg );
 
-        zeq::Event event( type );
-        if( payload )
+#ifdef ZEQ_USE_ZEROBUF
+        ZerobufMap::const_iterator i = _zerobufs.find( type );
+        if( i == _zerobufs.end( )) // FlatBuffer
+#endif
         {
-            zmq_msg_init( &msg );
-            zmq_msg_recv( &msg, socket.socket, 0 );
-            const size_t size = zmq_msg_size( &msg );
-            ConstByteArray data( new uint8_t[size],
-                                 std::default_delete< uint8_t[] >( ));
-            memcpy( (void*)data.get(), zmq_msg_data( &msg ), size );
-            event.setData( data, size );
-            assert( event.getSize() == size );
-            zmq_msg_close( &msg );
-        }
+            zeq::Event event( type );
+            if( payload )
+            {
+                zmq_msg_init( &msg );
+                zmq_msg_recv( &msg, socket.socket, 0 );
+                const size_t size = zmq_msg_size( &msg );
+                ConstByteArray data( new uint8_t[size],
+                                     std::default_delete< uint8_t[] >( ));
+                memcpy( (void*)data.get(), zmq_msg_data( &msg ), size );
+                event.setData( data, size );
+                assert( event.getSize() == size );
+                zmq_msg_close( &msg );
+            }
 
-        if( _eventFuncs.count( type ) != 0 )
-            _eventFuncs[type]( event );
+            if( _eventFuncs.count( type ) != 0 )
+                _eventFuncs[type]( event );
 #ifndef NDEBUG
-        else
+            else
+            {
+                // Note eile: The topic filtering in the handler registration
+                // should ensure that we don't get messages we haven't
+                // handlers. If this throws, something does not work.
+                ZEQTHROW( std::runtime_error( "Got unsubscribed event" ));
+            }
+#endif
+        }
+#ifdef ZEQ_USE_ZEROBUF
+        else // zerobuf
         {
-            // Note eile: The topic filtering in the handler registration should
-            // ensure that we don't get messages we haven't handlers. If this
-            // throws, something does not work.
-            ZEQTHROW( std::runtime_error( "Got unsubscribed event" ));
+            zerobuf::Zerobuf* zerobuf = i->second;
+            if( payload )
+            {
+                zmq_msg_init( &msg );
+                zmq_msg_recv( &msg, socket.socket, 0 );
+                zerobuf->setZerobufData( zmq_msg_data( &msg ),
+                                         zmq_msg_size( &msg ));
+                zmq_msg_close( &msg );
+            }
+            zerobuf->notifyUpdated();
         }
 #endif
     }
@@ -197,6 +244,18 @@ public:
                     zmq_strerror( zmq_errno( )));
             }
         }
+#ifdef ZEQ_USE_ZEROBUF
+        for( const auto& i : _zerobufs )
+        {
+            if( zmq_setsockopt( _subscribers[zmqURI], ZMQ_SUBSCRIBE,
+                                &i.first, sizeof( uint128_t )) == -1 )
+            {
+                throw std::runtime_error(
+                    std::string( "Cannot update topic filter: " ) +
+                    zmq_strerror( zmq_errno( )));
+            }
+        }
+#endif
 
         Socket entry;
         entry.socket = _subscribers[zmqURI];
@@ -207,6 +266,18 @@ public:
     }
 
 private:
+    typedef std::map< uint128_t, EventFunc > EventFuncs;
+    typedef std::map< std::string, void* > SocketMap;
+
+    SocketMap _subscribers;
+    EventFuncs _eventFuncs;
+#ifdef ZEQ_USE_ZEROBUF
+    typedef std::map< uint128_t, zerobuf::Zerobuf* > ZerobufMap;
+    ZerobufMap _zerobufs;
+#endif
+    servus::Servus _service;
+    std::vector< Socket > _entries;
+
     std::string _getZmqURI( const std::string& instance )
     {
         const size_t pos = instance.find( ":" );
@@ -216,13 +287,35 @@ private:
         return buildZmqURI( host, std::stoi( port ));
     }
 
-    typedef std::map< uint128_t, EventFunc > EventFuncs;
-    typedef std::map< std::string, void* > SocketMap;
+#ifdef ZEQ_USE_ZEROBUF
+    void _subscribe( const uint128_t& event )
+    {
+        for( const auto& socket : _subscribers )
+        {
+            if( zmq_setsockopt( socket.second, ZMQ_SUBSCRIBE,
+                                &event, sizeof( event )) == -1 )
+            {
+                throw std::runtime_error(
+                    std::string( "Cannot update topic filter: " ) +
+                    zmq_strerror( zmq_errno( )));
+            }
+        }
+    }
 
-    SocketMap _subscribers;
-    EventFuncs _eventFuncs;
-    servus::Servus _service;
-    std::vector< Socket > _entries;
+    void _unsubscribe( const uint128_t& event )
+    {
+        for( const auto& socket : _subscribers )
+        {
+            if( zmq_setsockopt( socket.second, ZMQ_UNSUBSCRIBE,
+                                &event, sizeof( event )) == -1 )
+            {
+                throw std::runtime_error(
+                    std::string( "Cannot update topic filter: " ) +
+                    zmq_strerror( zmq_errno( )));
+            }
+        }
+    }
+#endif
 };
 }
 
@@ -252,6 +345,28 @@ bool Subscriber::deregisterHandler( const uint128_t& event )
 {
     return _impl->deregisterHandler( event );
 }
+
+#ifdef ZEQ_USE_ZEROBUF
+bool Subscriber::subscribe( zerobuf::Zerobuf& zerobuf )
+{
+    return _impl->subscribe( zerobuf );
+}
+
+bool Subscriber::unsubscribe( const zerobuf::Zerobuf& zerobuf )
+{
+    return _impl->unsubscribe( zerobuf );
+}
+#else
+bool Subscriber::subscribe( zerobuf::Zerobuf& )
+{
+    ZEQTHROW( std::runtime_error( "ZeroEQ not built with ZeroBuf support "));
+}
+
+bool Subscriber::unsubscribe( const zerobuf::Zerobuf& )
+{
+    ZEQTHROW( std::runtime_error( "ZeroEQ not built with ZeroBuf support "));
+}
+#endif
 
 void Subscriber::addSockets( std::vector< detail::Socket >& entries )
 {

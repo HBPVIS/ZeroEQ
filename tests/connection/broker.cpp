@@ -34,8 +34,12 @@ public:
     void run()
     {
         zeq::Subscriber subscriber( test::buildURI( "foo", "127.0.0.1", port ));
+#ifdef ZEQ_USE_ZEROBUF
+        test::EchoIn echo;
+        BOOST_CHECK( subscriber.subscribe( echo ));
+#endif
         BOOST_CHECK( subscriber.registerHandler( zeq::vocabulary::EVENT_ECHO,
-                       std::bind( &test::onEchoEvent, std::placeholders::_1 )));
+           std::bind( &Subscriber::onEchoEvent, this, std::placeholders::_1 )));
 
         // Using the connection broker in place of zeroconf
         BrokerPtr broker( createBroker( subscriber ));
@@ -49,10 +53,16 @@ public:
             _condition.notify_all();
         }
 
+        // test receive of data for echo event (flatbuffers, 'received') and
+        // echo object (zerobuf, 'echo.gotData')
         for( size_t i = 0; i < 100 && !received ; ++i )
         {
             if( subscriber.receive( 100 ))
-                received = true;
+            {
+#ifdef ZEQ_USE_ZEROBUF
+                received = echo.gotData && received;
+#endif
+            }
         }
     }
 
@@ -70,6 +80,12 @@ protected:
     mutable std::mutex _mutex;
     bool _started;
 
+    void onEchoEvent( const zeq::Event& event )
+    {
+        test::onEchoEvent( event );
+        received = true;
+    }
+
     virtual BrokerPtr createBroker( zeq::Subscriber& subscriber )
     {
         return BrokerPtr(
@@ -86,8 +102,14 @@ BOOST_AUTO_TEST_CASE(test_broker)
     zeq::Publisher publisher( test::buildURI( "bar", "*", port ));
     BOOST_CHECK( zeq::connection::Service::subscribe( brokerAddress,
                                                       publisher ));
+#ifdef ZEQ_USE_ZEROBUF
+    const test::EchoOut echo;
+#endif
     for( size_t i = 0; i < 100 && !subscriber.received; ++i )
     {
+#ifdef ZEQ_USE_ZEROBUF
+        BOOST_CHECK( publisher.publish( echo ));
+#endif
         BOOST_CHECK( publisher.publish(
                          zeq::vocabulary::serializeEcho( test::echoMessage )));
         std::this_thread::sleep_for( std::chrono::milliseconds( 100 ));
@@ -140,8 +162,15 @@ BOOST_AUTO_TEST_CASE(test_named_broker)
     BOOST_CHECK( zeq::connection::Service::subscribe(
                      "127.0.0.1", "zeq::connection::test_named_broker",
                      publisher ));
+
+#ifdef ZEQ_USE_ZEROBUF
+    const test::EchoOut echo;
+#endif
     for( size_t i = 0; i < 100 && !subscriber1.received; ++i )
     {
+#ifdef ZEQ_USE_ZEROBUF
+        BOOST_CHECK( publisher.publish( echo ));
+#endif
         BOOST_CHECK( publisher.publish(
                          zeq::vocabulary::serializeEcho( test::echoMessage )));
         std::this_thread::sleep_for( std::chrono::milliseconds( 100 ));

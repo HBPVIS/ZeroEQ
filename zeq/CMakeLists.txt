@@ -50,6 +50,9 @@ set(ZEQ_LINK_LIBRARIES ${CMAKE_THREAD_LIBS_INIT}
                        ${LIBZMQ_LIBRARIES}
                        ${FLATBUFFERS_LIBRARY}
                        ${SERVUS_LIBRARIES})
+if(ZEROBUF_FOUND)
+  list(APPEND ZEQ_LINK_LIBRARIES ${ZEROBUF_LIBRARIES})
+endif()
 if(MSVC)
   list(APPEND ZEQ_LINK_LIBRARIES Ws2_32)
 endif()

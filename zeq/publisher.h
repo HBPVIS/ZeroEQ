@@ -44,6 +44,16 @@ public:
     ZEQ_API bool publish( const Event& event );
 
     /**
+     * Publish the given Zerobuf object to any subscriber.
+     *
+     * If there is no subscriber for that event, no event will be send.
+     *
+     * @param zerobuf the ZeroBuf object to publish
+     * @return true if publish was successful
+     */
+    ZEQ_API bool publish( const zerobuf::Zerobuf& zerobuf );
+
+    /**
      * Get the publisher URI.
      *
      * Contains the used hostname and port, if none where given in the
@@ -56,10 +66,10 @@ public:
     std::string getAddress() const; //!< @internal
 
 private:
+    detail::Publisher* const _impl;
+
     Publisher( const Publisher& ) = delete;
     Publisher& operator=( const Publisher& ) = delete;
-
-    detail::Publisher* const _impl;
 };
 
 }

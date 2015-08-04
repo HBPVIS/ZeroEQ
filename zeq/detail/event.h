@@ -26,7 +26,7 @@ static inline void dummy_deleter( const void* ) {}
 class Event
 {
 public:
-    Event( const uint128_t& type_ )
+    explicit Event( const uint128_t& type_ )
         : type( type_ )
         , size( 0 )
     {}
