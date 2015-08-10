@@ -35,9 +35,8 @@ ZeroEQ requires the following external, pre-installed dependencies:
 
 ~~~
 git clone https://github.com/HBPVIS/zeq.git
-cd zeq
-mkdir build
-cd build
+mkdir zeq/build
+cd zeq/build
 cmake ..
 make
 ~~~
