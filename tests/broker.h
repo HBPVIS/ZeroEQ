@@ -18,36 +18,34 @@
 
 namespace test
 {
-
-servus::URI buildPublisherURI( const std::string& schema )
+zeq::URI buildPublisherURI()
 {
-    return servus::URI( schema + ":" );
+    std::string name = std::string(
+        boost::unit_test::framework::current_test_case().p_name );
+    std::replace( name.begin(), name.end(), '_', '-' );
+    return zeq::URI( name + "://" );
 }
 
-servus::URI buildPublisherURI( const std::string& schema,
-                               const unsigned int port )
+zeq::URI buildPublisherURI( const unsigned int port )
 {
-    return servus::URI( schema + "://*:" +
-                          std::to_string( port ));
+    zeq::URI uri = buildPublisherURI();
+    uri.setPort( port );
+    return uri;
 }
 
-servus::URI buildURI( const std::string& schema,
-                        const std::string& hostname )
+zeq::URI buildURI( const std::string& hostname )
 {
-    std::stringstream uri;
-    uri << schema << "://" << hostname;
-    return servus::URI( uri.str( ));
+    std::string name = std::string(
+        boost::unit_test::framework::current_test_case().p_name );
+    std::replace( name.begin(), name.end(), '_', '-' );
+    return zeq::URI( name + "://" + hostname );
 }
 
-servus::URI buildURI( const std::string& schema,
-                        const std::string& hostname,
-                        const unsigned int port )
+zeq::URI buildURI( const std::string& hostname, const unsigned int port )
 {
-    std::stringstream uri;
-    uri << schema << "://";
-    if( !hostname.empty( ))
-        uri << hostname << ":" << std::to_string( port );
-    return servus::URI( uri.str( ));
+    zeq::URI uri = buildURI( hostname );
+    uri.setPort( port );
+    return uri;
 }
 
 const std::string echoMessage( "echo_event" );
@@ -89,4 +87,3 @@ void onExitEvent( const zeq::Event& event )
 }
 
 }
-

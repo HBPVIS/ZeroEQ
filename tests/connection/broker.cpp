@@ -33,7 +33,7 @@ public:
 
     void run()
     {
-        zeq::Subscriber subscriber( test::buildURI( "foo", "127.0.0.1", port ));
+        zeq::Subscriber subscriber( test::buildURI( "127.0.0.1", port ));
 #ifdef ZEQ_USE_ZEROBUF
         test::EchoIn echo;
         BOOST_CHECK( subscriber.subscribe( echo ));
@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE(test_broker)
     std::thread thread( std::bind( &Subscriber::run, &subscriber ));
 
     // Using a different scheme so zeroconf resolution does not work
-    zeq::Publisher publisher( test::buildURI( "bar", "*", port ));
+    zeq::Publisher publisher( test::buildURI( "*", port ));
     BOOST_CHECK( zeq::connection::Service::subscribe( brokerAddress,
                                                       publisher ));
 #ifdef ZEQ_USE_ZEROBUF
@@ -158,7 +158,7 @@ BOOST_AUTO_TEST_CASE(test_named_broker)
     std::thread thread2( std::bind( &Subscriber::run, &subscriber2 ));
 
     // Using a different scheme so zeroconf resolution does not work
-    zeq::Publisher publisher( test::buildURI( "bar", "*", port ));
+    zeq::Publisher publisher( test::buildURI( "*", port ));
     BOOST_CHECK( zeq::connection::Service::subscribe(
                      "127.0.0.1", "zeq::connection::test_named_broker",
                      publisher ));
@@ -201,9 +201,7 @@ class FailingNamedSubscriber : public Subscriber
 BOOST_AUTO_TEST_CASE(test_named_broker_port_used)
 {
     FixedNamedSubscriber subscriber1;
-
     std::thread thread1( std::bind( &Subscriber::run, &subscriber1 ));
-
     subscriber1.waitStarted();
 
     FailingNamedSubscriber subscriber2;
@@ -217,7 +215,7 @@ BOOST_AUTO_TEST_CASE(test_named_broker_port_used)
 
 BOOST_AUTO_TEST_CASE(test_invalid_broker)
 {
-    zeq::Subscriber subscriber( test::buildURI( "foo", "127.0.0.1", port ));
+    zeq::Subscriber subscriber( test::buildURI( "127.0.0.1", port ));
     BOOST_CHECK_THROW( zeq::connection::Broker( std::string( "invalidIP" ),
                                                 subscriber ),
                        std::runtime_error );
