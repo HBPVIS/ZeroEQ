@@ -11,27 +11,27 @@
 
 #include <servus/servus.h>
 
-BOOST_AUTO_TEST_CASE(test_create_uri_publisher)
+BOOST_AUTO_TEST_CASE(create_uri_publisher)
 {
-    zeq::Publisher publisher( test::buildPublisherURI( "foo" ));
+    zeq::Publisher publisher( test::buildPublisherURI( ));
 
     const servus::URI& uri = publisher.getURI();
-    BOOST_CHECK_EQUAL( uri.getScheme(), std::string( "foo" ));
+    BOOST_CHECK_EQUAL( uri.getScheme(), std::string( "create-uri-publisher" ));
     BOOST_CHECK( !uri.getHost().empty( ));
     BOOST_CHECK( uri.getPort() > 1024 );
 }
 
-BOOST_AUTO_TEST_CASE(test_create_invalid_uri_publisher)
+BOOST_AUTO_TEST_CASE(create_invalid_uri_publisher)
 {
     // invalid URI, hostname only not allowed
     BOOST_CHECK_THROW(
-        zeq::Publisher publisher( test::buildURI( "foo", "localhost" )),
+        zeq::Publisher publisher( test::buildURI( "localhost" )),
         std::runtime_error );
 }
 
-BOOST_AUTO_TEST_CASE(test_publish)
+BOOST_AUTO_TEST_CASE(publish)
 {
-    zeq::Publisher publisher( test::buildPublisherURI( "foo" ));
+    zeq::Publisher publisher( test::buildPublisherURI( ));
 #ifdef ZEQ_USE_ZEROBUF
     BOOST_CHECK( publisher.publish( test::EchoOut( )));
 #endif
@@ -39,13 +39,13 @@ BOOST_AUTO_TEST_CASE(test_publish)
                      zeq::vocabulary::serializeEcho( test::echoMessage )));
 }
 
-BOOST_AUTO_TEST_CASE(test_publish_empty_event)
+BOOST_AUTO_TEST_CASE(publish_empty_event)
 {
-    zeq::Publisher publisher( test::buildPublisherURI( "foo" ));
+    zeq::Publisher publisher( test::buildPublisherURI( ));
     BOOST_CHECK( publisher.publish( zeq::Event( zeq::vocabulary::EVENT_EXIT )));
 }
 
-BOOST_AUTO_TEST_CASE(test_multiple_publisher_on_same_host)
+BOOST_AUTO_TEST_CASE(multiple_publisher_on_same_host)
 {
     if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
         return;

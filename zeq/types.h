@@ -33,6 +33,7 @@ namespace zeq
 {
 
 using servus::uint128_t;
+using servus::URI;
 class Event;
 class Publisher;
 class Subscriber;
