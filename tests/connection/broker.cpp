@@ -26,7 +26,7 @@ class Subscriber
 public:
     Subscriber()
         : received( false )
-        , _started( false )
+        , _state( STATE_CREATED )
     {}
 
     virtual ~Subscriber() {}
@@ -49,7 +49,7 @@ public:
 
         {
             std::unique_lock< std::mutex > lock( _mutex );
-            _started = true;
+            _state = STATE_STARTED;
             _condition.notify_all();
         }
 
@@ -69,7 +69,21 @@ public:
     void waitStarted() const
     {
         std::unique_lock< std::mutex > lock( _mutex );
-        while( !_started )
+        while( _state < STATE_STARTED )
+            _condition.wait( lock );
+    }
+
+    void setRun()
+    {
+        std::unique_lock< std::mutex > lock( _mutex );
+        _state = STATE_RUN;
+        _condition.notify_all();
+    }
+
+    void waitRun() const
+    {
+        std::unique_lock< std::mutex > lock( _mutex );
+        while( _state < STATE_RUN )
             _condition.wait( lock );
     }
 
@@ -78,7 +92,12 @@ public:
 protected:
     mutable std::condition_variable _condition;
     mutable std::mutex _mutex;
-    bool _started;
+    enum State
+    {
+        STATE_CREATED,
+        STATE_STARTED,
+        STATE_RUN
+    } _state;
 
     void onEchoEvent( const zeq::Event& event )
     {
@@ -137,7 +156,7 @@ class NamedSubscriber : public Subscriber
             }
             catch( ... ) {}
 
-            std::this_thread::sleep_for( std::chrono::milliseconds( 100 ));
+            waitRun();
         }
         return BrokerPtr();
     }
@@ -156,6 +175,9 @@ BOOST_AUTO_TEST_CASE(test_named_broker)
     RandomNamedSubscriber subscriber2;
     subscriber2.received = true;
     std::thread thread2( std::bind( &Subscriber::run, &subscriber2 ));
+
+    subscriber1.setRun();
+    subscriber2.setRun();
 
     // Using a different scheme so zeroconf resolution does not work
     zeq::Publisher publisher( test::buildURI( "*", port ));
@@ -208,6 +230,7 @@ BOOST_AUTO_TEST_CASE(test_named_broker_port_used)
     subscriber2.received = true;
     std::thread thread2( std::bind( &Subscriber::run, &subscriber2 ));
 
+    subscriber1.setRun();
     subscriber1.received = true;
     thread2.join();
     thread1.join();
