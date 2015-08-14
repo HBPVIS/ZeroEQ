@@ -46,15 +46,14 @@ set(ZEQ_SOURCES
   subscriber.cpp
   vocabulary.cpp)
 
-set(ZEQ_LINK_LIBRARIES ${CMAKE_THREAD_LIBS_INIT}
-                       ${LIBZMQ_LIBRARIES}
-                       ${FLATBUFFERS_LIBRARY}
-                       ${SERVUS_LIBRARIES})
-if(ZEROBUF_FOUND)
-  list(APPEND ZEQ_LINK_LIBRARIES ${ZEROBUF_LIBRARIES})
-endif()
+set(ZEQ_LINK_LIBRARIES PUBLIC Servus
+                       PRIVATE ${CMAKE_THREAD_LIBS_INIT} ${LIBZMQ_LIBRARIES}
+                               flatbuffers)
 if(MSVC)
   list(APPEND ZEQ_LINK_LIBRARIES Ws2_32)
+endif()
+if(ZEROBUF_FOUND)
+  list(APPEND ZEQ_LINK_LIBRARIES PUBLIC ZeroBuf)
 endif()
 
 common_library(zeq)

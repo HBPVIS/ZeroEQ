@@ -11,5 +11,4 @@ set(CPACK_PACKAGE_LICENSE "Proprietary")
 
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "libboost-test-dev")
 
-set(ZEQ_EXCLUDE_LIBRARIES testevent)
 include(CommonCPack)
