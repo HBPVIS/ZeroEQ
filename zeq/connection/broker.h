@@ -86,7 +86,7 @@ public:
     /** @return the port to which this broker is bound. */
     ZEQ_API uint16_t getPort() const;
 
-    std::string getAddress() const; //!< @internal
+    ZEQ_API std::string getAddress() const; //!< @internal
 
 private:
     detail::Broker* const _impl;
