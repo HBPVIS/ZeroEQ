@@ -1,5 +1,4 @@
 # Copyright (c) HBP 2014-2015 Daniel.Nachbaur@epfl.ch
-# All rights reserved. Do not distribute without further notice.
 
 source_group(\\ FILES CMakeLists.txt)
 
@@ -31,6 +30,7 @@ set(ZEQ_HEADERS
   detail/event.h
   detail/eventDescriptor.h
   detail/port.h
+  detail/sender.h
   detail/socket.h
   detail/vocabulary.h)
 

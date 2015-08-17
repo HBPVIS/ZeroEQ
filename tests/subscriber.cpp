@@ -12,11 +12,9 @@
 
 using namespace zeq::vocabulary;
 
-#define DUMMYURI test::buildURI( "localhost", zeq::detail::getRandomPort( ))
-
 BOOST_AUTO_TEST_CASE(test_subscribe)
 {
-    zeq::Subscriber subscriber( DUMMYURI );
+    zeq::Subscriber subscriber( test::buildURI( "localhost" ));
 }
 
 BOOST_AUTO_TEST_CASE(test_invalid_subscribe)
@@ -30,14 +28,14 @@ BOOST_AUTO_TEST_CASE(test_invalid_subscribe)
 
 BOOST_AUTO_TEST_CASE(test_registerhandler)
 {
-    zeq::Subscriber subscriber( DUMMYURI );
+    zeq::Subscriber subscriber( test::buildURI( "localhost" ));
     BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
                        std::bind( &test::onEchoEvent, std::placeholders::_1 )));
 }
 
 BOOST_AUTO_TEST_CASE(test_deregisterhandler)
 {
-    zeq::Subscriber subscriber( DUMMYURI );
+    zeq::Subscriber subscriber( test::buildURI( "localhost" ));
     BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
                        std::bind( &test::onEchoEvent, std::placeholders::_1 )));
     BOOST_CHECK( subscriber.deregisterHandler( EVENT_ECHO ));
@@ -45,7 +43,7 @@ BOOST_AUTO_TEST_CASE(test_deregisterhandler)
 
 BOOST_AUTO_TEST_CASE(test_invalid_registerhandler)
 {
-    zeq::Subscriber subscriber( DUMMYURI );
+    zeq::Subscriber subscriber( test::buildURI( "localhost" ));
     BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
                        std::bind( &test::onEchoEvent, std::placeholders::_1 )));
     BOOST_CHECK( !subscriber.registerHandler( EVENT_ECHO,
@@ -54,7 +52,7 @@ BOOST_AUTO_TEST_CASE(test_invalid_registerhandler)
 
 BOOST_AUTO_TEST_CASE(test_invalid_deregisterhandler)
 {
-    zeq::Subscriber subscriber( DUMMYURI );
+    zeq::Subscriber subscriber( test::buildURI( "localhost" ));
     BOOST_CHECK( !subscriber.deregisterHandler( EVENT_ECHO ));
     BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
                        std::bind( &test::onEchoEvent, std::placeholders::_1 )));

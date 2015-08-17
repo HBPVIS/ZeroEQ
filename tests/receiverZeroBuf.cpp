@@ -13,7 +13,7 @@ void testReceive( zeq::Publisher& publisher, zeq::Receiver& receiver,
     var1.gotData = false;
     var2.gotData = false;
 
-    for( size_t i = 0; i < 10; ++i )
+    for( size_t i = 0; i < 20; ++i )
     {
         BOOST_CHECK( publisher.publish( test::EchoOut( )));
         receiver.receive( 100 );
@@ -32,37 +32,34 @@ void testReceive( zeq::Publisher& publisher, zeq::Receiver& receiver,
     testReceive( publisher, receiver, var, var, line );
 }
 
-BOOST_AUTO_TEST_CASE(test_two_subscribers)
+BOOST_AUTO_TEST_CASE(two_subscribers)
 {
-    const unsigned short port = zeq::detail::getRandomPort();
-    zeq::Subscriber subscriber1( test::buildURI( "localhost", port ));
-    zeq::Subscriber subscriber2( test::buildURI( "localhost", port ),
+    zeq::Publisher publisher( test::buildPublisherURI( ));
+    zeq::Subscriber subscriber1( test::buildURI( "localhost", publisher ));
+    zeq::Subscriber subscriber2( test::buildURI( "localhost", publisher ),
                                  subscriber1 );
     test::EchoIn one;
     test::EchoIn two;
     BOOST_CHECK( subscriber1.subscribe( one ));
     BOOST_CHECK( subscriber2.subscribe( two ));
 
-    zeq::Publisher publisher( test::buildPublisherURI( port ));
 
     testReceive( publisher, subscriber1, one, two, __LINE__ );
     testReceive( publisher, subscriber2, one, two, __LINE__ );
 }
 
-BOOST_AUTO_TEST_CASE(test_publisher_routing)
+BOOST_AUTO_TEST_CASE(publisher_routing)
 {
-    const unsigned short port = zeq::detail::getRandomPort();
-    zeq::Subscriber* subscriber1 =
-        new zeq::Subscriber( test::buildURI( "localhost", 1000 ));
-    zeq::Subscriber subscriber2( test::buildURI( "localhost", port ),
+    zeq::Publisher publisher( test::buildPublisherURI( ));
+    zeq::Subscriber* subscriber1 = new zeq::Subscriber(
+                                      test::buildURI( "localhost" ));
+    zeq::Subscriber subscriber2( test::buildURI( "localhost", publisher ),
                                  *subscriber1 );
 
     test::EchoIn one;
     test::EchoIn two;
     BOOST_CHECK( subscriber1->subscribe( one ));
     BOOST_CHECK( subscriber2.subscribe( two ));
-
-    zeq::Publisher publisher( test::buildPublisherURI( port ));
 
     testReceive( publisher, *subscriber1, two, __LINE__ );
     BOOST_CHECK( !one.gotData );

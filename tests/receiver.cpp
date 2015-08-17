@@ -20,7 +20,7 @@ void testReceive( zeq::Publisher& publisher, zeq::Receiver& receiver,
     gotOne = false;
     gotTwo = false;
 
-    for( size_t i = 0; i < 10; ++i )
+    for( size_t i = 0; i < 20; ++i )
     {
         BOOST_CHECK( publisher.publish( serializeEcho( test::echoMessage )));
         receiver.receive( 100 );
@@ -42,9 +42,9 @@ void testReceive( zeq::Publisher& publisher, zeq::Receiver& receiver,
 
 BOOST_AUTO_TEST_CASE(test_two_subscribers)
 {
-    const unsigned short port = zeq::detail::getRandomPort();
-    zeq::Subscriber subscriber1( test::buildURI( "localhost", port ));
-    zeq::Subscriber subscriber2( test::buildURI( "localhost", port ),
+    zeq::Publisher publisher( test::buildPublisherURI( ));
+    zeq::Subscriber subscriber1( test::buildURI( "localhost", publisher ));
+    zeq::Subscriber subscriber2( test::buildURI( "localhost", publisher ),
                                  subscriber1 );
 
     BOOST_CHECK( subscriber1.registerHandler( zeq::vocabulary::EVENT_ECHO,
@@ -52,26 +52,23 @@ BOOST_AUTO_TEST_CASE(test_two_subscribers)
     BOOST_CHECK( subscriber2.registerHandler( zeq::vocabulary::EVENT_ECHO,
                                 std::bind( &onEvent2, std::placeholders::_1 )));
 
-    zeq::Publisher publisher( test::buildPublisherURI( port ));
-
     testReceive( publisher, subscriber1, gotOne, gotTwo, __LINE__ );
     testReceive( publisher, subscriber2, gotOne, gotTwo, __LINE__ );
 }
 
 BOOST_AUTO_TEST_CASE(test_publisher_routing)
 {
-    const unsigned short port = zeq::detail::getRandomPort();
+    zeq::Publisher publisher( test::buildPublisherURI( ));
+    zeq::Publisher silentPublisher( test::buildPublisherURI( ));
     zeq::Subscriber* subscriber1 =
-        new zeq::Subscriber( test::buildURI( "localhost", 1000 ));
-    zeq::Subscriber subscriber2( test::buildURI( "localhost", port ),
+        new zeq::Subscriber( test::buildURI( "localhost", silentPublisher ));
+    zeq::Subscriber subscriber2( test::buildURI( "localhost", publisher ),
                                  *subscriber1 );
 
     BOOST_CHECK( subscriber1->registerHandler( zeq::vocabulary::EVENT_ECHO,
                                 std::bind( &onEvent1, std::placeholders::_1 )));
     BOOST_CHECK( subscriber2.registerHandler( zeq::vocabulary::EVENT_ECHO,
                                 std::bind( &onEvent2, std::placeholders::_1 )));
-
-    zeq::Publisher publisher( test::buildPublisherURI( port ));
 
     testReceive( publisher, *subscriber1, gotTwo, __LINE__ );
     BOOST_CHECK( !gotOne );

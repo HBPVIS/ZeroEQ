@@ -16,6 +16,14 @@
 #include <boost/test/unit_test.hpp>
 #include <string>
 
+#ifdef _WIN32
+#  include <process.h>
+#  define getpid _getpid
+#else
+#  include <sys/types.h>
+#  include <unistd.h>
+#endif
+
 namespace test
 {
 zeq::URI buildPublisherURI()
@@ -23,14 +31,7 @@ zeq::URI buildPublisherURI()
     std::string name = std::string(
         boost::unit_test::framework::current_test_case().p_name );
     std::replace( name.begin(), name.end(), '_', '-' );
-    return zeq::URI( name + "://" );
-}
-
-zeq::URI buildPublisherURI( const unsigned int port )
-{
-    zeq::URI uri = buildPublisherURI();
-    uri.setPort( port );
-    return uri;
+    return zeq::URI( name + std::to_string( getpid( )) + "://" );
 }
 
 zeq::URI buildURI( const std::string& hostname )
@@ -38,13 +39,15 @@ zeq::URI buildURI( const std::string& hostname )
     std::string name = std::string(
         boost::unit_test::framework::current_test_case().p_name );
     std::replace( name.begin(), name.end(), '_', '-' );
-    return zeq::URI( name + "://" + hostname );
+    return zeq::URI( name + std::to_string( getpid( )) + "://" + hostname );
 }
 
-zeq::URI buildURI( const std::string& hostname, const unsigned int port )
+zeq::URI buildURI( const std::string& hostname, const zeq::Publisher& to )
 {
+    assert( &to );
+    assert( to.getPort( ));
     zeq::URI uri = buildURI( hostname );
-    uri.setPort( port );
+    uri.setPort( to.getPort( ));
     return uri;
 }
 
