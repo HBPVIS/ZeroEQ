@@ -83,6 +83,11 @@ public:
     /** Destroy this broker. */
     ZEQ_API ~Broker();
 
+    /** @return the port to which this broker is bound. */
+    ZEQ_API uint16_t getPort() const;
+
+    std::string getAddress() const; //!< @internal
+
 private:
     detail::Broker* const _impl;
 

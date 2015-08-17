@@ -63,6 +63,9 @@ public:
      */
     ZEQ_API const servus::URI& getURI() const;
 
+    /** @return the port to which this publisher is bound. */
+    ZEQ_API uint16_t getPort() const;
+
     std::string getAddress() const; //!< @internal
 
 private:

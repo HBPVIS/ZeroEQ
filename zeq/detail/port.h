@@ -19,9 +19,6 @@ namespace detail
 /** @return a fixed, pseudo-random port for the given name. */
 uint16_t getPort( const std::string& name );
 
-/** @return a random port number. */
-ZEQ_API uint16_t getRandomPort();
-
 }
 }
 

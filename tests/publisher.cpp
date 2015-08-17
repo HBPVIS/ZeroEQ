@@ -16,7 +16,10 @@ BOOST_AUTO_TEST_CASE(create_uri_publisher)
     zeq::Publisher publisher( test::buildPublisherURI( ));
 
     const servus::URI& uri = publisher.getURI();
-    BOOST_CHECK_EQUAL( uri.getScheme(), std::string( "create-uri-publisher" ));
+    const std::string expectedScheme( "create-uri-publisher" );
+    const std::string baseScheme = uri.getScheme().substr( 0,
+                                                      expectedScheme.length( ));
+    BOOST_CHECK_EQUAL( baseScheme, expectedScheme );
     BOOST_CHECK( !uri.getHost().empty( ));
     BOOST_CHECK( uri.getPort() > 1024 );
 }

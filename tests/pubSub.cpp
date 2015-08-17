@@ -19,28 +19,25 @@ BOOST_AUTO_TEST_CASE(subscribe_to_same_schema)
 {
     zeq::Publisher publisher( test::buildPublisherURI( ));
     BOOST_CHECK_NO_THROW( zeq::Subscriber subscriber(
-                              test::buildURI( "localhost",
-                                              zeq::detail::getRandomPort( ))));
+                              test::buildURI( "localhost" )));
 }
 
 BOOST_AUTO_TEST_CASE(subscribe_to_different_schema)
 {
     zeq::Publisher publisher( test::buildPublisherURI( ));
-    zeq::URI uri = test::buildURI( "localhost", zeq::detail::getRandomPort( ));
+    zeq::URI uri = test::buildURI( "localhost" );
     uri.setScheme( uri.getScheme() + "bar" );
     BOOST_CHECK_NO_THROW( zeq::Subscriber subscriber( uri ));
 }
 
 BOOST_AUTO_TEST_CASE(publish_receive)
 {
-    const unsigned short port = zeq::detail::getRandomPort();
-    const servus::URI uri = test::buildURI( "localhost", port );
-
+    zeq::Publisher publisher( test::buildURI( "*" ));
+    const servus::URI uri = test::buildURI( "localhost", publisher );
     zeq::Subscriber subscriber( uri );
     BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
                        std::bind( &test::onEchoEvent, std::placeholders::_1 )));
 
-    zeq::Publisher publisher( test::buildURI( "*", port ));
 
     bool received = false;
     for( size_t i = 0; i < 10; ++i )
@@ -58,8 +55,7 @@ BOOST_AUTO_TEST_CASE(publish_receive)
 
 BOOST_AUTO_TEST_CASE(no_receive)
 {
-    zeq::Subscriber subscriber( test::buildURI( "127.0.0.1",
-                                                zeq::detail::getRandomPort( )));
+    zeq::Subscriber subscriber( test::buildURI( "127.0.0.1" ));
     BOOST_CHECK( !subscriber.receive( 100 ));
 }
 
@@ -312,13 +308,10 @@ BOOST_AUTO_TEST_CASE(publish_receive_zerobuf)
 
     echoOut.setMessage( "The quick brown fox" );
 
-    const unsigned short port = zeq::detail::getRandomPort();
-    const servus::URI uri = test::buildURI( "localhost", port );
-
+    zeq::Publisher publisher( test::buildURI( "*" ));
+    const servus::URI uri = test::buildURI( "localhost", publisher );
     zeq::Subscriber subscriber( uri );
     BOOST_CHECK( subscriber.subscribe( echoIn ));
-
-    zeq::Publisher publisher( test::buildURI( "*", port ));
 
     for( size_t i = 0; i < 10; ++i )
     {

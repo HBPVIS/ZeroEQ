@@ -16,10 +16,9 @@
 #include <mutex>
 #include <thread>
 
-const unsigned int port = zeq::detail::getRandomPort();
-const std::string brokerAddress = std::string( "127.0.0.1:" ) +
-                                  std::to_string( port + 1 );
 typedef std::unique_ptr< zeq::connection::Broker > BrokerPtr;
+std::string _broker;
+zeq::Publisher* _publisher = 0;
 
 class Subscriber
 {
@@ -33,7 +32,7 @@ public:
 
     void run()
     {
-        zeq::Subscriber subscriber( test::buildURI( "127.0.0.1", port ));
+        zeq::Subscriber subscriber( test::buildURI( "127.0.0.1", *_publisher ));
 #ifdef ZEQ_USE_ZEROBUF
         test::EchoIn echo;
         BOOST_CHECK( subscriber.subscribe( echo ));
@@ -42,11 +41,12 @@ public:
            std::bind( &Subscriber::onEchoEvent, this, std::placeholders::_1 )));
 
         // Using the connection broker in place of zeroconf
-        BrokerPtr broker( createBroker( subscriber ));
-        BOOST_CHECK( broker.get( ));
+        BrokerPtr broker = createBroker( subscriber );
+        BOOST_REQUIRE( broker.get( ));
         if( !broker )
             return;
 
+        _broker = broker->getAddress();
         {
             std::unique_lock< std::mutex > lock( _mutex );
             _state = STATE_STARTED;
@@ -108,19 +108,22 @@ protected:
     virtual BrokerPtr createBroker( zeq::Subscriber& subscriber )
     {
         return BrokerPtr(
-            new zeq::connection::Broker( brokerAddress, subscriber ));
+            new zeq::connection::Broker( "127.0.0.1:0", subscriber ));
     }
 };
 
-BOOST_AUTO_TEST_CASE(test_broker)
+BOOST_AUTO_TEST_CASE( broker )
 {
+    // Using a different scheme so zeroconf resolution does not work
+    zeq::Publisher publisher( test::buildURI( "*" ));
+    _publisher = &publisher;
+    _broker.clear();
+
     Subscriber subscriber;
     std::thread thread( std::bind( &Subscriber::run, &subscriber ));
+    subscriber.waitStarted();
 
-    // Using a different scheme so zeroconf resolution does not work
-    zeq::Publisher publisher( test::buildURI( "*", port ));
-    BOOST_CHECK( zeq::connection::Service::subscribe( brokerAddress,
-                                                      publisher ));
+    BOOST_CHECK( zeq::connection::Service::subscribe( _broker, publisher ));
 #ifdef ZEQ_USE_ZEROBUF
     const test::EchoOut echo;
 #endif
@@ -136,6 +139,7 @@ BOOST_AUTO_TEST_CASE(test_broker)
 
     thread.join();
     BOOST_CHECK( subscriber.received );
+    _publisher = 0;
 }
 
 template< zeq::connection::Broker::PortSelection mode >
@@ -167,10 +171,17 @@ typedef NamedSubscriber< zeq::connection::Broker::PORT_FIXED >
 typedef NamedSubscriber< zeq::connection::Broker::PORT_FIXED_OR_RANDOM >
     RandomNamedSubscriber;
 
-BOOST_AUTO_TEST_CASE(test_named_broker)
+BOOST_AUTO_TEST_CASE( named_broker )
 {
+    // Using a different scheme so zeroconf resolution does not work
+    zeq::URI uri = test::buildURI( "*" );
+    uri.setScheme( "foo" );
+    zeq::Publisher publisher( uri );
+    _publisher = &publisher;
+
     FixedNamedSubscriber subscriber1;
     std::thread thread1( std::bind( &Subscriber::run, &subscriber1 ));
+    subscriber1.waitStarted();
 
     RandomNamedSubscriber subscriber2;
     subscriber2.received = true;
@@ -179,8 +190,6 @@ BOOST_AUTO_TEST_CASE(test_named_broker)
     subscriber1.setRun();
     subscriber2.setRun();
 
-    // Using a different scheme so zeroconf resolution does not work
-    zeq::Publisher publisher( test::buildURI( "*", port ));
     BOOST_CHECK( zeq::connection::Service::subscribe(
                      "127.0.0.1", "zeq::connection::test_named_broker",
                      publisher ));
@@ -201,6 +210,7 @@ BOOST_AUTO_TEST_CASE(test_named_broker)
     thread2.join();
     thread1.join();
     BOOST_CHECK( subscriber1.received );
+    _publisher = 0;
 }
 
 class FailingNamedSubscriber : public Subscriber
@@ -220,10 +230,13 @@ class FailingNamedSubscriber : public Subscriber
     }
 };
 
-BOOST_AUTO_TEST_CASE(test_named_broker_port_used)
+BOOST_AUTO_TEST_CASE( named_broker_port_used )
 {
     if( getenv( "TRAVIS" ))
         return;
+
+    zeq::Publisher publisher( test::buildURI( "*" ));
+    _publisher = &publisher;
 
     FixedNamedSubscriber subscriber1;
     std::thread thread1( std::bind( &Subscriber::run, &subscriber1 ));
@@ -232,16 +245,19 @@ BOOST_AUTO_TEST_CASE(test_named_broker_port_used)
     FailingNamedSubscriber subscriber2;
     subscriber2.received = true;
     std::thread thread2( std::bind( &Subscriber::run, &subscriber2 ));
+    subscriber2.waitStarted();
 
-    subscriber1.setRun();
     subscriber1.received = true;
+    subscriber1.setRun();
     thread2.join();
     thread1.join();
+
+    _publisher = 0;
 }
 
-BOOST_AUTO_TEST_CASE(test_invalid_broker)
+BOOST_AUTO_TEST_CASE( invalid_broker )
 {
-    zeq::Subscriber subscriber( test::buildURI( "127.0.0.1", port ));
+    zeq::Subscriber subscriber( test::buildURI( "127.0.0.1" ));
     BOOST_CHECK_THROW( zeq::connection::Broker( std::string( "invalidIP" ),
                                                 subscriber ),
                        std::runtime_error );

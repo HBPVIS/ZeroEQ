@@ -5,8 +5,6 @@
 
 #include "port.h"
 
-#include <random>
-
 namespace zeq
 {
 namespace detail
@@ -18,14 +16,5 @@ uint16_t getPort( const std::string& name )
     return 1024 + (md5.low() % (65535-1024));
 }
 
-uint16_t getRandomPort()
-{
-    static std::random_device device;
-    static std::minstd_rand engine( device( ));
-    std::uniform_int_distribution< uint16_t > generator( 1024, 65535u );
-    return generator( engine );
-}
-
 }
 }
-

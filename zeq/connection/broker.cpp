@@ -6,11 +6,13 @@
 #include "broker.h"
 
 #include <zeq/detail/port.h>
+#include <zeq/detail/sender.h>
 #include <zeq/detail/socket.h>
 #include <zeq/receiver.h>
 #include <zeq/log.h>
 
 #include <map>
+#include <cassert>
 
 namespace zeq
 {
@@ -18,68 +20,72 @@ namespace connection
 {
 namespace detail
 {
-class Broker
+class Broker : public zeq::detail::Sender
 {
 public:
     Broker( const std::string& name, Receiver& receiver,
             const connection::Broker::PortSelection mode, void* context )
-        : _receiver( receiver )
-        , _socket( zmq_socket( context, ZMQ_REP ))
+        : Sender( URI( std::string( "tcp://*:" ) +
+                       std::to_string( uint32_t( zeq::detail::getPort( name)))),
+                  context, ZMQ_REP )
+        , _receiver( receiver )
     {
-        const std::string zmqAddr( std::string( "tcp://*:" ) +
-                       std::to_string( uint32_t(zeq::detail::getPort( name ))));
-
-        _listen( zmqAddr, mode ) ||
-            _listen( "tcp://*:0", connection::Broker::PORT_FIXED );
+        if( !_listen( mode ))
+        {
+            uri = URI( "tcp://*:0" );
+            _listen( connection::Broker::PORT_FIXED );
+        }
+        initURI();
     }
 
     Broker( Receiver& receiver, const std::string& address, void* context )
-        : _receiver( receiver )
-        , _socket( zmq_socket( context, ZMQ_REP ))
+        : Sender( URI( std::string( "tcp://" ) + address ), context, ZMQ_REP )
+        , _receiver( receiver )
     {
-        _listen( std::string( "tcp://" ) + address,
-                 connection::Broker::PORT_FIXED );
+        _listen( connection::Broker::PORT_FIXED );
+        initURI();
     }
 
-    ~Broker()
-    {
-        if( _socket )
-            zmq_close( _socket );
-    }
+    ~Broker() {}
 
     void addSockets( std::vector< zeq::detail::Socket >& entries )
     {
+        assert( socket );
+        if( !socket )
+            return;
+
         zeq::detail::Socket entry;
-        entry.socket = _socket;
+        entry.socket = socket;
         entry.events = ZMQ_POLLIN;
         entries.push_back( entry );
     }
 
-    void process( zeq::detail::Socket& socket )
+    void process( zeq::detail::Socket& socket_ )
     {
         zmq_msg_t msg;
         zmq_msg_init( &msg );
-        zmq_msg_recv( &msg, socket.socket, 0 );
+        zmq_msg_recv( &msg, socket_.socket, 0 );
         const std::string address( (const char*)zmq_msg_data( &msg ),
                                    zmq_msg_size( &msg ));
 
         _receiver.addConnection( std::string( "tcp://" ) + address );
-        zmq_msg_send( &msg, socket.socket, 0 );
+        zmq_msg_send( &msg, socket_.socket, 0 );
         zmq_msg_close( &msg );
     }
 
 private:
     zeq::Receiver& _receiver;
-    void* _socket;
 
-    bool _listen( const std::string& address,
-                  const connection::Broker::PortSelection mode )
+    bool _listen( const connection::Broker::PortSelection mode )
     {
-        if( zmq_bind( _socket, address.c_str( )) == -1 )
+        const std::string address = std::to_string( uri ) +
+                                    ( uri.getPort() ? "" : ":0" );
+        if( zmq_bind( socket, address.c_str( )) == -1 )
         {
             if( mode == connection::Broker::PORT_FIXED )
             {
-                zmq_close( _socket );
+                zmq_close( socket );
+                socket = 0;
                 ZEQTHROW( std::runtime_error(
                               "Cannot connect broker to " + address + ": " +
                               zmq_strerror( zmq_errno( ))));
@@ -119,6 +125,16 @@ void Broker::addSockets( std::vector< zeq::detail::Socket >& entries )
 void Broker::process( zeq::detail::Socket& socket )
 {
     _impl->process( socket );
+}
+
+uint16_t Broker::getPort() const
+{
+    return _impl->getPort();
+}
+
+std::string Broker::getAddress() const
+{
+    return _impl->getAddress();
 }
 
 }

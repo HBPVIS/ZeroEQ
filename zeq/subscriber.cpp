@@ -257,6 +257,10 @@ public:
         }
 #endif
 
+        assert( _subscribers.find( zmqURI ) != _subscribers.end( ));
+        if( _subscribers.find( zmqURI ) == _subscribers.end( ))
+            return false;
+
         Socket entry;
         entry.socket = _subscribers[zmqURI];
         entry.events = ZMQ_POLLIN;
