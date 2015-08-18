@@ -7,18 +7,27 @@
 
 #include "broker.h"
 
+#include <chrono>
+
 void testReceive( zeq::Publisher& publisher, zeq::Receiver& receiver,
                   test::EchoIn& var1, test::EchoIn& var2, const int line )
 {
     var1.gotData = false;
     var2.gotData = false;
 
-    for( size_t i = 0; i < 20; ++i )
+    const auto startTime = std::chrono::high_resolution_clock::now();
+    for( ;; )
     {
         BOOST_CHECK( publisher.publish( test::EchoOut( )));
-        receiver.receive( 100 );
+        while( receiver.receive( 100 )) {}
 
         if( var1.gotData && var2.gotData )
+            break;
+
+        const auto endTime = std::chrono::high_resolution_clock::now();
+        const auto elapsed =
+            std::chrono::nanoseconds( endTime - startTime ).count() / 1000000;
+        if( elapsed > 2000 /*ms*/ )
             break;
     }
     BOOST_CHECK_MESSAGE( var1.gotData,
