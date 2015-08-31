@@ -1,0 +1,16 @@
+// Copyright (c) 2015, Human Brain Project
+//                      Sergio E. Galindo <sergio.galindo@urjc.es>
+//                     
+
+namespace zeq.hbp;
+
+enum CellSetOpType : byte { SYNAPTIC_PROJECTION = 0 }
+
+table CellSetBinaryOp
+{
+  first:[uint];
+  second:[uint];
+  operation:CellSetOpType;
+}
+
+root_type CellSetBinaryOp;

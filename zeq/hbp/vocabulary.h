@@ -16,6 +16,8 @@
 #include <zeq/hbp/imageJPEG_zeq_generated.h>
 #include <zeq/hbp/lookupTable1D_zeq_generated.h>
 #include <zeq/hbp/selections_zeq_generated.h>
+#include <zeq/hbp/cellSetBinaryOp_zeq_generated.h>
+#include <zeq/hbp/cellSetBinaryOp_generated.h>
 
 namespace zeq
 {
@@ -67,6 +69,32 @@ struct ImageJPEG
 private:
     const uint32_t _sizeInBytes;
     const uint8_t* _data;
+};
+
+
+/**
+ * Stores two unsigned int vectors and an operation flag.
+ *
+ * This class stores a couple of unsigned int vectors
+ * and an operation flag indicating the operation type of the event.
+ *
+ */
+struct CellSetBinaryOp
+{
+public:
+
+  CellSetBinaryOp( ): operation((zeq::hbp::CellSetOpType) 0 ) { }
+  CellSetBinaryOp( const std::vector< unsigned int >& first_,
+                  const std::vector< unsigned int >& second_,
+                  zeq::hbp::CellSetOpType operation_ )
+  : first( first_ )
+  , second( second_ )
+  , operation( operation_ )
+  { }
+
+  std::vector< unsigned int > first;
+  std::vector< unsigned int > second;
+  zeq::hbp::CellSetOpType operation;
 };
 
 }
@@ -174,6 +202,22 @@ ZEQ_API Event serializeImageJPEG( const data::ImageJPEG& image );
  */
 ZEQ_API data::ImageJPEG deserializeImageJPEG( const Event& event );
 
+/**
+ * Serialize the given CellSetBinaryOp into an Event of type
+ * EVENT_CELLSETBINARYOP.
+ * @param cellSetBinaryOp the CellSetBinaryOp to be serialized.
+ * @return the serialized event.
+ */
+ZEQ_API
+Event serializeCellSetBinaryOp( const data::CellSetBinaryOp& cellSetBinaryOp );
+
+/**
+ * Deserialize the given EVENT_CELLSETBINARYOP event into a CellSetBinaryOp
+ * consisting of a couple of std::vector of unsigned int and the operation type.
+ * @param event the event product of serializeCellSetBinaryOp.
+ * @return the deserialized CellSetBinaryOp.
+ */
+ZEQ_API data::CellSetBinaryOp deserializeCellSetBinaryOp( const Event& event );
 
 }
 }

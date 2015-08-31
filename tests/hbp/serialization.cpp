@@ -95,3 +95,34 @@ BOOST_AUTO_TEST_CASE( imageJPEGEvent )
                                    deserializedImage.getDataPtr(),
                                    deserializedImage.getDataPtr() + size );
 }
+
+BOOST_AUTO_TEST_CASE( cellSetBinaryOp )
+{
+  zeq::hbp::data::CellSetBinaryOp cellSet ({ 0, 2, 4, 6 },
+                                           { 1, 3, 5, 7 },
+                                           zeq::hbp::CellSetOpType::
+                                           CellSetOpType_SYNAPTIC_PROJECTION);
+//  cellSet.first = ;
+//  cellSet.second = ;
+//  cellSet.operation =
+//      zeq::hbp::CellSetOpType::CellSetOpType_SYNAPTIC_PROJECTION;
+
+  const zeq::Event& cellSetBinaryOpEvent =
+      zeq::hbp::serializeCellSetBinaryOp( cellSet );
+
+  zeq::hbp::data::CellSetBinaryOp deserializedCellSetBinaryOp =
+      zeq::hbp::deserializeCellSetBinaryOp( cellSetBinaryOpEvent );
+
+  BOOST_CHECK_EQUAL( cellSet.operation,
+                     deserializedCellSetBinaryOp.operation);
+
+  BOOST_CHECK_EQUAL_COLLECTIONS( cellSet.first.begin( ),
+                                 cellSet.first.end( ),
+                                 deserializedCellSetBinaryOp.first.begin( ),
+                                 deserializedCellSetBinaryOp.first.end( ));
+
+  BOOST_CHECK_EQUAL_COLLECTIONS( cellSet.second.begin( ),
+                                 cellSet.second.end( ),
+                                 deserializedCellSetBinaryOp.second.begin( ),
+                                 deserializedCellSetBinaryOp.second.end( ));
+}
