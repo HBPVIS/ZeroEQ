@@ -4,6 +4,8 @@
 
 * [81](https://github.com/HBPVIS/zeq/pull/81):
   Implement (optional) ZeroBuf support
+* [94](https://github.com/HBPVIS/zeq/pull/94):
+  Added CellSetBinaryOp to HBP vocabulary
 
 # Release 0.3 (07-07-2015) {#Release03}
 
