@@ -23,8 +23,12 @@ namespace zeq
 {
 namespace hbp
 {
+
+typedef std::vector< uint32_t > uint32_ts;
+
 namespace data
 {
+
 /** Rendering frame information. */
 struct Frame
 {
@@ -84,16 +88,15 @@ struct CellSetBinaryOp
 public:
 
   CellSetBinaryOp( ): operation((zeq::hbp::CellSetOpType) 0 ) { }
-  CellSetBinaryOp( const std::vector< unsigned int >& first_,
-                  const std::vector< unsigned int >& second_,
-                  zeq::hbp::CellSetOpType operation_ )
+  CellSetBinaryOp( const uint32_ts& first_, const uint32_ts& second_,
+                   zeq::hbp::CellSetOpType operation_ )
   : first( first_ )
   , second( second_ )
   , operation( operation_ )
   { }
 
-  std::vector< unsigned int > first;
-  std::vector< unsigned int > second;
+  uint32_ts first;
+  uint32_ts second;
   zeq::hbp::CellSetOpType operation;
 };
 
@@ -144,7 +147,7 @@ ZEQ_API data::Frame deserializeFrame( const Event& event );
  * @return the serialized event.
  */
 ZEQ_API
-Event serializeSelectedIDs( const std::vector< unsigned int >& ids );
+Event serializeSelectedIDs( const uint32_ts& ids );
 
 /**
  * Deserialize the given neuron selection event into the vector of neuron GIDs.
@@ -160,7 +163,7 @@ std::vector< unsigned int > deserializeSelectedIDs( const Event& event );
  * @return the serialized event.
  */
 ZEQ_API
-Event serializeToggleIDRequest( const std::vector< unsigned int >& ids );
+Event serializeToggleIDRequest( const uint32_ts& ids );
 
 /**
  * Deserialize an toggle selection request event into the vector of neuron GIDs.

@@ -11,6 +11,8 @@
 
 #include <boost/test/unit_test.hpp>
 
+typedef std::vector< uint32_t > uint32_ts;
+
 BOOST_AUTO_TEST_CASE( cameraEvent )
 {
     const std::vector< float > camera( 16, 42 );
@@ -98,14 +100,9 @@ BOOST_AUTO_TEST_CASE( imageJPEGEvent )
 
 BOOST_AUTO_TEST_CASE( cellSetBinaryOp )
 {
-  zeq::hbp::data::CellSetBinaryOp cellSet ({ 0, 2, 4, 6 },
-                                           { 1, 3, 5, 7 },
-                                           zeq::hbp::CellSetOpType::
-                                           CellSetOpType_SYNAPTIC_PROJECTION);
-//  cellSet.first = ;
-//  cellSet.second = ;
-//  cellSet.operation =
-//      zeq::hbp::CellSetOpType::CellSetOpType_SYNAPTIC_PROJECTION;
+  zeq::hbp::data::CellSetBinaryOp cellSet (
+      { 0, 2, 4, 6 }, { 1, 3, 5, 7 },
+      zeq::hbp::CellSetOpType::CellSetOpType_SYNAPTIC_PROJECTION);
 
   const zeq::Event& cellSetBinaryOpEvent =
       zeq::hbp::serializeCellSetBinaryOp( cellSet );

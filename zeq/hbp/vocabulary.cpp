@@ -115,7 +115,7 @@ data::ImageJPEG deserializeImageJPEG( const ::zeq::Event& event )
     return data::ImageJPEG( data->data()->size(), data->data()->Data( ));
 }
 
-Event serializeSelectedIDs( const uints& ids )
+Event serializeSelectedIDs( const uint32_ts& ids )
 {
     zeq::Event event( EVENT_SELECTEDIDS );
     BUILD_VECTOR_ONLY_BUFFER( event, SelectedIDs, ids );
@@ -127,7 +127,7 @@ uints deserializeSelectedIDs( const Event& event )
     return deserializeVector( event, &SelectedIDs::ids );
 }
 
-zeq::Event serializeToggleIDRequest( const uints& ids )
+zeq::Event serializeToggleIDRequest( const uint32_ts& ids )
 {
     zeq::Event event( EVENT_TOGGLEIDREQUEST );
     BUILD_VECTOR_ONLY_BUFFER( event, ToggleIDRequest, ids );
@@ -179,11 +179,10 @@ deserializeCellSetBinaryOp( const Event& event )
   data::CellSetBinaryOp result;
 
   auto data = GetCellSetBinaryOp( event.getData( ));
-  result.first = deserializeVector( data->first( ));
-  result.second = deserializeVector( data->second( ));
-  result.operation = data->operation( );
 
-  return result;
+  return data::CellSetBinaryOp( deserializeVector( data->first( )),
+                                deserializeVector( data->second( )),
+                                data->operation( ));
 }
 
 }
