@@ -11,13 +11,14 @@
 #include <zeq/types.h>
 #include <zeq/api.h>
 
+#include <zeq/hbp/enums.h>
+
 #include <zeq/hbp/camera_zeq_generated.h>
+#include <zeq/hbp/cellSetBinaryOp_zeq_generated.h>
 #include <zeq/hbp/frame_zeq_generated.h>
 #include <zeq/hbp/imageJPEG_zeq_generated.h>
 #include <zeq/hbp/lookupTable1D_zeq_generated.h>
 #include <zeq/hbp/selections_zeq_generated.h>
-#include <zeq/hbp/cellSetBinaryOp_zeq_generated.h>
-#include <zeq/hbp/cellSetBinaryOp_generated.h>
 
 namespace zeq
 {
@@ -87,17 +88,17 @@ struct CellSetBinaryOp
 {
 public:
 
-  CellSetBinaryOp( ): operation((zeq::hbp::CellSetOpType) 0 ) { }
-  CellSetBinaryOp( const uint32_ts& first_, const uint32_ts& second_,
-                   zeq::hbp::CellSetOpType operation_ )
-  : first( first_ )
-  , second( second_ )
-  , operation( operation_ )
-  { }
+    CellSetBinaryOp() {}
+    CellSetBinaryOp( const uint32_ts& first_, const uint32_ts& second_,
+                     CellSetBinaryOpType operation_ )
+        : first( first_ )
+        , second( second_ )
+        , operation( operation_ )
+    {}
 
-  uint32_ts first;
-  uint32_ts second;
-  zeq::hbp::CellSetOpType operation;
+    uint32_ts first;
+    uint32_ts second;
+    CellSetBinaryOpType operation;
 };
 
 }

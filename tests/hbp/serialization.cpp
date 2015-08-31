@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE( cellSetBinaryOp )
 {
   zeq::hbp::data::CellSetBinaryOp cellSet (
       { 0, 2, 4, 6 }, { 1, 3, 5, 7 },
-      zeq::hbp::CellSetOpType::CellSetOpType_SYNAPTIC_PROJECTION);
+      zeq::hbp::CELLSETOP_SYNAPTIC_PROJECTIONS);
 
   const zeq::Event& cellSetBinaryOpEvent =
       zeq::hbp::serializeCellSetBinaryOp( cellSet );
