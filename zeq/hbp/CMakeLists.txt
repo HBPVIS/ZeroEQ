@@ -4,14 +4,14 @@
 
 flatbuffers_generate_c_headers(HBP_FBS
   detail/camera.fbs
+  detail/cellSetBinaryOp.fbs
   detail/frame.fbs
   detail/imageJPEG.fbs
   detail/lookupTable1D.fbs
   detail/selections.fbs
-  detail/cellSetBinaryOp.fbs
 )
 
-set(ZEQHBP_PUBLIC_HEADERS vocabulary.h ${HBP_FBS_ZEQ_OUTPUTS})
+set(ZEQHBP_PUBLIC_HEADERS enums.h vocabulary.h ${HBP_FBS_ZEQ_OUTPUTS})
 set(ZEQHBP_SOURCES vocabulary.cpp)
 set(ZEQHBP_LINK_LIBRARIES PUBLIC zeq)
 if(MSVC)

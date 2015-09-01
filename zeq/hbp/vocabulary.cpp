@@ -7,6 +7,7 @@
 #include "vocabulary.h"
 
 #include <zeq/hbp/camera_generated.h>
+#include <zeq/hbp/cellSetBinaryOp_generated.h>
 #include <zeq/hbp/frame_generated.h>
 #include <zeq/hbp/imageJPEG_generated.h>
 #include <zeq/hbp/selections_generated.h>
@@ -182,7 +183,7 @@ deserializeCellSetBinaryOp( const Event& event )
 
   return data::CellSetBinaryOp( deserializeVector( data->first( )),
                                 deserializeVector( data->second( )),
-                                data->operation( ));
+                                CellSetBinaryOpType(data->operation( )));
 }
 
 }
