@@ -14,6 +14,7 @@
 
 #include <flatbuffers/idl.h>
 #include <unordered_map>
+#include <stdexcept>
 
 namespace zeq
 {

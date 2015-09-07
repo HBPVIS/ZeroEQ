@@ -8,6 +8,7 @@
 
 #include <servus/uri.h>
 #include <zmq.h>
+#include <stdexcept>
 
 // for NI_MAXHOST
 #ifdef _WIN32

@@ -20,6 +20,7 @@
 #include <cassert>
 #include <map>
 #include <string.h>
+#include <stdexcept>
 
 namespace zeq
 {
