@@ -44,7 +44,6 @@ zeq::URI buildURI( const std::string& hostname )
 
 zeq::URI buildURI( const std::string& hostname, const zeq::Publisher& to )
 {
-    assert( &to );
     assert( to.getPort( ));
     zeq::URI uri = buildURI( hostname );
     uri.setPort( to.getPort( ));
