@@ -174,6 +174,13 @@ Event serializeCellSetBinaryOp( const data::CellSetBinaryOp& cellSetBinaryOp )
   return event;
 }
 
+Event serializeCellSetBinaryOp( const uint32_ts& first, const uint32_ts& second,
+                                CellSetBinaryOpType type )
+{
+    return serializeCellSetBinaryOp(
+        data::CellSetBinaryOp( first, second, type ));
+}
+
 data::CellSetBinaryOp
 deserializeCellSetBinaryOp( const Event& event )
 {

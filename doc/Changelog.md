@@ -6,6 +6,8 @@
   Implement (optional) ZeroBuf support
 * [94](https://github.com/HBPVIS/zeq/pull/94):
   Added CellSetBinaryOp to HBP vocabulary
+* [97](https://github.com/HBPVIS/zeq/pull/97):
+  Added a small command line tool to send events parsed from a script file.
 
 # Release 0.3 (07-07-2015) {#Release03}
 

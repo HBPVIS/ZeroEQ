@@ -216,6 +216,13 @@ ZEQ_API
 Event serializeCellSetBinaryOp( const data::CellSetBinaryOp& cellSetBinaryOp );
 
 /**
+ * Convenience overload of the function above
+ */
+ZEQ_API
+Event serializeCellSetBinaryOp( const uint32_ts& first, const uint32_ts& second,
+                                CellSetBinaryOpType type );
+
+/**
  * Deserialize the given EVENT_CELLSETBINARYOP event into a CellSetBinaryOp
  * consisting of a couple of std::vector of unsigned int and the operation type.
  * @param event the event product of serializeCellSetBinaryOp.
