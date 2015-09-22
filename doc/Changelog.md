@@ -2,6 +2,8 @@
 
 # Release 0.4 (git master) {#Release04}
 
+* [98](https://github.com/HBPVIS/zeq/pull/98):
+  Disable zeroconf subscriptions to publishers in the same process
 * [81](https://github.com/HBPVIS/zeq/pull/81):
   Implement (optional) ZeroBuf support
 * [94](https://github.com/HBPVIS/zeq/pull/94):

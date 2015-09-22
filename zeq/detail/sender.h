@@ -6,6 +6,8 @@
 #ifndef ZEQ_DETAIL_SENDER_H
 #define ZEQ_DETAIL_SENDER_H
 
+#include <zeq/log.h> // ZEQINFO
+#include <zeq/types.h>
 #include <servus/uri.h>
 #include <zmq.h>
 #include <stdexcept>
@@ -79,6 +81,8 @@ public:
             ZEQINFO << "Bound to " << uri << std::endl;
         }
     }
+
+    static uint128_t& getUUID();
 
     servus::URI uri;
     void* socket;

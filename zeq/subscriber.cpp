@@ -9,6 +9,7 @@
 #include "event.h"
 #include "log.h"
 #include "detail/broker.h"
+#include "detail/sender.h"
 #include "detail/socket.h"
 #include "detail/byteswap.h"
 
@@ -31,6 +32,7 @@ class Subscriber
 public:
     Subscriber( const servus::URI& uri, void* context )
         : _service( std::string( "_" ) + uri.getScheme() + "._tcp" )
+        , _filterSelf( uri.findQuery( "subscribeSelf" ) == uri.queryEnd( ))
     {
         if( uri.getScheme().empty( ))
             ZEQTHROW( std::runtime_error(
@@ -49,7 +51,7 @@ public:
         else
         {
             const std::string& zmqURI = buildZmqURI( uri );
-            if( !addConnection( context, zmqURI ))
+            if( !addConnection( context, zmqURI, uint128_t( )))
             {
                 ZEQTHROW( std::runtime_error(
                               "Cannot connect subscriber to " + zmqURI + ": " +
@@ -206,7 +208,6 @@ public:
         if( _service.isBrowsing( ))
             _service.browse( 0 );
         const servus::Strings& instances = _service.getInstances();
-
         for( const std::string& instance : instances )
         {
             const std::string& zmqURI = _getZmqURI( instance );
@@ -214,7 +215,9 @@ public:
             // New subscription
             if( _subscribers.count( zmqURI ) == 0 )
             {
-                if( !addConnection( context, zmqURI ))
+                const uint128_t identifier( _service.get( instance,
+                                                          "Instance" ));
+                if( !addConnection( context, zmqURI, identifier ))
                 {
                     ZEQINFO << "Cannot connect subscriber to " << zmqURI << ": "
                             << zmq_strerror( zmq_errno( )) << std::endl;
@@ -223,8 +226,12 @@ public:
         }
     }
 
-    bool addConnection( void* context, const std::string& zmqURI )
+    bool addConnection( void* context, const std::string& zmqURI,
+                        const uint128_t& instance )
     {
+        if( _filterSelf && instance == detail::Sender::getUUID( ))
+            return true;
+
         _subscribers[zmqURI] = zmq_socket( context, ZMQ_SUB );
 
         if( zmq_connect( _subscribers[zmqURI], zmqURI.c_str( )) == -1 )
@@ -282,6 +289,8 @@ private:
 #endif
     servus::Servus _service;
     std::vector< Socket > _entries;
+
+    const bool _filterSelf;
 
     std::string _getZmqURI( const std::string& instance )
     {
@@ -390,7 +399,7 @@ void Subscriber::update()
 
 void Subscriber::addConnection( const std::string& uri )
 {
-    _impl->addConnection( getZMQContext(), uri );
+    _impl->addConnection( getZMQContext(), uri, uint128_t( ));
 }
 
 }

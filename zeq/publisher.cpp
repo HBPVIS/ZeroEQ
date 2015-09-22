@@ -142,6 +142,8 @@ private:
             return;
         }
 
+        _service.set( "Instance", detail::Sender::getUUID().getString( ));
+
         const servus::Servus::Result& result =
             _service.announce( uri.getPort(), getAddress( ));
 
