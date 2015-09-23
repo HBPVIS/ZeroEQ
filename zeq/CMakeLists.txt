@@ -38,6 +38,7 @@ set(ZEQ_SOURCES
   connection/broker.cpp
   connection/service.cpp
   detail/port.cpp
+  detail/sender.cpp
   detail/vocabulary.cpp
   event.cpp
   eventDescriptor.cpp

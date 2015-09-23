@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <chrono>
 #include <deque>
+#include <stdexcept>
 
 namespace zeq
 {

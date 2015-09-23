@@ -94,10 +94,16 @@ BOOST_AUTO_TEST_CASE(publish_receive_zeroconf)
     if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
         return;
 
-    zeq::Publisher publisher( test::buildPublisherURI( ));
-    zeq::Subscriber subscriber( test::buildPublisherURI( ));
+    zeq::URI uri = test::buildPublisherURI();
+    zeq::Publisher publisher( uri );
+    zeq::Subscriber noSubscriber( uri );
+
+    uri.addQuery( "subscribeSelf", "true" );
+    zeq::Subscriber subscriber( uri );
 
     BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
+                       std::bind( &test::onEchoEvent, std::placeholders::_1 )));
+    BOOST_CHECK( noSubscriber.registerHandler( EVENT_ECHO,
                        std::bind( &test::onEchoEvent, std::placeholders::_1 )));
 
     bool received = false;
@@ -106,7 +112,8 @@ BOOST_AUTO_TEST_CASE(publish_receive_zeroconf)
         BOOST_CHECK( publisher.publish(
                          zeq::vocabulary::serializeEcho( test::echoMessage )));
 
-        if( subscriber.receive( 100 ))
+        BOOST_CHECK( !noSubscriber.receive( 100 ));
+        if( subscriber.receive( 0 ))
         {
             received = true;
             break;
@@ -205,7 +212,9 @@ BOOST_AUTO_TEST_CASE(publish_receive_late_zeroconf)
     if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
         return;
 
-    zeq::Subscriber subscriber( test::buildPublisherURI( ));
+    zeq::URI uri = test::buildPublisherURI();
+    uri.addQuery( "subscribeSelf", "true" );
+    zeq::Subscriber subscriber( uri );
     zeq::Publisher publisher( test::buildPublisherURI( ));
 
     BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
@@ -229,8 +238,11 @@ BOOST_AUTO_TEST_CASE(publish_receive_empty_event_zeroconf)
     if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
         return;
 
-    zeq::Publisher publisher( test::buildPublisherURI( ));
-    zeq::Subscriber subscriber( test::buildPublisherURI( ));
+    zeq::URI uri = test::buildPublisherURI();
+    zeq::Publisher publisher( uri );
+
+    uri.addQuery( "subscribeSelf", "true" );
+    zeq::Subscriber subscriber( uri );
 
     BOOST_CHECK( subscriber.registerHandler( EVENT_EXIT,
                        std::bind( &test::onExitEvent, std::placeholders::_1 )));
@@ -288,7 +300,10 @@ BOOST_AUTO_TEST_CASE(publish_blocking_receive_zeroconf)
     if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
         return;
 
-    zeq::Subscriber subscriber( test::buildPublisherURI( ));
+    zeq::URI uri = test::buildPublisherURI();
+    uri.addQuery( "subscribeSelf", "true" );
+    zeq::Subscriber subscriber( uri );
+
     BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
                        std::bind( &test::onEchoEvent, std::placeholders::_1 )));
 
