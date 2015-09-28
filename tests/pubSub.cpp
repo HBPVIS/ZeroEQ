@@ -179,7 +179,7 @@ BOOST_AUTO_TEST_CASE(publish_receive_filters)
     // benchmark with no data to be transmitted
     const zeq::Event& event = serializeEcho( message );
     auto startTime = std::chrono::high_resolution_clock::now();
-    for( size_t i = 0; i < 1000; ++i )
+    for( size_t i = 0; i < 20000; ++i )
     {
         BOOST_CHECK( publisher->publish( event ));
         while( subscriber.receive( 0 )) /* NOP to drain */;
@@ -192,7 +192,7 @@ BOOST_AUTO_TEST_CASE(publish_receive_filters)
                        std::bind( &onLargeEcho, std::placeholders::_1 )));
 
     startTime = std::chrono::high_resolution_clock::now();
-    for( size_t i = 0; i < 1000; ++i )
+    for( size_t i = 0; i < 20000; ++i )
     {
         BOOST_CHECK( publisher->publish( event ));
         while( subscriber.receive( 0 )) /* NOP to drain */;
