@@ -10,19 +10,15 @@
 
 namespace
 {
-std::string buildZmqURI( const std::string& host, const uint16_t port )
+std::string buildZmqURI( std::string host, const uint16_t port )
 {
-    std::ostringstream zmqURI;
-    zmqURI << "tcp://";
     if( host.empty( ))
-        zmqURI << "*";
-    else
-        zmqURI << host;
-    if( port == 0 )
-        zmqURI << ":*";
-    else
-        zmqURI << ":" << port;
-    return zmqURI.str();
+        host = "*";
+    if( host != "*" && port == 0 ) // zmq does not support host:0
+        throw std::runtime_error(
+            "OS-chosen port not supported with hostname " + host );
+
+    return std::string( "tcp://" ) + host + ":" + std::to_string( int( port ));
 }
 
 std::string buildZmqURI( const servus::URI& uri )
