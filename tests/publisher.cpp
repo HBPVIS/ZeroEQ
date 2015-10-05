@@ -42,6 +42,19 @@ BOOST_AUTO_TEST_CASE(publish)
                      zeq::vocabulary::serializeEcho( test::echoMessage )));
 }
 
+BOOST_AUTO_TEST_CASE(publish_update_uri)
+{
+    zeq::URI uri = test::buildPublisherURI();
+    zeq::Publisher publisher( uri );
+    BOOST_CHECK_MESSAGE( uri.getPort() != 0, uri );
+    BOOST_CHECK_MESSAGE( !uri.getHost().empty(), uri );
+#ifdef ZEQ_USE_ZEROBUF
+    BOOST_CHECK( publisher.publish( test::EchoOut( )));
+#endif
+    BOOST_CHECK( publisher.publish(
+                     zeq::vocabulary::serializeEcho( test::echoMessage )));
+}
+
 BOOST_AUTO_TEST_CASE(publish_empty_event)
 {
     zeq::Publisher publisher( test::buildPublisherURI( ));

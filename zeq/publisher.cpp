@@ -163,6 +163,12 @@ Publisher::Publisher( const servus::URI& uri, const uint32_t announceMode )
 {
 }
 
+Publisher::Publisher( servus::URI& uri, uint32_t announceMode )
+    : _impl( new detail::Publisher( uri, announceMode ))
+{
+    uri = _impl->uri;
+}
+
 Publisher::~Publisher()
 {
     delete _impl;
