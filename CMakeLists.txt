@@ -17,6 +17,8 @@ include(Common)
 
 set(COMMON_PROJECT_DOMAIN eu.humanbrainproject)
 set(ZEQ_DESCRIPTION "ZeroEQ - Zero Event Queue")
+set(ZEQ_MAINTAINER "Human Brain Project <HBPVis@googlegroups.com>")
+set(ZEQ_LICENSE LGPL)
 set(ZEQ_DEPENDENT_LIBRARIES Servus)
 
 common_package(Boost COMPONENTS unit_test_framework)
