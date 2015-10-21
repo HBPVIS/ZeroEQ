@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <fstream>
 #include <string.h>
+#include <cctype>
 
 const char* scriptFile = 0;
 std::string uri = "hbp://";
