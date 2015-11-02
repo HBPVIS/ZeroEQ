@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(test_two_subscribers)
                                  subscriber1 );
 
     BOOST_CHECK( subscriber1.registerHandler( zeq::vocabulary::EVENT_ECHO,
-                               std::bind( &onEvent1, std::placeholders::_1 )));
+                                std::bind( &onEvent1, std::placeholders::_1 )));
     BOOST_CHECK( subscriber2.registerHandler( zeq::vocabulary::EVENT_ECHO,
                                 std::bind( &onEvent2, std::placeholders::_1 )));
 

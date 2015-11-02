@@ -33,10 +33,10 @@ ZeroEQ requires the following external, pre-installed dependencies:
 * ZeroMQ 4.0 or later
 * Boost (tested with 1.54) for unit tests
 
-~~~
-git clone https://github.com/HBPVIS/zeq.git
-mkdir zeq/build
-cd zeq/build
-cmake ..
-make
-~~~
+Building from source is as simple as:
+
+    git clone https://github.com/HBPVIS/zeq.git
+    mkdir zeq/build
+    cd zeq/build
+    cmake ..
+    make
