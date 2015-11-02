@@ -16,31 +16,31 @@ namespace zeq
 {
 namespace connection
 {
-bool Service::subscribe( const std::string& brokerAddress,
+bool Service::subscribe( const std::string& address,
                          const Publisher& publisher )
 {
     void* context = zmq_ctx_new();
     void* socket = zmq_socket( context, ZMQ_REQ );
-    const std::string zmqAddress = std::string("tcp://" ) + brokerAddress;
+    const std::string zmqAddress = std::string("tcp://" ) + address;
     if( zmq_connect( socket, zmqAddress.c_str( )) == -1 )
     {
-        ZEQINFO << "Can't reach connection broker at " << brokerAddress
+        ZEQINFO << "Can't reach connection broker at " << address
                 << std::endl;
         zmq_close( socket );
         zmq_ctx_destroy( context );
         return false;
     }
 
-    const std::string& address = publisher.getAddress();
+    const std::string& pubAddress = publisher.getAddress();
     zmq_msg_t request;
-    zmq_msg_init_size( &request, address.size( ));
-    memcpy( zmq_msg_data( &request ), address.c_str(), address.size( ));
+    zmq_msg_init_size( &request, pubAddress.size( ));
+    memcpy( zmq_msg_data( &request ), pubAddress.c_str(), pubAddress.size( ));
 
     if( zmq_msg_send( &request, socket, 0 ) == -1 )
     {
         zmq_msg_close( &request );
-        ZEQINFO << "Can't send connection request " << address << " to "
-                << brokerAddress << ": " << zmq_strerror( zmq_errno( ))
+        ZEQINFO << "Can't send connection request " << pubAddress << " to "
+                << address << ": " << zmq_strerror( zmq_errno( ))
                 << std::endl;
         return false;
     }
@@ -51,7 +51,7 @@ bool Service::subscribe( const std::string& brokerAddress,
     if( zmq_msg_recv( &reply, socket, 0 )  == -1 )
     {
         zmq_msg_close( &reply );
-        ZEQINFO << "Can't receive connection reply from " << brokerAddress
+        ZEQINFO << "Can't receive connection reply from " << address
                 << std::endl;
         return false;
     }
@@ -63,15 +63,15 @@ bool Service::subscribe( const std::string& brokerAddress,
     zmq_close( socket );
     zmq_ctx_destroy( context );
 
-    return address == std::string( result );
+    return pubAddress == std::string( result );
 }
 
-bool Service::subscribe( const std::string& brokerAddress,
+bool Service::subscribe( const std::string& hostname,
                          const std::string& name,
                          const Publisher& publisher )
 {
-    const std::string address( brokerAddress + ":" +
-                            std::to_string( uint32_t(detail::getPort( name ))));
+    const std::string address( hostname + ":" +
+                           std::to_string( uint32_t( detail::getPort( name ))));
     return subscribe( address, publisher );
 }
 
