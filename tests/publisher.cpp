@@ -46,6 +46,7 @@ BOOST_AUTO_TEST_CASE(publish_update_uri)
 {
     zeq::URI uri = test::buildPublisherURI();
     zeq::Publisher publisher( uri );
+    uri = publisher.getURI();
     BOOST_CHECK_MESSAGE( uri.getPort() != 0, uri );
     BOOST_CHECK_MESSAGE( !uri.getHost().empty(), uri );
 #ifdef ZEQ_USE_ZEROBUF
