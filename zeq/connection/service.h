@@ -29,10 +29,9 @@ public:
      * Upon success, the Broker will add the publisher's address to its managed
      * Subscriber.
      *
-     * @param address the broker address, without the protocol.
+     * @param address the broker address (hostname:port), without the protocol.
      * @param publisher the publisher to subscribe to.
-     *
-     * @return
+     * @return true if the subscription was successful, false on error.
      */
     ZEQ_API static bool subscribe( const std::string& address,
                                    const Publisher& publisher );
@@ -44,13 +43,12 @@ public:
      * Subscriber. The broker port is derived using the same hashing algorithm
      * as in the corresponding Broker constructor.
      *
-     * @param brokerAddress the broker address, without the protocol and port.
+     * @param hostname the broker address, without the protocol and port.
      * @param name the application namespace.
      * @param publisher the publisher to subscribe to.
-     *
-     * @return
+     * @return true if the subscription was successful, false on error.
      */
-    ZEQ_API static bool subscribe( const std::string& brokerAddress,
+    ZEQ_API static bool subscribe( const std::string& hostname,
                                    const std::string& name,
                                    const Publisher& publisher );
 
