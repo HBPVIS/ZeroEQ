@@ -31,18 +31,6 @@ public:
     ZEQ_API Publisher( const servus::URI& uri,
                        uint32_t announceMode = ANNOUNCE_ALL );
 
-    /**
-     * Create a publisher on the given URI.
-     *
-     * This ctor takes a non-const URI and will update the hostname and port if
-     * it is chosen automatically, e.g., the host is empty or the port is 0.
-     *
-     * @param uri publishing URI in the format scheme://[*|host|IP|IF][:port]
-     * @param announceMode bitwise combination of AnnounceMode network protocols
-     */
-    ZEQ_API Publisher( servus::URI& uri,
-                       uint32_t announceMode = ANNOUNCE_ALL );
-
     ZEQ_API ~Publisher();
 
     /**

@@ -42,7 +42,7 @@ public:
      *
      * A receive on any Subscriber of a shared group will work on all
      * subscribers and call the registered handlers. Note to implementer: wrap
-     * zmg_context in a shared_ptr object used by all instances.
+     * zmq_context in a shared_ptr object used by all instances.
      *
      * @param uri publishing URI in the format scheme://[*|host|IP|IF][:port]
      * @param shared another receiver to share data reception with.
