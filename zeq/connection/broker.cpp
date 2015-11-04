@@ -127,11 +127,6 @@ void Broker::process( zeq::detail::Socket& socket )
     _impl->process( socket );
 }
 
-uint16_t Broker::getPort() const
-{
-    return _impl->getPort();
-}
-
 std::string Broker::getAddress() const
 {
     return _impl->getAddress();

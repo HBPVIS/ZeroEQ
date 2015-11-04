@@ -31,6 +31,8 @@ BOOST_AUTO_TEST_CASE( frameEvent )
         const zeq::hbp::data::Frame& out = zeq::hbp::deserializeFrame( event );
 
         BOOST_CHECK_EQUAL( frame, out );
+
+        std::cout << frame << std::endl; // increase coverage
     }
     {
         const zeq::hbp::data::Frame frame( 3, 2, 1, -1 );
@@ -102,10 +104,11 @@ BOOST_AUTO_TEST_CASE( cellSetBinaryOp )
 {
   zeq::hbp::data::CellSetBinaryOp cellSet (
       { 0, 2, 4, 6 }, { 1, 3, 5, 7 },
-      zeq::hbp::CELLSETOP_SYNAPTIC_PROJECTIONS);
+      zeq::hbp::CELLSETOP_SYNAPTIC_PROJECTIONS );
 
   const zeq::Event& cellSetBinaryOpEvent =
-      zeq::hbp::serializeCellSetBinaryOp( cellSet );
+      zeq::hbp::serializeCellSetBinaryOp( cellSet.first, cellSet.second,
+                                          cellSet.operation );
 
   zeq::hbp::data::CellSetBinaryOp deserializedCellSetBinaryOp =
       zeq::hbp::deserializeCellSetBinaryOp( cellSetBinaryOpEvent );

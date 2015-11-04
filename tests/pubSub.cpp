@@ -7,34 +7,21 @@
 #define BOOST_TEST_MODULE zeq_pub_sub
 
 #include "broker.h"
+#include <zeq/detail/sender.h>
 
 #include <servus/servus.h>
+#include <servus/uri.h>
 
 #include <thread>
 #include <chrono>
 
 using namespace zeq::vocabulary;
 
-BOOST_AUTO_TEST_CASE(subscribe_to_same_schema)
-{
-    zeq::Publisher publisher( test::buildPublisherURI( ));
-    BOOST_CHECK_NO_THROW( zeq::Subscriber subscriber(
-                              test::buildURI( "localhost" )));
-}
-
-BOOST_AUTO_TEST_CASE(subscribe_to_different_schema)
-{
-    zeq::Publisher publisher( test::buildPublisherURI( ));
-    zeq::URI uri = test::buildURI( "localhost" );
-    uri.setScheme( uri.getScheme() + "bar" );
-    BOOST_CHECK_NO_THROW( zeq::Subscriber subscriber( uri ));
-}
 
 BOOST_AUTO_TEST_CASE(publish_receive)
 {
-    zeq::Publisher publisher( test::buildURI( "*" ));
-    const servus::URI uri = test::buildURI( "localhost", publisher );
-    zeq::Subscriber subscriber( uri );
+    zeq::Publisher publisher( zeq::NULL_SESSION );
+    zeq::Subscriber subscriber( zeq::URI( publisher.getURI( )));
     BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
                        std::bind( &test::onEchoEvent, std::placeholders::_1 )));
 
@@ -55,29 +42,28 @@ BOOST_AUTO_TEST_CASE(publish_receive)
 
 BOOST_AUTO_TEST_CASE(no_receive)
 {
-    zeq::Subscriber subscriber( test::buildURI( "127.0.0.1" ));
+    zeq::Subscriber subscriber( zeq::URI( "1.2.3.4:1234" ));
     BOOST_CHECK( !subscriber.receive( 100 ));
 }
 
-BOOST_AUTO_TEST_CASE( subscribe_to_same_schema_zeroconf )
-{
-    if( !servus::Servus::isAvailable( ))
-        return;
-
-    zeq::Publisher publisher( test::buildPublisherURI( ));
-    BOOST_CHECK_NO_THROW(
-        zeq::Subscriber subscriber( test::buildPublisherURI( )));
-}
-
-BOOST_AUTO_TEST_CASE(subscribe_to_different_schema_zeroconf)
+BOOST_AUTO_TEST_CASE( subscribe_to_same_session_zeroconf )
 {
     if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
         return;
 
-    zeq::URI uri = test::buildPublisherURI();
-    zeq::Publisher publisher( uri );
-    uri.setScheme( uri.getScheme() + " bar" );
-    BOOST_CHECK_NO_THROW( zeq::Subscriber subscriber( uri ));
+    zeq::Publisher publisher( test::buildUniqueSession( ));
+    BOOST_CHECK_NO_THROW(
+        zeq::Subscriber subscriber( publisher.getSession( )));
+}
+
+BOOST_AUTO_TEST_CASE(subscribe_to_different_session_zeroconf)
+{
+    if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
+        return;
+
+    zeq::Publisher publisher( test::buildUniqueSession( ));
+    BOOST_CHECK_NO_THROW(
+                zeq::Subscriber subscriber( publisher.getSession() + "bar" ));
 }
 
 BOOST_AUTO_TEST_CASE(no_receive_zeroconf)
@@ -85,7 +71,7 @@ BOOST_AUTO_TEST_CASE(no_receive_zeroconf)
     if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
         return;
 
-    zeq::Subscriber subscriber( test::buildPublisherURI( ));
+    zeq::Subscriber subscriber( test::buildUniqueSession( ));
     BOOST_CHECK( !subscriber.receive( 100 ));
 }
 
@@ -94,12 +80,10 @@ BOOST_AUTO_TEST_CASE(publish_receive_zeroconf)
     if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
         return;
 
-    zeq::URI uri = test::buildPublisherURI();
-    zeq::Publisher publisher( uri );
-    zeq::Subscriber noSubscriber( uri );
-
-    uri.addQuery( "subscribeSelf", "true" );
-    zeq::Subscriber subscriber( uri );
+    zeq::Publisher publisher( test::buildUniqueSession( ));
+    zeq::Subscriber noSubscriber( publisher.getSession( ));
+    zeq::detail::Sender::getUUID() = servus::make_UUID(); // different machine
+    zeq::Subscriber subscriber( publisher.getSession( ));
 
     BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
                        std::bind( &test::onEchoEvent, std::placeholders::_1 )));
@@ -127,8 +111,8 @@ BOOST_AUTO_TEST_CASE(publish_receive_zeroconf_disabled)
     if( getenv("TRAVIS"))
         return;
 
-    zeq::Publisher publisher( test::buildPublisherURI(), zeq::ANNOUNCE_NONE );
-    zeq::Subscriber subscriber( test::buildPublisherURI( ));
+    zeq::Publisher publisher( zeq::NULL_SESSION );
+    zeq::Subscriber subscriber( test::buildUniqueSession( ));
 
     BOOST_CHECK( subscriber.registerHandler(
                      EVENT_ECHO, std::bind( &test::onEchoEvent,
@@ -159,9 +143,8 @@ BOOST_AUTO_TEST_CASE(publish_receive_filters)
     // The publisher needs to be destroyed before the subscriber otherwise
     // zmq_ctx_destroy() can hang forever. For more details see
     // zmq_ctx_destroy() documentation.
-    zeq::Publisher* publisher = new zeq::Publisher( test::buildPublisherURI(),
-                                                    zeq::ANNOUNCE_NONE );
-    zeq::Subscriber subscriber( publisher->getURI( ));
+    zeq::Publisher* publisher = new zeq::Publisher( zeq::NULL_SESSION );
+    zeq::Subscriber subscriber( zeq::URI( publisher->getURI( )));
     const std::string message( 60000, 'a' );
 
     // Make sure we're connected
@@ -212,10 +195,9 @@ BOOST_AUTO_TEST_CASE(publish_receive_late_zeroconf)
     if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
         return;
 
-    zeq::URI uri = test::buildPublisherURI();
-    uri.addQuery( "subscribeSelf", "true" );
-    zeq::Subscriber subscriber( uri );
-    zeq::Publisher publisher( test::buildPublisherURI( ));
+    zeq::Subscriber subscriber( test::buildUniqueSession( ));
+    zeq::detail::Sender::getUUID() = servus::make_UUID(); // different machine
+    zeq::Publisher publisher( subscriber.getSession( ));
 
     BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
                        std::bind( &test::onEchoEvent, std::placeholders::_1 )));
@@ -238,11 +220,9 @@ BOOST_AUTO_TEST_CASE(publish_receive_empty_event_zeroconf)
     if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
         return;
 
-    zeq::URI uri = test::buildPublisherURI();
-    zeq::Publisher publisher( uri );
-
-    uri.addQuery( "subscribeSelf", "true" );
-    zeq::Subscriber subscriber( uri );
+    zeq::Publisher publisher( test::buildUniqueSession( ));
+    zeq::detail::Sender::getUUID() = servus::make_UUID(); // different machine
+    zeq::Subscriber subscriber( publisher.getSession( ));
 
     BOOST_CHECK( subscriber.registerHandler( EVENT_EXIT,
                        std::bind( &test::onExitEvent, std::placeholders::_1 )));
@@ -266,9 +246,9 @@ namespace
 class Publisher
 {
 public:
-    Publisher()
+    Publisher( const std::string& session )
         : running( true )
-        , _publisher( test::buildPublisherURI( ))
+        , _publisher( session )
     {}
 
     void run()
@@ -300,14 +280,14 @@ BOOST_AUTO_TEST_CASE(publish_blocking_receive_zeroconf)
     if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
         return;
 
-    zeq::URI uri = test::buildPublisherURI();
-    uri.addQuery( "subscribeSelf", "true" );
-    zeq::Subscriber subscriber( uri );
+
+    zeq::Subscriber subscriber( test::buildUniqueSession( ));
+    zeq::detail::Sender::getUUID() = servus::make_UUID(); // different machine
+    Publisher publisher( subscriber.getSession( ));
 
     BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
                        std::bind( &test::onEchoEvent, std::placeholders::_1 )));
 
-    Publisher publisher;
     std::thread thread( std::bind( &Publisher::run, &publisher ));
     BOOST_CHECK( subscriber.receive( ));
 
@@ -323,9 +303,8 @@ BOOST_AUTO_TEST_CASE(publish_receive_zerobuf)
 
     echoOut.setMessage( "The quick brown fox" );
 
-    zeq::Publisher publisher( test::buildURI( "*" ));
-    const servus::URI uri = test::buildURI( "localhost", publisher );
-    zeq::Subscriber subscriber( uri );
+    zeq::Publisher publisher( zeq::NULL_SESSION );
+    zeq::Subscriber subscriber( zeq::URI( publisher.getURI( )));
     BOOST_CHECK( subscriber.subscribe( echoIn ));
 
     for( size_t i = 0; i < 10; ++i )

@@ -8,7 +8,7 @@
 
 #include <zeq/log.h> // ZEQINFO
 #include <zeq/types.h>
-#include <servus/uri.h>
+#include <zeq/uri.h>
 #include <zmq.h>
 #include <stdexcept>
 
@@ -35,7 +35,7 @@ public:
         , socket( zmq_socket( _createContext( context ), type ))
     {}
 
-    Sender( const servus::URI& uri_, void* context, const int type )
+    Sender( const URI& uri_, void* context, const int type )
         : _context( 0 )
         , uri( uri_ )
         , socket( zmq_socket( _createContext( context ), type ))
@@ -53,8 +53,6 @@ public:
     {
         return uri.getHost() + ":" + std::to_string( uint32_t( uri.getPort( )));
     }
-
-    uint16_t getPort() const { return uri.getPort(); }
 
     void initURI()
     {
@@ -84,7 +82,7 @@ public:
 
     static uint128_t& getUUID();
 
-    servus::URI uri;
+    URI uri;
     void* socket;
 
 private:

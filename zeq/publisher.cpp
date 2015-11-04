@@ -9,6 +9,7 @@
 #include "log.h"
 #include "detail/broker.h"
 #include "detail/byteswap.h"
+#include "detail/constants.h"
 #include "detail/sender.h"
 
 #include <servus/servus.h>
@@ -16,20 +17,83 @@
 #  include <zerobuf/Zerobuf.h>
 #endif
 
+#include <cstring>
 #include <map>
-#include <string.h>
 
 namespace zeq
 {
-namespace detail
+
+namespace
 {
-class Publisher : public Sender
+std::string _getApplicationName()
+{
+    // http://stackoverflow.com/questions/933850
+#ifdef _MSC_VER
+    char result[MAX_PATH];
+    const std::string execPath( result, GetModuleFileName( NULL, result,
+                                                           MAX_PATH ));
+#elif __APPLE__
+    char result[PATH_MAX+1];
+    uint32_t size = sizeof(result);
+    if( _NSGetExecutablePath( result, &size ) != 0 )
+        return std::string();
+    const std::string execPath( result );
+#else
+    char result[PATH_MAX];
+    const ssize_t count = readlink( "/proc/self/exe", result, PATH_MAX );
+    if( count < 0 )
+    {
+        // Not all UNIX have /proc/self/exe
+        ZEQWARN << "Could not find absolute executable path" << std::endl;
+        return std::string();
+    }
+    const std::string execPath( result, count > 0 ? count : 0 );
+#endif
+
+#ifdef _MSC_VER
+    const size_t lastSeparator = execPath.find_last_of('\\');
+#else
+    const size_t lastSeparator = execPath.find_last_of('/');
+#endif
+    if( lastSeparator == std::string::npos )
+        return execPath;
+    // lastSeparator + 1 may be at most equal to filename.size(), which is good
+    return execPath.substr( lastSeparator + 1 );
+}
+}
+
+class Publisher::Impl : public detail::Sender
 {
 public:
-    Publisher( const servus::URI& uri_, const uint32_t announceMode )
-        : Sender( uri_, 0, ZMQ_PUB )
-        , _service( std::string( "_" ) + uri.getScheme() + "._tcp" )
+    Impl( servus::URI uri_, const uint32_t announceMode )
+        : detail::Sender( uri_, 0, ZMQ_PUB )
+        , _service( PUBLISHER_SERVICE )
+        , _session( getDefaultSession( ))
     {
+        uri_.setScheme( "" );
+        const std::string& zmqURI = buildZmqURI( uri_ );
+        if( zmq_bind( socket, zmqURI.c_str( )) == -1 )
+        {
+            zmq_close( socket );
+            socket = 0;
+            ZEQTHROW( std::runtime_error(
+                          std::string( "Cannot bind publisher socket '" ) +
+                          zmqURI + "': " + zmq_strerror( zmq_errno( ))));
+        }
+
+        initURI();
+        _initService( announceMode );
+    }
+
+    Impl( const URI& uri_, const std::string& session )
+        : detail::Sender( uri_, 0, ZMQ_PUB )
+        , _service( PUBLISHER_SERVICE )
+        , _session( session == DEFAULT_SESSION ? getDefaultSession() : session )
+    {
+        if( session.empty( ))
+            ZEQTHROW( std::runtime_error(
+                          "Empty session is not allowed for publisher" ));
+
         const std::string& zmqURI = buildZmqURI( uri );
         if( zmq_bind( socket, zmqURI.c_str( )) == -1 )
         {
@@ -40,10 +104,13 @@ public:
                           zmqURI + "': " + zmq_strerror( zmq_errno( ))));
         }
 
-        _initService( announceMode );
+        initURI();
+
+        if( session != NULL_SESSION )
+            _initService();
     }
 
-    ~Publisher() {}
+    ~Impl() {}
 
     bool publish( const zeq::Event& event )
     {
@@ -126,11 +193,12 @@ public:
     }
 #endif
 
+    const std::string& getSession() const { return _session; }
+
 private:
-    void _initService( const uint32_t announceMode )
+    void _initService( const uint32_t announceMode = ANNOUNCE_REQUIRED )
     {
-        initURI();
-        if( !( announceMode & ANNOUNCE_ZEROCONF ))
+        if( !( announceMode & (ANNOUNCE_ZEROCONF | ANNOUNCE_REQUIRED) ))
             return;
 
         const bool required = announceMode & ANNOUNCE_REQUIRED;
@@ -142,7 +210,11 @@ private:
             return;
         }
 
-        _service.set( "Instance", detail::Sender::getUUID().getString( ));
+        _service.set( KEY_INSTANCE, detail::Sender::getUUID().getString( ));
+        _service.set( KEY_USER, getUserName( ));
+        _service.set( KEY_APPLICATION, _getApplicationName( ));
+        if( !_session.empty( ))
+            _service.set( KEY_SESSION, _session );
 
         const servus::Servus::Result& result =
             _service.announce( uri.getPort(), getAddress( ));
@@ -155,17 +227,35 @@ private:
     }
 
     servus::Servus _service;
+    const std::string _session;
 };
+
+Publisher::Publisher()
+    : _impl( new Impl( URI(), DEFAULT_SESSION ))
+{
 }
 
+Publisher::Publisher( const std::string& session )
+    : _impl( new Impl( URI(), session ))
+{}
+
+Publisher::Publisher( const URI& uri )
+    : _impl( new Impl( uri, DEFAULT_SESSION ))
+{}
+
+Publisher::Publisher( const URI& uri, const std::string& session )
+    : _impl( new Impl( uri, session ))
+{}
+
 Publisher::Publisher( const servus::URI& uri, const uint32_t announceMode )
-    : _impl( new detail::Publisher( uri, announceMode ))
+    : _impl( new Impl( uri, announceMode ))
 {
+    ZEQWARN << "zeq::Publisher( const servus::URI&, uint32_t ) is deprecated"
+            << std::endl;
 }
 
 Publisher::~Publisher()
 {
-    delete _impl;
 }
 
 bool Publisher::publish( const Event& event )
@@ -190,14 +280,14 @@ std::string Publisher::getAddress() const
     return _impl->getAddress();
 }
 
-uint16_t Publisher::getPort() const
+const std::string& Publisher::getSession() const
 {
-    return _impl->getPort();
+    return _impl->getSession();
 }
 
 const servus::URI& Publisher::getURI() const
 {
-    return _impl->uri;
+    return _impl->uri.toServusURI();
 }
 
 }

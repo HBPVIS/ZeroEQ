@@ -26,27 +26,20 @@
 
 namespace test
 {
-zeq::URI buildPublisherURI()
+std::string buildUniqueSession()
 {
     std::string name = std::string(
         boost::unit_test::framework::current_test_case().p_name );
     std::replace( name.begin(), name.end(), '_', '-' );
-    return zeq::URI( name + std::to_string( getpid( )) + "://" );
-}
-
-zeq::URI buildURI( const std::string& hostname )
-{
-    std::string name = std::string(
-        boost::unit_test::framework::current_test_case().p_name );
-    std::replace( name.begin(), name.end(), '_', '-' );
-    return zeq::URI( name + std::to_string( getpid( )) + "://" + hostname );
+    return name + std::to_string( getpid( ));
 }
 
 zeq::URI buildURI( const std::string& hostname, const zeq::Publisher& to )
 {
-    assert( to.getPort( ));
-    zeq::URI uri = buildURI( hostname );
-    uri.setPort( to.getPort( ));
+    assert( to.getURI().getPort( ));
+    zeq::URI uri;
+    uri.setHost( hostname );
+    uri.setPort( to.getURI().getPort( ));
     return uri;
 }
 

@@ -19,6 +19,16 @@ namespace detail { class Subscriber; }
 /**
  * Subscribes to Publisher to receive events.
  *
+ * If the subscriber is in the same session as discovered publishers, it
+ * automatically subscribes to those publishers. Publishers from the same
+ * application instance are not considered though.
+ *
+ * A subscription to a non-existing publisher is valid. It will start receiving
+ * events once the other publisher(s) is(are) publishing.
+ *
+ * A receive on any Subscriber of a shared group will work on all subscribers
+ * and call the registered handlers.
+ *
  * Not thread safe.
  *
  * Example: @include tests/subscriber.cpp
@@ -27,27 +37,107 @@ class Subscriber : public Receiver
 {
 public:
     /**
-     * Create and subscribe to one or more publishers.
+     * Create a default subscriber.
      *
-     * A subscription to a non-existing publisher is valid. It will start
-     * receiving events once the other publisher(s) is(are) publishing.
+     * Postconditions:
+     * - discovers publishers on _zeroeq_pub._tcp ZeroConf service
+     * - filters session \<username\> or ZEROEQ_SESSION from environment
      *
-     * @param uri publishing URI in the format scheme://[*|host|IP|IF][:port]
-     * @throw std::runtime_error when the subscription failed.
+     * @throw std::runtime_error if ZeroConf is not available
      */
+    ZEQ_API Subscriber();
+
+    /**
+     * Create a subscriber which subscribes to publisher(s) from the given
+     * session.
+     *
+     * Postconditions:
+     * - discovers publishers on _zeroeq_pub._tcp ZeroConf service
+     * - filters for given session
+     *
+     * @param session session name used for filtering of discovered publishers
+     * @throw std::runtime_error if ZeroConf is not available
+     */
+    ZEQ_API explicit Subscriber( const std::string& session );
+
+    /**
+     * Create a subscriber which subscribes to a specific publisher.
+     *
+     * Postconditions:
+     * - connected to the publisher on the given URI once publisher is running
+     *   on the URI
+     *
+     * @param uri publisher URI in the format [scheme://]*|host|IP|IF:port
+     * @throw std::runtime_error if URI is not fully qualified
+     */
+    ZEQ_API explicit Subscriber( const URI& uri );
+
+    /**
+     * Create a subscriber which subscribes to publisher(s) on the given URI.
+     *
+     * The discovery and filtering by session is only used if the URI is not
+     * fully qualified.
+     *
+     * Postconditions:
+     * - discovers publishers on _zeroeq_pub._tcp ZeroConf service if URI is not
+     *   fully qualified
+     * - filters session \<username\> or ZEROEQ_SESSION from environment if
+     *   zeq::DEFAULT_SESSION
+     *
+     * @param uri publisher URI in the format [scheme://][*|host|IP|IF][:port]
+     * @param session session name used for filtering of discovered publishers
+     * @throw std::runtime_error if ZeroConf is not available or if session name
+     *                           is invalid
+     */
+    ZEQ_API Subscriber( const URI& uri, const std::string& session );
+
+    /**
+     * Create a default shared subscriber.
+     *
+     * @sa Subscriber()
+     * @param shared another receiver to share data reception with
+     */
+    ZEQ_API Subscriber( Receiver& shared );
+
+    /**
+     * Create a shared subscriber which subscribes to publisher(s) from the
+     * given session.
+     *
+     * @sa Subscriber( const std::string& )
+     *
+     * @param session only subscribe to publishers of the same session
+     * @param shared another receiver to share data reception with
+     */
+    ZEQ_API Subscriber( const std::string& session, Receiver& shared );
+
+    /**
+     * Create a shared subscriber which subscribes to publisher(s) on the given
+     * URI.
+     *
+     * @sa Subscriber( const URI& )
+     *
+     * @param uri publisher URI in the format [scheme://]*|host|IP|IF:port
+     * @param shared another receiver to share data reception with
+     */
+    ZEQ_API Subscriber( const URI& uri, Receiver& shared );
+
+    /**
+     * Create a subscriber which subscribes to publisher(s) on the given URI.
+     *
+     * @sa Subscriber( const URI&, const std::string& )
+     *
+     * @param uri publisher URI in the format [scheme://][*|host|IP|IF][:port]
+     * @param session session name used for filtering of discovered publishers
+     * @param shared another receiver to share data reception with.
+     */
+    ZEQ_API Subscriber( const URI& uri, const std::string& session,
+                        Receiver& shared );
+
+
+    /** @deprecated */
     ZEQ_API explicit Subscriber( const servus::URI& uri );
 
-    /*
-     * Create a shared subscription to one or more publishers.
-     *
-     * A receive on any Subscriber of a shared group will work on all
-     * subscribers and call the registered handlers. Note to implementer: wrap
-     * zmq_context in a shared_ptr object used by all instances.
-     *
-     * @param uri publishing URI in the format scheme://[*|host|IP|IF][:port]
-     * @param shared another receiver to share data reception with.
-     * @throw std::runtime_error when the subscription failed.
-     */
+    /** @deprecated */
     ZEQ_API Subscriber( const servus::URI& uri, Receiver& shared );
 
     /** Destroy this subscriber and withdraw any subscriptions. */
@@ -97,8 +187,11 @@ public:
      */
     ZEQ_API bool unsubscribe( const zerobuf::Zerobuf& zerobuf );
 
+    /** @return the session name that is used for filtering. */
+    ZEQ_API const std::string& getSession() const;
+
 private:
-    detail::Subscriber* const _impl;
+    std::unique_ptr< detail::Subscriber > _impl;
 
     // Receiver API
     void addSockets( std::vector< detail::Socket >& entries ) final;

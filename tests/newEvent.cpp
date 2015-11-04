@@ -70,8 +70,8 @@ void onMessageEvent( const zeq::Event& event )
 
 BOOST_AUTO_TEST_CASE(new_event)
 {
-    zeq::Publisher publisher( test::buildPublisherURI( ));
-    zeq::Subscriber subscriber( test::buildURI( "localhost", publisher ));
+    zeq::Publisher publisher( zeq::NULL_SESSION );
+    zeq::Subscriber subscriber( zeq::URI( publisher.getURI( )));
     BOOST_CHECK( subscriber.registerHandler( zeqtest::EVENT_NEWEVENT,
                  std::bind( &zeqtest::onMessageEvent, std::placeholders::_1 )));
 

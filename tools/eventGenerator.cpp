@@ -5,7 +5,6 @@
 
 #include <zeq/zeq.h>
 #include <zeq/hbp/hbp.h>
-#include <servus/uri.h>
 
 #include <chrono>
 #include <thread>
@@ -15,7 +14,6 @@
 #include <cctype>
 
 const char* scriptFile = 0;
-std::string uri = "hbp://";
 
 typedef std::pair< float, zeq::Event > PauseEventPair;
 typedef std::vector< PauseEventPair > Events;
@@ -28,8 +26,7 @@ int main( int argc, char** argv )
 {
     parseArguments( argc, argv );
 
-    servus::URI schema( uri );
-    zeq::Publisher publisher( schema );
+    zeq::Publisher publisher;
     Events events;
     parseScript( scriptFile, events );
     for( Events::const_iterator i = events.begin(); i != events.end(); ++i )
@@ -195,7 +192,7 @@ void parseScript( const char* filename, Events& events )
 void printUsageAndExit( const char* name, const int code, bool full = false )
 {
     std::cerr << "Usage: " << name
-              << " [--schema,-s uri] [script]" << std::endl
+              << " [script]" << std::endl
               << "       " << name << " --help" << std::endl;
     if (full)
     {
@@ -229,18 +226,8 @@ void parseArguments( int argc, char** argv )
 {
     for( int i = 1; i != argc; ++i )
     {
-        if( strcmp( argv[i], "--schema" ) == 0 || strcmp( argv[i],  "-s") == 0 )
-        {
-            if( i == argc - 1 )
-            {
-                std::cerr << "Missing parameter to schema" << std::endl;
-                exit( -1 );
-            }
-            uri = argv[i + 1];
-            ++i;
-        }
-        else if( strcmp( argv[i], "--help" ) == 0 ||
-                 strcmp( argv[i], "-h" ) == 0 )
+        if( strcmp( argv[i], "--help" ) == 0 ||
+            strcmp( argv[i], "-h" ) == 0 )
         {
             printUsageAndExit( argv[0], 0, true );
         }

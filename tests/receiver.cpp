@@ -51,7 +51,7 @@ void testReceive( zeq::Publisher& publisher, zeq::Receiver& receiver,
 
 BOOST_AUTO_TEST_CASE(test_two_subscribers)
 {
-    zeq::Publisher publisher( test::buildPublisherURI( ));
+    zeq::Publisher publisher( zeq::NULL_SESSION );
     zeq::Subscriber subscriber1( test::buildURI( "localhost", publisher ));
     zeq::Subscriber subscriber2( test::buildURI( "localhost", publisher ),
                                  subscriber1 );
@@ -67,8 +67,8 @@ BOOST_AUTO_TEST_CASE(test_two_subscribers)
 
 BOOST_AUTO_TEST_CASE(test_publisher_routing)
 {
-    zeq::Publisher publisher( test::buildPublisherURI( ));
-    zeq::Publisher silentPublisher( test::buildPublisherURI( ));
+    zeq::Publisher publisher( zeq::NULL_SESSION );
+    zeq::Publisher silentPublisher( zeq::NULL_SESSION );
     zeq::Subscriber* subscriber1 =
         new zeq::Subscriber( test::buildURI( "localhost", silentPublisher ));
     zeq::Subscriber subscriber2( test::buildURI( "localhost", publisher ),

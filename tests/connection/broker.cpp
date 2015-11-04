@@ -114,8 +114,7 @@ protected:
 
 BOOST_AUTO_TEST_CASE( broker )
 {
-    // Using a different scheme so zeroconf resolution does not work
-    zeq::Publisher publisher( test::buildURI( "*" ));
+    zeq::Publisher publisher( zeq::NULL_SESSION );
     _publisher = &publisher;
     _broker.clear();
 
@@ -173,10 +172,7 @@ typedef NamedSubscriber< zeq::connection::Broker::PORT_FIXED_OR_RANDOM >
 
 BOOST_AUTO_TEST_CASE( named_broker )
 {
-    // Using a different scheme so zeroconf resolution does not work
-    zeq::URI uri = test::buildURI( "*" );
-    uri.setScheme( "foo" );
-    zeq::Publisher publisher( uri );
+    zeq::Publisher publisher( zeq::NULL_SESSION );
     _publisher = &publisher;
 
     FixedNamedSubscriber subscriber1;
@@ -235,7 +231,7 @@ BOOST_AUTO_TEST_CASE( named_broker_port_used )
     if( getenv( "TRAVIS" ))
         return;
 
-    zeq::Publisher publisher( test::buildURI( "*" ));
+    zeq::Publisher publisher( zeq::NULL_SESSION );
     _publisher = &publisher;
 
     FixedNamedSubscriber subscriber1;
@@ -257,7 +253,7 @@ BOOST_AUTO_TEST_CASE( named_broker_port_used )
 
 BOOST_AUTO_TEST_CASE( invalid_broker )
 {
-    zeq::Subscriber subscriber( test::buildURI( "127.0.0.1" ));
+    zeq::Subscriber subscriber( zeq::URI( "127.0.0.1:1234" ));
     BOOST_CHECK_THROW( zeq::connection::Broker( std::string( "invalidIP" ),
                                                 subscriber ),
                        std::runtime_error );
