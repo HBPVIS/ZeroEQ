@@ -17,6 +17,10 @@ ZeroEQ provides the following major features:
 * Automatic publisher discovery using Zeroconf
 * Serialization of events using flatbuffers
 
+## List of RFCs {#RFC}
+
+* [Session filtering and management port](@ref Sessions)
+
 # Building {#Building}
 
 ZeroEQ is a cross-platform toolkit, designed to run on any modern operating
