@@ -41,7 +41,7 @@ int main( const int argc, char** argv )
     const int time = (argc > 1) ? ::atoi( argv[1] ) : 50;
     const float angle = (argc > 2) ? ::atof( argv[2] ) : 0.1f;
 
-    zeq::Publisher publisher( servus::URI( "hbp://" ));
+    zeq::Publisher publisher;
     std::vector< float > matrix( 16, 0 );
     matrix[ 0 ] = 1;
     matrix[ 5 ] = 1;

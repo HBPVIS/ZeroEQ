@@ -17,10 +17,10 @@
  * Publish-subscribe classes for typed events.
  *
  * A Publisher opens a listening port on the network, and publishes an Event on
- * this port. It announces its publishing URI scheme for automatic discovery.
+ * this port. It announces its session for automatic discovery.
  *
  * A Subscriber either explicitely subscribes to the publisher port, or uses
- * automatic discovery to find publishers using the same URI scheme. Automatic
+ * automatic discovery to find publishers using the same session. Automatic
  * discovery is implemented using zeroconf networking (avahi or Apple Bonjour).
  *
  * The connection::Broker and connection::Service may be used to introduce a
@@ -33,10 +33,10 @@ namespace zeq
 {
 
 using servus::uint128_t;
-using servus::URI;
 class Event;
 class Publisher;
 class Subscriber;
+class URI;
 struct EventDescriptor;
 
 typedef std::shared_ptr< const uint8_t > ConstByteArray;
@@ -50,8 +50,12 @@ static const uint32_t TIMEOUT_INDEFINITE = 0xffffffffu;
 
 using servus::make_uint128;
 
+static const std::string DEFAULT_SESSION = "__zeq";
+static const std::string NULL_SESSION = "__null_session";
+
 namespace detail { struct Socket; }
 
+/** @deprecated */
 enum AnnounceMode //!< Network presence announcements
 {
     ANNOUNCE_NONE = 0x0u, //!< Do not announce presence on the network

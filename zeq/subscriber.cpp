@@ -9,6 +9,7 @@
 #include "event.h"
 #include "log.h"
 #include "detail/broker.h"
+#include "detail/constants.h"
 #include "detail/sender.h"
 #include "detail/socket.h"
 #include "detail/byteswap.h"
@@ -19,8 +20,8 @@
 #include <servus/servus.h>
 
 #include <cassert>
+#include <cstring>
 #include <map>
-#include <string.h>
 #include <stdexcept>
 
 namespace zeq
@@ -30,14 +31,48 @@ namespace detail
 class Subscriber
 {
 public:
-    Subscriber( const servus::URI& uri, void* context )
-        : _service( std::string( "_" ) + uri.getScheme() + "._tcp" )
-        , _filterSelf( uri.findQuery( "subscribeSelf" ) == uri.queryEnd( ))
+    Subscriber( const std::string& session, void* context )
+        : _browser( PUBLISHER_SERVICE )
+        , _selfInstance( detail::Sender::getUUID( ))
+        , _session( session == DEFAULT_SESSION ? getDefaultSession() : session )
     {
-        if( uri.getScheme().empty( ))
+        if( _session == zeq::NULL_SESSION || session.empty( ))
+            ZEQTHROW( std::runtime_error( std::string(
+                    "Invalid session name for subscriber" )));
+
+        if( !servus::Servus::isAvailable( ))
             ZEQTHROW( std::runtime_error(
-                          std::to_string( uri ) +
-                          " is not a valid URI (scheme is missing)."));
+                          std::string( "Empty servus implementation" )));
+
+        _browser.beginBrowsing( servus::Servus::IF_ALL );
+        update( context );
+    }
+
+    Subscriber( const URI& uri, void* context )
+        : _browser( PUBLISHER_SERVICE )
+        , _selfInstance( detail::Sender::getUUID( ))
+    {
+        if( uri.getHost().empty() || uri.getPort() == 0 )
+                ZEQTHROW( std::runtime_error( std::string(
+                              "Non-fully qualified URI used for subscriber" )));
+
+        const std::string& zmqURI = buildZmqURI( uri );
+        if( !addConnection( context, zmqURI, uint128_t( )))
+        {
+            ZEQTHROW( std::runtime_error(
+                          "Cannot connect subscriber to " + zmqURI + ": " +
+                           zmq_strerror( zmq_errno( ))));
+        }
+    }
+
+    Subscriber( const URI& uri, const std::string& session, void* context )
+        : _browser( PUBLISHER_SERVICE )
+        , _selfInstance( detail::Sender::getUUID( ))
+        , _session( session == DEFAULT_SESSION ? getDefaultSession() : session )
+    {
+        if( _session == zeq::NULL_SESSION || session.empty( ))
+            ZEQTHROW( std::runtime_error( std::string(
+                    "Invalid session name for subscriber" )));
 
         if( uri.getHost().empty() || uri.getPort() == 0 )
         {
@@ -45,7 +80,7 @@ public:
                 ZEQTHROW( std::runtime_error(
                               std::string( "Empty servus implementation" )));
 
-            _service.beginBrowsing( servus::Servus::IF_ALL );
+            _browser.beginBrowsing( servus::Servus::IF_ALL );
             update( context );
         }
         else
@@ -67,8 +102,8 @@ public:
             if( socket.second )
                 zmq_close( socket.second );
         }
-        if( _service.isBrowsing( ))
-            _service.endBrowsing();
+        if( _browser.isBrowsing( ))
+            _browser.endBrowsing();
     }
 
     bool registerHandler( const uint128_t& event, const EventFunc& func )
@@ -83,9 +118,9 @@ public:
                 zmq_setsockopt( socket.second, ZMQ_SUBSCRIBE,
                                 &event, sizeof( event )) == -1 )
             {
-                throw std::runtime_error(
+                ZEQTHROW( std::runtime_error(
                     std::string( "Cannot update topic filter: " ) +
-                    zmq_strerror( zmq_errno( )));
+                    zmq_strerror( zmq_errno( ))));
             }
         }
 
@@ -104,9 +139,9 @@ public:
                 zmq_setsockopt( socket.second, ZMQ_UNSUBSCRIBE,
                                 &event, sizeof( event )) == -1 )
             {
-                throw std::runtime_error(
+                ZEQTHROW( std::runtime_error(
                     std::string( "Cannot update topic filter: " ) +
-                    zmq_strerror( zmq_errno( )));
+                    zmq_strerror( zmq_errno( ))));
             }
         }
 
@@ -205,9 +240,9 @@ public:
 
     void update( void* context )
     {
-        if( _service.isBrowsing( ))
-            _service.browse( 0 );
-        const servus::Strings& instances = _service.getInstances();
+        if( _browser.isBrowsing( ))
+            _browser.browse( 0 );
+        const servus::Strings& instances = _browser.getInstances();
         for( const std::string& instance : instances )
         {
             const std::string& zmqURI = _getZmqURI( instance );
@@ -215,8 +250,16 @@ public:
             // New subscription
             if( _subscribers.count( zmqURI ) == 0 )
             {
-                const uint128_t identifier( _service.get( instance,
-                                                          "Instance" ));
+                const std::string& session = _browser.get( instance,
+                                                           KEY_SESSION );
+                if( _browser.containsKey( instance, KEY_SESSION ) &&
+                    !_session.empty() && session != _session )
+                {
+                    continue;
+                }
+
+                const uint128_t identifier( _browser.get( instance,
+                                                          KEY_INSTANCE ));
                 if( !addConnection( context, zmqURI, identifier ))
                 {
                     ZEQINFO << "Cannot connect subscriber to " << zmqURI << ": "
@@ -229,7 +272,7 @@ public:
     bool addConnection( void* context, const std::string& zmqURI,
                         const uint128_t& instance )
     {
-        if( _filterSelf && instance == detail::Sender::getUUID( ))
+        if( instance == _selfInstance )
             return true;
 
         _subscribers[zmqURI] = zmq_socket( context, ZMQ_SUB );
@@ -247,9 +290,9 @@ public:
             if( zmq_setsockopt( _subscribers[zmqURI], ZMQ_SUBSCRIBE,
                                 &i.first, sizeof( uint128_t )) == -1 )
             {
-                throw std::runtime_error(
+                ZEQTHROW( std::runtime_error(
                     std::string( "Cannot update topic filter: " ) +
-                    zmq_strerror( zmq_errno( )));
+                    zmq_strerror( zmq_errno( ))));
             }
         }
 #ifdef ZEQ_USE_ZEROBUF
@@ -258,9 +301,9 @@ public:
             if( zmq_setsockopt( _subscribers[zmqURI], ZMQ_SUBSCRIBE,
                                 &i.first, sizeof( uint128_t )) == -1 )
             {
-                throw std::runtime_error(
+                ZEQTHROW( std::runtime_error(
                     std::string( "Cannot update topic filter: " ) +
-                    zmq_strerror( zmq_errno( )));
+                    zmq_strerror( zmq_errno( ))));
             }
         }
 #endif
@@ -277,6 +320,8 @@ public:
         return true;
     }
 
+    const std::string& getSession() const { return _session; }
+
 private:
     typedef std::map< uint128_t, EventFunc > EventFuncs;
     typedef std::map< std::string, void* > SocketMap;
@@ -287,10 +332,11 @@ private:
     typedef std::map< uint128_t, zerobuf::Zerobuf* > ZerobufMap;
     ZerobufMap _zerobufs;
 #endif
-    servus::Servus _service;
-    std::vector< Socket > _entries;
+    servus::Servus _browser;
+    std::vector< detail::Socket > _entries;
 
-    const bool _filterSelf;
+    const uint128_t _selfInstance;
+    const std::string _session;
 
     std::string _getZmqURI( const std::string& instance )
     {
@@ -298,7 +344,7 @@ private:
         const std::string& host = instance.substr( 0, pos );
         const std::string& port = instance.substr( pos + 1 );
 
-        return buildZmqURI( host, std::stoi( port ));
+        return buildZmqURI( DEFAULT_SCHEMA, host, std::stoi( port ));
     }
 
 #ifdef ZEQ_USE_ZEROBUF
@@ -309,9 +355,9 @@ private:
             if( zmq_setsockopt( socket.second, ZMQ_SUBSCRIBE,
                                 &event, sizeof( event )) == -1 )
             {
-                throw std::runtime_error(
+                ZEQTHROW( std::runtime_error(
                     std::string( "Cannot update topic filter: " ) +
-                    zmq_strerror( zmq_errno( )));
+                    zmq_strerror( zmq_errno( ))));
             }
         }
     }
@@ -323,9 +369,9 @@ private:
             if( zmq_setsockopt( socket.second, ZMQ_UNSUBSCRIBE,
                                 &event, sizeof( event )) == -1 )
             {
-                throw std::runtime_error(
+                ZEQTHROW( std::runtime_error(
                     std::string( "Cannot update topic filter: " ) +
-                    zmq_strerror( zmq_errno( )));
+                    zmq_strerror( zmq_errno( ))));
             }
         }
     }
@@ -333,21 +379,74 @@ private:
 };
 }
 
-Subscriber::Subscriber( const servus::URI& uri )
+Subscriber::Subscriber()
+    : Receiver()
+    , _impl( new detail::Subscriber( DEFAULT_SESSION, getZMQContext( )))
+{
+}
+
+Subscriber::Subscriber( const std::string& session )
+    : Receiver()
+    , _impl( new detail::Subscriber( session, getZMQContext( )))
+{
+}
+
+Subscriber::Subscriber( const URI& uri )
     : Receiver()
     , _impl( new detail::Subscriber( uri, getZMQContext( )))
 {
 }
 
-Subscriber::Subscriber( const servus::URI& uri, Receiver& shared )
+Subscriber::Subscriber( const URI& uri, const std::string& session )
+    : Receiver()
+    , _impl( new detail::Subscriber( uri, session, getZMQContext( )))
+{
+}
+
+Subscriber::Subscriber( Receiver& shared )
+    : Receiver( shared )
+    , _impl( new detail::Subscriber( DEFAULT_SESSION, getZMQContext( )))
+{
+}
+
+Subscriber::Subscriber( const std::string& session, Receiver& shared )
+    : Receiver( shared )
+    , _impl( new detail::Subscriber( session, getZMQContext( )))
+{
+}
+
+Subscriber::Subscriber( const URI& uri, Receiver& shared  )
     : Receiver( shared )
     , _impl( new detail::Subscriber( uri, getZMQContext( )))
 {
 }
 
+Subscriber::Subscriber( const URI& uri, const std::string& session, Receiver& shared  )
+    : Receiver( shared )
+    , _impl( new detail::Subscriber( uri, session, getZMQContext( )))
+{
+}
+
+Subscriber::Subscriber( const servus::URI& uri )
+    : Receiver()
+    , _impl( new detail::Subscriber( URI( uri ), DEFAULT_SESSION,
+                                     getZMQContext( )))
+{
+    ZEQWARN << "zeq::Subscriber( const servus::URI& ) is deprecated"
+            << std::endl;
+}
+
+Subscriber::Subscriber( const servus::URI& uri, Receiver& shared )
+    : Receiver( shared )
+    , _impl( new detail::Subscriber( URI( uri ), DEFAULT_SESSION,
+                                     getZMQContext( )))
+{
+    ZEQWARN << "zeq::Subscriber( const servus::URI&, Receiver& shared ) is "
+               "deprecated" << std::endl;
+}
+
 Subscriber::~Subscriber()
 {
-    delete _impl;
 }
 
 bool Subscriber::registerHandler( const uint128_t& event, const EventFunc& func)
@@ -381,6 +480,11 @@ bool Subscriber::unsubscribe( const zerobuf::Zerobuf& )
     ZEQTHROW( std::runtime_error( "ZeroEQ not built with ZeroBuf support "));
 }
 #endif
+
+const std::string& Subscriber::getSession() const
+{
+    return _impl->getSession();
+}
 
 void Subscriber::addSockets( std::vector< detail::Socket >& entries )
 {

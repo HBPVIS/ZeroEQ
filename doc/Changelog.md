@@ -2,6 +2,14 @@
 
 # git master
 
+* [109](https://github.com/HBPVIS/zeq/pull/109):
+  Implement session filtering from Sessions.md RFC
+  * Custom/user-defined schemas in URIs for publisher and subscriber are used
+    as session name. Porting to new constructors with explicit session name
+    is recommended if fixed session name is desired.
+  * zeq::Publisher::getPort() removed, use
+    zeq::Publisher::getURI().getPort() instead
+
 # Release 0.4 (02-11-2015)
 
 * [98](https://github.com/HBPVIS/zeq/pull/98):

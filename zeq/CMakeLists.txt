@@ -23,10 +23,12 @@ set(ZEQ_PUBLIC_HEADERS
   receiver.h
   subscriber.h
   types.h
+  uri.h
   vocabulary.h)
 
 set(ZEQ_HEADERS
   detail/broker.h
+  detail/constants.h
   detail/event.h
   detail/eventDescriptor.h
   detail/port.h
@@ -45,6 +47,7 @@ set(ZEQ_SOURCES
   publisher.cpp
   receiver.cpp
   subscriber.cpp
+  uri.cpp
   vocabulary.cpp)
 
 set(ZEQ_LINK_LIBRARIES PUBLIC Servus

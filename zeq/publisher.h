@@ -10,12 +10,16 @@
 #include <zeq/api.h>
 #include <zeq/types.h>
 
+#include <memory>
+
 namespace zeq
 {
-namespace detail { class Publisher; }
 
 /**
  * Serves and publishes events, consumed by Subscriber.
+ *
+ * The session is tied to ZeroConf announcement and can be disabled by passing
+ * zeq::NULL_SESSION as the session name.
  *
  * Example: @include tests/publisher.cpp
  */
@@ -23,11 +27,61 @@ class Publisher
 {
 public:
     /**
-     * Create a publisher on the given URI.
+     * Create a default publisher.
      *
-     * @param uri publishing URI in the format scheme://[*|host|IP|IF][:port]
-     * @param announceMode bitwise combination of AnnounceMode network protocols
+     * Postconditions:
+     * - bound to all network interfaces
+     * - runs on a random port
+     * - announces itself on the _zeroeq_pub._tcp ZeroConf service as host:port
+     * - announces session \<username\> or ZEROEQ_SESSION from environment if set
+     *
+     * @throw std::runtime_error if session is empty or socket setup fails
      */
+    ZEQ_API Publisher();
+
+    /**
+     * Create a publisher which announces the specified session.
+     *
+     * Postconditions:
+     * - bound to all network interfaces
+     * - runs on a random port
+     * - announces itself on the _zeroeq_pub._tcp ZeroConf service as host:port
+     * - announces given session
+     *
+     * @param session session name used for announcement
+     * @throw std::runtime_error if session is empty or socket setup fails
+     */
+    ZEQ_API explicit Publisher( const std::string& session );
+
+    /**
+     * Create a publisher which runs on the specified URI.
+     *
+     * Postconditions:
+     * - bound to the host and/or port from the given URI
+     * - announces itself on the _zeroeq_pub._tcp ZeroConf service as host:port
+     * - announces session \<username\> or ZEROEQ_SESSION from environment if set
+     *
+     * @param uri publishing URI in the format [scheme://][*|host|IP|IF][:port]
+     * @throw std::runtime_error if session is empty or socket setup fails
+     */
+    ZEQ_API explicit Publisher( const URI& uri );
+
+    /**
+     * Create a publisher which runs on the specified URI and announces the
+     * specified session.
+     *
+     * Postconditions:
+     * - bound to the host and/or port from the given URI
+     * - announces itself on the _zeroeq_pub._tcp ZeroConf service as host:port
+     * - announces given session
+     *
+     * @param session session name used for announcement
+     * @param uri publishing URI in the format [scheme://][*|host|IP|IF][:port]
+     * @throw std::runtime_error if session is empty or socket setup fails
+     */
+    ZEQ_API Publisher( const URI& uri, const std::string& session );
+
+    /** @deprecated */
     ZEQ_API Publisher( const servus::URI& uri,
                        uint32_t announceMode = ANNOUNCE_ALL );
 
@@ -60,16 +114,19 @@ public:
      * constructor uri.
      *
      * @return the publisher URI.
+     * @todo change signature to return zeq::URI, needs downstream project
+     *       adaptions. Also make zeq::URI( const servus::URI& from ) explicit.
      */
     ZEQ_API const servus::URI& getURI() const;
 
-    /** @return the port to which this publisher is bound. */
-    ZEQ_API uint16_t getPort() const;
+    /** @return the session name that is announced */
+    ZEQ_API const std::string& getSession() const;
 
     std::string getAddress() const; //!< @internal
 
 private:
-    detail::Publisher* const _impl;
+    class Impl;
+    std::unique_ptr< Impl > _impl;
 
     Publisher( const Publisher& ) = delete;
     Publisher& operator=( const Publisher& ) = delete;
