@@ -16,6 +16,10 @@
 #ifdef ZEQ_USE_ZEROBUF
 #  include <zerobuf/Zerobuf.h>
 #endif
+#if __APPLE__
+#  include <dirent.h>
+#  include <mach-o/dyld.h>
+#endif
 
 #include <cstring>
 #include <map>
