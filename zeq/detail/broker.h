@@ -24,7 +24,7 @@
 
 namespace
 {
-std::string buildZmqURI( const std::string& schema,
+inline std::string buildZmqURI( const std::string& schema,
                          std::string host, const uint16_t port )
 {
     if( host.empty( ))
@@ -37,18 +37,18 @@ std::string buildZmqURI( const std::string& schema,
     return zmqURI + ":" + std::to_string( int( port ));
 }
 
-std::string buildZmqURI( const zeq::URI& uri )
+inline std::string buildZmqURI( const zeq::URI& uri )
 {
     return buildZmqURI( uri.getScheme(), uri.getHost(), uri.getPort( ));
 }
 
-std::string getUserName()
+inline std::string getUserName()
 {
     const char* user = getlogin();
     return user ? user : UNKNOWN_USER;
 }
 
-std::string getDefaultSession()
+inline std::string getDefaultSession()
 {
     const char* session = getenv( ENV_SESSION.c_str( ));
     return session && strcmp(session, "") != 0 ? session : getUserName();
