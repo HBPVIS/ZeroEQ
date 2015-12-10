@@ -61,7 +61,7 @@ public:
 
 class EchoIn : public zeq::vocabulary::Echo
 {
-    void notifyUpdated() final
+    void notifyReceived() final
     {
         BOOST_CHECK_EQUAL( getMessageString(),
                            "So long, and thanks for all the fish!" );
