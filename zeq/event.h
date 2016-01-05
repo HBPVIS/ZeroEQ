@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2014-2015, Human Brain Project
+/* Copyright (c) 2014-2016, Human Brain Project
  *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  */
 
@@ -15,6 +15,10 @@ namespace detail
 {
     class Subscriber;
     class Event;
+}
+namespace vocabulary
+{
+    Event serializeSchemas( const zerobuf::Schemas& );
 }
 
 /**
@@ -61,6 +65,7 @@ private:
     Event& operator=( const Event& ) = delete;
 
     friend class detail::Subscriber;
+    friend Event vocabulary::serializeSchemas( const zerobuf::Schemas& );
 
     /** Set a raw buffer as event data. */
     void setData( const ConstByteArray& data, const size_t size );
