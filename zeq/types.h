@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2014-2015, Human Brain Project
+/* Copyright (c) 2014-2016, Human Brain Project
  *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *                          Juan Hernando <jhernando@fi.upm.es>
  */
@@ -7,11 +7,17 @@
 #ifndef ZEQ_TYPES_H
 #define ZEQ_TYPES_H
 
+#include <zeq/defines.h>
 #include <servus/types.h>
 #include <servus/uint128_t.h>
-
 #include <functional>
 #include <memory>
+
+#ifdef ZEQ_USE_ZEROBUF
+#  include <zerobuf/types.h>
+#else
+namespace zerobuf { class Schemas; } // dummy forward decl for vocabulary.h
+#endif
 
 /**
  * Publish-subscribe classes for typed events.

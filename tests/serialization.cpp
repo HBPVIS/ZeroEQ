@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2014-2015, Human Brain Project
+/* Copyright (c) 2014-2016, Human Brain Project
  *                          Juan Hernando <jhernando@fi.upm.es>
  *                          Daniel Nachbaur <danielnachbaur@epfl.ch>
  */
@@ -14,6 +14,10 @@
 
 #include <tests/binary_generated.h>
 #include <tests/binary_zeq_generated.h>
+
+#ifdef ZEQ_USE_ZEROBUF
+#  include <zerobuf/render/camera.h>
+#endif
 
 #include <boost/test/unit_test.hpp>
 
@@ -158,3 +162,17 @@ BOOST_AUTO_TEST_CASE(from_cpp_to_json_serialization)
     const std::string& deserialized = zeq::vocabulary::deserializeJSON( event );
     BOOST_CHECK_EQUAL( json, deserialized );
 }
+
+#ifdef ZEQ_USE_ZEROBUF
+BOOST_AUTO_TEST_CASE(zerobufSchema)
+{
+    const zerobuf::Schemas& inSchemas = zerobuf::render::Camera::schemas();
+    const zeq::Event& event = zeq::vocabulary::serializeSchemas( inSchemas );
+    const zerobuf::Schemas& outSchemas =
+        zeq::vocabulary::deserializeSchemas( event );
+
+    BOOST_CHECK_EQUAL( event.getType(), zerobuf::Schema::ZEROBUF_TYPE( ));
+    BOOST_CHECK_EQUAL_COLLECTIONS( inSchemas.begin(), inSchemas.end(),
+                                   outSchemas.begin(), outSchemas.end( ));
+}
+#endif

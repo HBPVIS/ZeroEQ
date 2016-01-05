@@ -1,4 +1,4 @@
-# Copyright (c) HBP 2014-2015 Daniel.Nachbaur@epfl.ch
+# Copyright (c) HBP 2014-2016 Daniel.Nachbaur@epfl.ch
 #                             Stefan.Eilemann@epfl.ch
 # Change this number when adding tests to force a CMake run: 4
 
@@ -18,7 +18,7 @@ if(ZEROBUF_FOUND)
   set(TESTEVENT_INCLUDE_NAME testevent)
   common_library(testevent)
 
-  list(APPEND TEST_LIBRARIES testevent)
+  list(APPEND TEST_LIBRARIES testevent ZeroBufRender)
 else()
   list(APPEND EXCLUDE_FROM_TESTS receiverZeroBuf.cpp)
 endif()
