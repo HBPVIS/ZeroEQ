@@ -229,8 +229,8 @@ public:
             {
                 zmq_msg_init( &msg );
                 zmq_msg_recv( &msg, socket.socket, 0 );
-                zerobuf->setZerobufData( zmq_msg_data( &msg ),
-                                         zmq_msg_size( &msg ));
+                zerobuf->copyZerobufData( zmq_msg_data( &msg ),
+                                          zmq_msg_size( &msg ));
                 zmq_msg_close( &msg );
             }
             zerobuf->notifyReceived();
