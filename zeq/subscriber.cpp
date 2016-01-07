@@ -148,6 +148,11 @@ public:
         return true;
     }
 
+    bool hasHandler( const uint128_t& event ) const
+    {
+        return _eventFuncs.count( event ) > 0;
+    }
+
 #ifdef ZEQ_USE_ZEROBUF
     bool subscribe( zerobuf::Zerobuf& zerobuf )
     {
@@ -457,6 +462,11 @@ bool Subscriber::registerHandler( const uint128_t& event, const EventFunc& func)
 bool Subscriber::deregisterHandler( const uint128_t& event )
 {
     return _impl->deregisterHandler( event );
+}
+
+bool Subscriber::hasHandler( const uint128_t& event ) const
+{
+    return _impl->hasHandler( event );
 }
 
 #ifdef ZEQ_USE_ZEROBUF

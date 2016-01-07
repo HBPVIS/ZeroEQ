@@ -163,6 +163,9 @@ public:
      */
     ZEQ_API bool deregisterHandler( const uint128_t& event );
 
+    /** @return true if a handler is registered for the given event. */
+    ZEQ_API bool hasHandler( const uint128_t& event ) const;
+
     /**
      * Subscribe a ZeroBuf object to receive updates from any connected
      * publisher.
