@@ -63,8 +63,10 @@ BOOST_AUTO_TEST_CASE(invalid_construction)
 BOOST_AUTO_TEST_CASE(registerhandler)
 {
     zeq::Subscriber subscriber;
+    BOOST_CHECK( !subscriber.hasHandler( EVENT_ECHO ));
     BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
                        std::bind( &test::onEchoEvent, std::placeholders::_1 )));
+    BOOST_CHECK( subscriber.hasHandler( EVENT_ECHO ));
 }
 
 BOOST_AUTO_TEST_CASE(deregisterhandler)
