@@ -1,6 +1,6 @@
 
-/* Copyright (c) 2015, Human Brain Project
- *                     Stefan.Eilemann@epfl.ch
+/* Copyright (c) 2015-2016, Human Brain Project
+ *                          Stefan.Eilemann@epfl.ch
  */
 
 #define BOOST_TEST_MODULE zerobuf_receiver
@@ -23,7 +23,8 @@ void testReceive( zeq::Publisher& publisher, zeq::Receiver& receiver,
     const auto startTime = std::chrono::high_resolution_clock::now();
     for( ;; )
     {
-        BOOST_CHECK( publisher.publish( test::EchoOut( )));
+        BOOST_CHECK( publisher.publish(
+                         zeq::vocabulary::Echo( test::echoMessage )));
         while( receiver.receive( 100 )) {}
 
         if( var1.gotData && var2.gotData )

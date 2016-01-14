@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2014-2015, Human Brain Project
+/* Copyright (c) 2014-2016, Human Brain Project
  *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *                          Stefan.Eilemann@epfl.ch
  */
@@ -12,10 +12,8 @@
 #include "detail/constants.h"
 #include "detail/sender.h"
 
+#include <servus/serializable.h>
 #include <servus/servus.h>
-#ifdef ZEQ_USE_ZEROBUF
-#  include <zerobuf/Zerobuf.h>
-#endif
 #if __APPLE__
 #  include <dirent.h>
 #  include <mach-o/dyld.h>
@@ -154,23 +152,22 @@ public:
         return true;
     }
 
-#ifdef ZEQ_USE_ZEROBUF
-    bool publish( const zerobuf::Zerobuf& zerobuf )
+    bool publish( const servus::Serializable& serializable )
     {
-        // TODO: Save type in zerobuf and transmit in one message
 #ifdef COMMON_LITTLEENDIAN
-        const uint128_t& type = zerobuf.getZerobufType();
+        const uint128_t& type = serializable.getTypeIdentifier();
 #else
-        uint128_t type = zerobuf.getZerobufType();
+        uint128_t type = serializable.getTypeIdentifier();
         detail::byteswap( type ); // convert to little endian wire protocol
 #endif
-        const void* data = zerobuf.getZerobufData();
+        const servus::Serializable::Data& data = serializable.toBinary();
+        const bool hasPayload = data.ptr && data.size > 0;
 
         zmq_msg_t msgHeader;
         zmq_msg_init_size( &msgHeader, sizeof( type ));
         memcpy( zmq_msg_data( &msgHeader ), &type, sizeof( type ));
         int ret = zmq_msg_send( &msgHeader, socket,
-                                data ? ZMQ_SNDMORE : 0 );
+                                hasPayload ? ZMQ_SNDMORE : 0 );
         zmq_msg_close( &msgHeader );
         if( ret == -1 )
         {
@@ -179,12 +176,12 @@ public:
             return false;
         }
 
-        if( !data )
+        if( !hasPayload )
             return true;
 
         zmq_msg_t msg;
-        zmq_msg_init_size( &msg, zerobuf.getZerobufSize( ));
-        ::memcpy( zmq_msg_data(&msg), data, zerobuf.getZerobufSize( ));
+        zmq_msg_init_size( &msg, data.size );
+        ::memcpy( zmq_msg_data(&msg), data.ptr.get(), data.size );
         ret = zmq_msg_send( &msg, socket, 0 );
         zmq_msg_close( &msg );
         if( ret  == -1 )
@@ -195,7 +192,6 @@ public:
         }
         return true;
     }
-#endif
 
     const std::string& getSession() const { return _session; }
 
@@ -267,17 +263,10 @@ bool Publisher::publish( const Event& event )
     return _impl->publish( event );
 }
 
-#ifdef ZEQ_USE_ZEROBUF
-bool Publisher::publish( const zerobuf::Zerobuf& zerobuf )
+bool Publisher::publish( const servus::Serializable& serializable )
 {
-    return _impl->publish( zerobuf );
+    return _impl->publish( serializable );
 }
-#else
-bool Publisher::publish( const zerobuf::Zerobuf& )
-{
-    ZEQTHROW( std::runtime_error( "ZeroEQ not built with ZeroBuf support "));
-}
-#endif
 
 std::string Publisher::getAddress() const
 {

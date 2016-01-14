@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2014-2015, Human Brain Project
+/* Copyright (c) 2014-2016, Human Brain Project
  *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *                          Stefan.Eilemann@epfl.ch
  *                          Juan Hernando <jhernando@fi.upm.es>
@@ -43,7 +43,7 @@ zeq::URI buildURI( const std::string& hostname, const zeq::Publisher& to )
     return uri;
 }
 
-const std::string echoMessage( "echo_event" );
+const std::string echoMessage( "So long, and thanks for all the fish!" );
 
 void onEchoEvent( const zeq::Event& event )
 {
@@ -53,25 +53,20 @@ void onEchoEvent( const zeq::Event& event )
 }
 
 #ifdef ZEQ_USE_ZEROBUF
-class EchoOut : public zeq::vocabulary::Echo
-{
-public:
-    EchoOut() { setMessage( "So long, and thanks for all the fish!" ); }
-};
-
 class EchoIn : public zeq::vocabulary::Echo
 {
-    void notifyReceived() final
-    {
-        BOOST_CHECK_EQUAL( getMessageString(),
-                           "So long, and thanks for all the fish!" );
-        gotData = true;
-    }
-
 public:
     bool gotData;
 
-    EchoIn() : gotData( false ) {}
+    EchoIn() : gotData( false )
+    {
+        setUpdatedFunction(
+            [this]()
+            {
+                BOOST_CHECK_EQUAL( getMessageString(), echoMessage );
+                gotData = true;
+            });
+    }
 };
 #endif
 

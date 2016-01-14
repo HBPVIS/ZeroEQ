@@ -2,6 +2,8 @@
 
 # git master
 
+* [116](https://github.com/HBPVIS/zeq/pull/116):
+  Generalize Zerobuf support into abstract servus::Serializable
 * [109](https://github.com/HBPVIS/zeq/pull/109):
   Implement session filtering from Sessions.md RFC
   * Custom/user-defined schemas in URIs for publisher and subscriber are used

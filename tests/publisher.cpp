@@ -1,8 +1,8 @@
 
-/* Copyright (c) 2015, Human Brain Project
- *                     Daniel Nachbaur <daniel.nachbaur@epfl.ch>
- *                     Stefan.Eilemann@epfl.ch
- *                     Juan Hernando <jhernando@fi.upm.es>
+/* Copyright (c) 2015-2016, Human Brain Project
+ *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
+ *                          Stefan.Eilemann@epfl.ch
+ *                          Juan Hernando <jhernando@fi.upm.es>
  */
 
 #define BOOST_TEST_MODULE zeq_publisher
@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(publish)
 {
     zeq::Publisher publisher( zeq::NULL_SESSION );
 #ifdef ZEQ_USE_ZEROBUF
-    BOOST_CHECK( publisher.publish( test::EchoOut( )));
+    BOOST_CHECK( publisher.publish( zeq::vocabulary::Echo( test::echoMessage)));
 #endif
     BOOST_CHECK( publisher.publish(
                      zeq::vocabulary::serializeEcho( test::echoMessage )));
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(publish_update_uri)
     BOOST_CHECK_MESSAGE( uri.getPort() != 0, uri );
     BOOST_CHECK_MESSAGE( !uri.getHost().empty(), uri );
 #ifdef ZEQ_USE_ZEROBUF
-    BOOST_CHECK( publisher.publish( test::EchoOut( )));
+    BOOST_CHECK( publisher.publish( zeq::vocabulary::Echo( test::echoMessage)));
 #endif
     BOOST_CHECK( publisher.publish(
                      zeq::vocabulary::serializeEcho( test::echoMessage )));
