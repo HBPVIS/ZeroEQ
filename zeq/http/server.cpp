@@ -1,0 +1,300 @@
+
+/* Copyright (c) 2016, Human Brain Project
+ *                     Stefan.Eilemann@epfl.ch
+ */
+
+#include <zeq/http/server.h>
+
+#include "../log.h"
+#include "../detail/broker.h"
+#include "../detail/sender.h"
+#include "../detail/socket.h"
+#include <httpxx/BufferedMessage.hpp>
+#include <httpxx/Message.hpp>
+#include <httpxx/ResponseBuilder.hpp>
+
+namespace httpxx = ::http; // avoid confusion between httpxx and zeq::http
+
+namespace zeq
+{
+namespace http
+{
+
+class Server::Impl : public detail::Sender
+{
+public:
+    Impl() : Impl( URI( )) {}
+
+    Impl( const URI& uri_ )
+        : detail::Sender( uri_, 0, ZMQ_STREAM )
+    {
+        const std::string& zmqURI = buildZmqURI( uri );
+        if( ::zmq_bind( socket, zmqURI.c_str( )) == -1 )
+            ZEQTHROW( std::runtime_error(
+                      std::string( "Cannot bind http server socket '" ) +
+                                   zmqURI + "': " +
+                                   zmq_strerror( zmq_errno( ))));
+        initURI();
+    }
+
+    bool subscribe( servus::Serializable& serializable )
+    {
+        const std::string& name = serializable.getTypeName();
+        if( _subscriptions.count( name ) != 0 )
+            return false;
+
+        _subscriptions[ name ] = &serializable;
+        return true;
+    }
+
+    bool unsubscribe( const servus::Serializable& serializable )
+    {
+        const std::string& name = serializable.getTypeName();
+        return _subscriptions.erase( name ) != 0;
+    }
+
+    bool register_( servus::Serializable& serializable )
+    {
+        const std::string& name = serializable.getTypeName();
+        if( _registrations.count( name ) != 0 )
+            return false;
+
+        _registrations[ name ] = &serializable;
+        return true;
+    }
+
+    bool unregister( const servus::Serializable& serializable )
+    {
+        const std::string& name = serializable.getTypeName();
+        return _registrations.erase( name ) != 0;
+    }
+
+    void addSockets( std::vector< detail::Socket >& entries )
+    {
+        detail::Socket entry;
+        entry.socket = socket;
+        entry.events = ZMQ_POLLIN;
+        entries.push_back( entry );
+    }
+
+    void process( detail::Socket& )
+    {
+        uint8_t id[256];
+        const int idSize = ::zmq_recv( socket, id, sizeof( id ), 0 );
+        if( idSize <= 0 )
+        {
+            ZEQWARN << "HTTP server receive failed: "
+                    << zmq_strerror( zmq_errno( )) << std::endl;
+            return;
+        }
+
+        // Read request and body
+        httpxx::BufferedRequest request;
+        std::string body;
+        while( !request.complete( ))
+        {
+            char msg[256];
+            const int msgSize = ::zmq_recv( socket, msg, sizeof( msg ), 0 );
+            if( msgSize < 0 )
+            {
+                ZEQWARN << "HTTP server receive failed: "
+                        << zmq_strerror( zmq_errno( )) << std::endl;
+                return;
+            }
+
+            int consumed = 0;
+            while( !request.complete() && msgSize > consumed )
+                consumed += request.feed( msg + consumed, msgSize - consumed );
+        }
+
+        // Handle
+        httpxx::ResponseBuilder response;
+        if( request.method() == httpxx::Method::get( ))
+            body = _processGet( request, response );
+        else if( request.method() == httpxx::Method::post( ))
+        {
+            if( request.has_header( "Content-Length" ))
+                _processPut( request, response );
+            else
+                response.set_status( 411 ); // Content-Length required
+            body.clear(); // no response body
+        }
+        else
+        {
+            response.set_status( 405 ); // Method Not Allowed
+            body.clear(); // no response body
+        }
+
+        const std::string& rep = response.to_string();
+        const int more = body.empty() ? 0 : ZMQ_SNDMORE;
+
+        // response header
+        if( ::zmq_send( socket, id, idSize, ZMQ_SNDMORE ) != idSize ||
+            ::zmq_send( socket, rep.c_str(), rep.length(), more ) !=
+            int( rep.length( )))
+        {
+            ZEQWARN << "Could not send HTTP response header: "
+                    << zmq_strerror( zmq_errno( )) << std::endl;
+            return;
+        }
+
+        // response body
+        if( !body.empty() &&
+            ( ::zmq_send( socket, id, idSize, ZMQ_SNDMORE ) != idSize ||
+              ::zmq_send( socket, body.c_str(), body.length(), 0 ) !=
+              int( body.length( ))))
+        {
+            ZEQWARN << "Could not send HTTP response body: "
+                    << zmq_strerror( zmq_errno( )) << std::endl;
+        }
+    }
+
+protected:
+    typedef std::map< std::string, servus::Serializable* > SerializableMap;
+    SerializableMap _subscriptions;
+    SerializableMap _registrations;
+
+    std::string _getTypeName( const std::string& url )
+    {
+        if( url.empty( ))
+            return url;
+
+        std::string name = url.substr( 1 );
+        while( true )
+        {
+            const size_t pos = name.find( '/' );
+            if( pos == std::string::npos )
+                return name;
+
+            name = name.substr( 0, pos ) + "::" + name.substr( pos + 1 );
+        }
+    }
+
+    std::string _processGet( const httpxx::BufferedRequest& request,
+                             httpxx::ResponseBuilder& response )
+    {
+        const std::string& type = _getTypeName( request.url( ));
+        const auto& i = _registrations.find( type );
+
+        if( i == _registrations.end( ))
+        {
+            response.set_status( 404 );
+            return std::string();
+        }
+
+        response.set_status( 200 );
+        return i->second->toJSON();
+    }
+
+    void _processPut( const httpxx::BufferedRequest& request,
+                      httpxx::ResponseBuilder& response )
+    {
+        const std::string& type = _getTypeName( request.url( ));
+        const auto& i = _subscriptions.find( type );
+
+        if( i == _subscriptions.end( ))
+            response.set_status( 404 );
+        else if( i->second->fromJSON( request.body( )))
+            response.set_status( 200 );
+        else
+            response.set_status( 400 );
+    }
+};
+
+namespace
+{
+std::string _getServerParameter( const int argc, char* argv[] )
+{
+    for( int i = 0; i < argc; ++i  )
+    {
+        if( std::string( argv[i] ) == "--http-server" )
+        {
+            if( i == argc - 1 || argv[ i + 1 ][0] == '-' )
+                return "tcp://";
+            return argv[i+1];
+        }
+    }
+    return std::string();
+}
+}
+
+Server::Server( const URI& uri, Receiver& shared )
+    : Receiver( shared )
+    , _impl( new Impl( uri ))
+{}
+
+Server::Server( const URI& uri )
+    : Receiver()
+    , _impl( new Impl( uri ))
+{}
+
+Server::Server( Receiver& shared )
+    : Receiver( shared )
+    , _impl( new Impl )
+{}
+
+Server::Server()
+    : Receiver()
+    , _impl( new Impl )
+{}
+
+Server::~Server()
+{}
+
+
+std::unique_ptr< Server > Server::parse( const int argc, char* argv[] )
+{
+    const std::string& param = _getServerParameter( argc, argv );
+    if( param.empty( ))
+        return nullptr;
+
+    return std::unique_ptr< Server >( new Server( URI( param )));
+}
+
+std::unique_ptr< Server > Server::parse( const int argc, char* argv[],
+                                         Receiver& shared )
+{
+    const std::string& param = _getServerParameter( argc, argv );
+    if( param.empty( ))
+        return nullptr;
+
+    return std::unique_ptr< Server >( new Server( URI( param ), shared ));
+}
+
+const servus::URI& Server::getURI() const
+{
+    return _impl->uri.toServusURI();
+}
+
+bool Server::subscribe( servus::Serializable& object )
+{
+    return _impl->subscribe( object );
+}
+
+bool Server::unsubscribe( const servus::Serializable& object )
+{
+    return _impl->unsubscribe( object );
+}
+
+bool Server::register_( servus::Serializable& object )
+{
+    return _impl->register_( object );
+}
+
+bool Server::unregister( const servus::Serializable& object )
+{
+    return _impl->unregister( object );
+}
+
+void Server::addSockets( std::vector< detail::Socket >& entries )
+{
+    _impl->addSockets( entries );
+}
+
+void Server::process( detail::Socket& socket )
+{
+    _impl->process( socket );
+}
+
+}
+}

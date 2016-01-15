@@ -1,4 +1,5 @@
-# Sessions filtering and management port {#Sessions}
+Sessions filtering and management port {#Sessions}
+============
 
 # Motivation
 

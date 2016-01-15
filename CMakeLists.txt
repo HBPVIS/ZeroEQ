@@ -23,6 +23,7 @@ set(ZEQ_DEPENDENT_LIBRARIES Servus)
 
 common_package(Boost COMPONENTS unit_test_framework)
 common_package(FlatBuffers REQUIRED)
+common_package(httpxx)
 common_package(libzmq REQUIRED)
 common_package(Servus REQUIRED)
 common_package(Threads REQUIRED)

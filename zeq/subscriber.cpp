@@ -24,12 +24,10 @@
 
 namespace zeq
 {
-namespace detail
-{
-class Subscriber
+class Subscriber::Impl
 {
 public:
-    Subscriber( const std::string& session, void* context )
+    Impl( const std::string& session, void* context )
         : _browser( PUBLISHER_SERVICE )
         , _selfInstance( detail::Sender::getUUID( ))
         , _session( session == DEFAULT_SESSION ? getDefaultSession() : session )
@@ -46,7 +44,7 @@ public:
         update( context );
     }
 
-    Subscriber( const URI& uri, void* context )
+    Impl( const URI& uri, void* context )
         : _browser( PUBLISHER_SERVICE )
         , _selfInstance( detail::Sender::getUUID( ))
     {
@@ -63,7 +61,7 @@ public:
         }
     }
 
-    Subscriber( const URI& uri, const std::string& session, void* context )
+    Impl( const URI& uri, const std::string& session, void* context )
         : _browser( PUBLISHER_SERVICE )
         , _selfInstance( detail::Sender::getUUID( ))
         , _session( session == DEFAULT_SESSION ? getDefaultSession() : session )
@@ -93,7 +91,7 @@ public:
         }
     }
 
-    ~Subscriber()
+    ~Impl()
     {
         for( const auto& socket : _subscribers )
         {
@@ -307,7 +305,7 @@ public:
         if( _subscribers.find( zmqURI ) == _subscribers.end( ))
             return false;
 
-        Socket entry;
+        detail::Socket entry;
         entry.socket = _subscribers[zmqURI];
         entry.events = ZMQ_POLLIN;
         _entries.push_back( entry );
@@ -370,59 +368,58 @@ private:
         }
     }
 };
-}
 
 Subscriber::Subscriber()
     : Receiver()
-    , _impl( new detail::Subscriber( DEFAULT_SESSION, getZMQContext( )))
+    , _impl( new Impl( DEFAULT_SESSION, getZMQContext( )))
 {
 }
 
 Subscriber::Subscriber( const std::string& session )
     : Receiver()
-    , _impl( new detail::Subscriber( session, getZMQContext( )))
+    , _impl( new Impl( session, getZMQContext( )))
 {
 }
 
 Subscriber::Subscriber( const URI& uri )
     : Receiver()
-    , _impl( new detail::Subscriber( uri, getZMQContext( )))
+    , _impl( new Impl( uri, getZMQContext( )))
 {
 }
 
 Subscriber::Subscriber( const URI& uri, const std::string& session )
     : Receiver()
-    , _impl( new detail::Subscriber( uri, session, getZMQContext( )))
+    , _impl( new Impl( uri, session, getZMQContext( )))
 {
 }
 
 Subscriber::Subscriber( Receiver& shared )
     : Receiver( shared )
-    , _impl( new detail::Subscriber( DEFAULT_SESSION, getZMQContext( )))
+    , _impl( new Impl( DEFAULT_SESSION, getZMQContext( )))
 {
 }
 
 Subscriber::Subscriber( const std::string& session, Receiver& shared )
     : Receiver( shared )
-    , _impl( new detail::Subscriber( session, getZMQContext( )))
+    , _impl( new Impl( session, getZMQContext( )))
 {
 }
 
 Subscriber::Subscriber( const URI& uri, Receiver& shared  )
     : Receiver( shared )
-    , _impl( new detail::Subscriber( uri, getZMQContext( )))
+    , _impl( new Impl( uri, getZMQContext( )))
 {
 }
 
 Subscriber::Subscriber( const URI& uri, const std::string& session, Receiver& shared  )
     : Receiver( shared )
-    , _impl( new detail::Subscriber( uri, session, getZMQContext( )))
+    , _impl( new Impl( uri, session, getZMQContext( )))
 {
 }
 
 Subscriber::Subscriber( const servus::URI& uri )
     : Receiver()
-    , _impl( new detail::Subscriber( URI( uri ), DEFAULT_SESSION,
+    , _impl( new Impl( URI( uri ), DEFAULT_SESSION,
                                      getZMQContext( )))
 {
     ZEQWARN << "zeq::Subscriber( const servus::URI& ) is deprecated"
@@ -431,7 +428,7 @@ Subscriber::Subscriber( const servus::URI& uri )
 
 Subscriber::Subscriber( const servus::URI& uri, Receiver& shared )
     : Receiver( shared )
-    , _impl( new detail::Subscriber( URI( uri ), DEFAULT_SESSION,
+    , _impl( new Impl( URI( uri ), DEFAULT_SESSION,
                                      getZMQContext( )))
 {
     ZEQWARN << "zeq::Subscriber( const servus::URI&, Receiver& shared ) is "

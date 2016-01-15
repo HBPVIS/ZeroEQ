@@ -1,20 +1,24 @@
-HTTP Server for ZeroEq Events
+HTTP Server for ZeroEq Events {#httpserver}
 ============
 
-The http server implements a zeq::Receiver and Sender to serve ZeroBuf
+The http::Server implements a zeq::Receiver and Sender to serve ZeroBuf
 objects through a REST interface with JSON payload. It is the evolution
-of the RESTBridge.
+of the RESTBridge. [Issue 115](https://github.com/HBPVIS/zeq/issues/115)
+tracks the implementation.
+
 
 ## Requirements
 
 * Translate Zerobufs to and from JSON
-* Accept PUT and POST requests and update subscribed Zerobuf in the same
+* Accept POST requests to update subscribed Zerobuf in the same
   way as a zeq::Subscriber
 * Accept GET requests and reply with the current state of registered
   Zerobuf in the same way as a Publisher::publish().
 * Allow custom code execution while handling a GET request, e.g., to
   render a new frame before serving a ImageJPEG request
 * Implement the same client REST API as the current RESTBridge
+* Do not accept PUT requests (as RestBridge does for updates): They are
+  for adding objects, which we might introduce later.
 
 ## Dependency Changes
 

@@ -11,15 +11,7 @@
 
 namespace zeq
 {
-namespace detail
-{
-    class Subscriber;
-    class Event;
-}
-namespace vocabulary
-{
-    Event serializeSchemas( const zerobuf::Schemas& );
-}
+namespace detail { class Event; }
 
 /**
  * An event is emitted by a Publisher to notify Subscriber of a change.
@@ -60,15 +52,12 @@ public:
     /** @internal @return serialization specific implementation */
     ZEQ_API flatbuffers::Parser& getParser();
 
+    /** @internal Set a raw buffer as event data. */
+    void setData( const ConstByteArray& data, const size_t size );
+
 private:
     Event( const Event& ) = delete;
     Event& operator=( const Event& ) = delete;
-
-    friend class detail::Subscriber;
-    friend Event vocabulary::serializeSchemas( const zerobuf::Schemas& );
-
-    /** Set a raw buffer as event data. */
-    void setData( const ConstByteArray& data, const size_t size );
 
     Event& operator=( Event&& rhs );
 

@@ -13,12 +13,14 @@ ZeroEQ provides the following major features:
 
 * Publish events using zeq::Publisher
 * Subscribe to events using zeq::Subscriber
+* Update and get events using zeq::http::Server using REST and JSON
 * Asynchronous, reliable transport using ZMQ
 * Automatic publisher discovery using Zeroconf
-* Serialization of events using flatbuffers
+* Serialization of events using [ZeroBuf](https://github.com/HBPVIS/ZeroBuf)
 
 ## List of RFCs {#RFC}
 
+* [HTTP GET and POST server](@ref httpserver)
 * [Session filtering and management port](@ref Sessions)
 
 # Building {#Building}
