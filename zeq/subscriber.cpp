@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2014-2015, Human Brain Project
+/* Copyright (c) 2014-2016, Human Brain Project
  *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *                          Stefan.Eilemann@epfl.ch
  */
@@ -14,9 +14,7 @@
 #include "detail/socket.h"
 #include "detail/byteswap.h"
 
-#ifdef ZEQ_USE_ZEROBUF
-#  include <zerobuf/Zerobuf.h>
-#endif
+#include <servus/serializable.h>
 #include <servus/servus.h>
 
 #include <cassert>
@@ -153,28 +151,26 @@ public:
         return _eventFuncs.count( event ) > 0;
     }
 
-#ifdef ZEQ_USE_ZEROBUF
-    bool subscribe( zerobuf::Zerobuf& zerobuf )
+    bool subscribe( servus::Serializable& serializable )
     {
-        const uint128_t& type = zerobuf.getZerobufType();
-        if( _zerobufs.count( type ) != 0 )
+        const uint128_t& type = serializable.getTypeIdentifier();
+        if( _serializables.count( type ) != 0 )
             return false;
 
         _subscribe( type );
-        _zerobufs[ type ] = &zerobuf;
+        _serializables[ type ] = &serializable;
         return true;
     }
 
-    bool unsubscribe( const zerobuf::Zerobuf& zerobuf )
+    bool unsubscribe( const servus::Serializable& serializable )
     {
-        const uint128_t& type = zerobuf.getZerobufType();
-        if( _zerobufs.erase( type ) == 0 )
+        const uint128_t& type = serializable.getTypeIdentifier();
+        if( _serializables.erase( type ) == 0 )
             return false;
 
         _unsubscribe( type );
         return true;
     }
-#endif
 
     void addSockets( std::vector< detail::Socket >& entries )
     {
@@ -195,10 +191,8 @@ public:
         const bool payload = zmq_msg_more( &msg );
         zmq_msg_close( &msg );
 
-#ifdef ZEQ_USE_ZEROBUF
-        ZerobufMap::const_iterator i = _zerobufs.find( type );
-        if( i == _zerobufs.end( )) // FlatBuffer
-#endif
+        SerializableMap::const_iterator i = _serializables.find( type );
+        if( i == _serializables.end( )) // FlatBuffer
         {
             zeq::Event event( type );
             if( payload )
@@ -226,21 +220,19 @@ public:
             }
 #endif
         }
-#ifdef ZEQ_USE_ZEROBUF
-        else // zerobuf
+        else // serializable
         {
-            zerobuf::Zerobuf* zerobuf = i->second;
+            servus::Serializable* serializable = i->second;
             if( payload )
             {
                 zmq_msg_init( &msg );
                 zmq_msg_recv( &msg, socket.socket, 0 );
-                zerobuf->copyZerobufData( zmq_msg_data( &msg ),
+                serializable->fromBinary( zmq_msg_data( &msg ),
                                           zmq_msg_size( &msg ));
                 zmq_msg_close( &msg );
             }
-            zerobuf->notifyReceived();
+            serializable->notifyUpdated();
         }
-#endif
     }
 
     void update( void* context )
@@ -300,8 +292,7 @@ public:
                     zmq_strerror( zmq_errno( ))));
             }
         }
-#ifdef ZEQ_USE_ZEROBUF
-        for( const auto& i : _zerobufs )
+        for( const auto& i : _serializables )
         {
             if( zmq_setsockopt( _subscribers[zmqURI], ZMQ_SUBSCRIBE,
                                 &i.first, sizeof( uint128_t )) == -1 )
@@ -311,7 +302,6 @@ public:
                     zmq_strerror( zmq_errno( ))));
             }
         }
-#endif
 
         assert( _subscribers.find( zmqURI ) != _subscribers.end( ));
         if( _subscribers.find( zmqURI ) == _subscribers.end( ))
@@ -333,10 +323,10 @@ private:
 
     SocketMap _subscribers;
     EventFuncs _eventFuncs;
-#ifdef ZEQ_USE_ZEROBUF
-    typedef std::map< uint128_t, zerobuf::Zerobuf* > ZerobufMap;
-    ZerobufMap _zerobufs;
-#endif
+
+    typedef std::map< uint128_t, servus::Serializable* > SerializableMap;
+    SerializableMap _serializables;
+
     servus::Servus _browser;
     std::vector< detail::Socket > _entries;
 
@@ -352,7 +342,6 @@ private:
         return buildZmqURI( DEFAULT_SCHEMA, host, std::stoi( port ));
     }
 
-#ifdef ZEQ_USE_ZEROBUF
     void _subscribe( const uint128_t& event )
     {
         for( const auto& socket : _subscribers )
@@ -380,7 +369,6 @@ private:
             }
         }
     }
-#endif
 };
 }
 
@@ -469,27 +457,15 @@ bool Subscriber::hasHandler( const uint128_t& event ) const
     return _impl->hasHandler( event );
 }
 
-#ifdef ZEQ_USE_ZEROBUF
-bool Subscriber::subscribe( zerobuf::Zerobuf& zerobuf )
+bool Subscriber::subscribe( servus::Serializable& serializable )
 {
-    return _impl->subscribe( zerobuf );
+    return _impl->subscribe( serializable );
 }
 
-bool Subscriber::unsubscribe( const zerobuf::Zerobuf& zerobuf )
+bool Subscriber::unsubscribe( const servus::Serializable& serializable )
 {
-    return _impl->unsubscribe( zerobuf );
+    return _impl->unsubscribe( serializable );
 }
-#else
-bool Subscriber::subscribe( zerobuf::Zerobuf& )
-{
-    ZEQTHROW( std::runtime_error( "ZeroEQ not built with ZeroBuf support "));
-}
-
-bool Subscriber::unsubscribe( const zerobuf::Zerobuf& )
-{
-    ZEQTHROW( std::runtime_error( "ZeroEQ not built with ZeroBuf support "));
-}
-#endif
 
 const std::string& Subscriber::getSession() const
 {

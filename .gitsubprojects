@@ -1,4 +1,4 @@
 # -*- mode: cmake -*-
-git_subproject(Servus https://github.com/HBPVIS/Servus.git b04d0d5)
+git_subproject(Servus https://github.com/HBPVIS/Servus.git 69295ba)
 git_subproject(FlatBuffers https://github.com/Bluebrain/flatbuffers.git f0ca636)
-git_subproject(ZeroBuf https://github.com/HBPVIS/ZeroBuf.git d800fb4)
+git_subproject(ZeroBuf https://github.com/HBPVIS/ZeroBuf.git 478bea1)

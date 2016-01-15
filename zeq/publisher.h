@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2014-2015, Human Brain Project
+/* Copyright (c) 2014-2016, Human Brain Project
  *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *                          Stefan.Eilemann@epfl.ch
  */
@@ -33,7 +33,7 @@ public:
      * - bound to all network interfaces
      * - runs on a random port
      * - announces itself on the _zeroeq_pub._tcp ZeroConf service as host:port
-     * - announces session \<username\> or ZEROEQ_SESSION from environment if set
+     * - announces session \<username\> or ZEROEQ_SESSION from environment
      *
      * @throw std::runtime_error if session is empty or socket setup fails
      */
@@ -59,7 +59,7 @@ public:
      * Postconditions:
      * - bound to the host and/or port from the given URI
      * - announces itself on the _zeroeq_pub._tcp ZeroConf service as host:port
-     * - announces session \<username\> or ZEROEQ_SESSION from environment if set
+     * - announces session \<username\> or ZEROEQ_SESSION from environment
      *
      * @param uri publishing URI in the format [scheme://][*|host|IP|IF][:port]
      * @throw std::runtime_error if session is empty or socket setup fails
@@ -98,14 +98,14 @@ public:
     ZEQ_API bool publish( const Event& event );
 
     /**
-     * Publish the given Zerobuf object to any subscriber.
+     * Publish the given serializable object to any subscriber.
      *
-     * If there is no subscriber for that event, no event will be send.
+     * If there is no subscriber for that serializable, no event will be sent.
      *
-     * @param zerobuf the ZeroBuf object to publish
+     * @param serializable the object to publish
      * @return true if publish was successful
      */
-    ZEQ_API bool publish( const zerobuf::Zerobuf& zerobuf );
+    ZEQ_API bool publish( const servus::Serializable& serializable );
 
     /**
      * Get the publisher URI.

@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2014-2015, Human Brain Project
+/* Copyright (c) 2014-2016, Human Brain Project
  *                          Stefan.Eilemann@epfl.ch
  *                          Juan Hernando <jhernando@fi.upm.es>
  */
@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE( broker )
 
     BOOST_CHECK( zeq::connection::Service::subscribe( _broker, publisher ));
 #ifdef ZEQ_USE_ZEROBUF
-    const test::EchoOut echo;
+    const zeq::vocabulary::Echo echo( test::echoMessage );
 #endif
     for( size_t i = 0; i < 100 && !subscriber.received; ++i )
     {
@@ -191,7 +191,7 @@ BOOST_AUTO_TEST_CASE( named_broker )
                      publisher ));
 
 #ifdef ZEQ_USE_ZEROBUF
-    const test::EchoOut echo;
+    const zeq::vocabulary::Echo echo( test::echoMessage );
 #endif
     for( size_t i = 0; i < 100 && !subscriber1.received; ++i )
     {

@@ -71,7 +71,6 @@ enum AnnounceMode //!< Network presence announcements
 };
 
 }
-namespace zerobuf { class Zerobuf; }
 
 // internal
 

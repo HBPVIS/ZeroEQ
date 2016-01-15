@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2014-2015, Human Brain Project
+/* Copyright (c) 2014-2016, Human Brain Project
  *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *                          Stefan.Eilemann@epfl.ch
  */
@@ -167,28 +167,28 @@ public:
     ZEQ_API bool hasHandler( const uint128_t& event ) const;
 
     /**
-     * Subscribe a ZeroBuf object to receive updates from any connected
+     * Subscribe a serializable object to receive updates from any connected
      * publisher.
      *
-     * Every update will be directly applied on the ZeroBuf object during
-     * receive(). To track updates on the object, notifyUpdated() is called
-     * accordingly.
+     * Every update will be directly applied on the object during receive(). To
+     * track updates on the object, the serializable's updated function is
+     * called accordingly.
      *
      * The subscribed object instance has to be valid until unsubscribe().
      *
-     * @param zerobuf the ZeroBuf object to update on receive()
+     * @param serializable the object to update on receive()
      * @return true if subscription was successful, false otherwise
      */
-    ZEQ_API bool subscribe( zerobuf::Zerobuf& zerobuf );
+    ZEQ_API bool subscribe( servus::Serializable& serializable );
 
     /**
-     * Unsubscribe a ZeroBuf object to stop applying updates from any connected
-     * receiver.
+     * Unsubscribe a serializable object to stop applying updates from any
+     * connected publisher.
      *
-     * @param zerobuf the ZeroBuf object to stop updating on receive()
+     * @param serializable the object to stop updating on receive()
      * @return true if removal of subscription was successful, false otherwise
      */
-    ZEQ_API bool unsubscribe( const zerobuf::Zerobuf& zerobuf );
+    ZEQ_API bool unsubscribe( const servus::Serializable& serializable );
 
     /** @return the session name that is used for filtering. */
     ZEQ_API const std::string& getSession() const;

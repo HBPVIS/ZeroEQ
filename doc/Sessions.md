@@ -69,7 +69,7 @@ user and for the system to perform filtering.
     * user = <user-name>
     * application = <application-name>
 * Event registration for vocabulary happens in
-  registerHandler/subscribe(ZeroBuf)
+  registerHandler/subscribe
 
 # Changes for Broker/Management port
 
