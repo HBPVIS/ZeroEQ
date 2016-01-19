@@ -13,12 +13,6 @@
 #include <functional>
 #include <memory>
 
-#ifdef ZEQ_USE_ZEROBUF
-#  include <zerobuf/types.h>
-#else
-namespace zerobuf { class Schemas; } // dummy forward decl for vocabulary.h
-#endif
-
 /**
  * Publish-subscribe classes for typed events.
  *

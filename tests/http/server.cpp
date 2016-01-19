@@ -9,6 +9,7 @@
 #include <zeq/subscriber.h>
 #include <zeq/uri.h>
 #include <zmq.h>
+#include <servus/serializable.h>
 #include <servus/uri.h>
 #include <boost/test/unit_test.hpp>
 #include <thread>

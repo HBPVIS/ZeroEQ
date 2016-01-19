@@ -1,4 +1,4 @@
-# Copyright (c) HBP 2014-2015 Daniel.Nachbaur@epfl.ch
+# Copyright (c) HBP 2014-2016 Daniel.Nachbaur@epfl.ch
 #                             Stefan.Eilemann@epfl.ch
 
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
@@ -27,10 +27,6 @@ common_package(httpxx)
 common_package(libzmq REQUIRED)
 common_package(Servus REQUIRED)
 common_package(Threads REQUIRED)
-common_package(ZeroBuf)
-if(ZEROBUF_FOUND)
-  list(APPEND ZEQ_DEPENDENT_LIBRARIES ZeroBuf)
-endif()
 common_package_post()
 
 add_subdirectory(zeq)

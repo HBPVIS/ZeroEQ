@@ -9,6 +9,7 @@
 #include "../detail/broker.h"
 #include "../detail/sender.h"
 #include "../detail/socket.h"
+#include <servus/serializable.h>
 #include <httpxx/BufferedMessage.hpp>
 #include <httpxx/Message.hpp>
 #include <httpxx/ResponseBuilder.hpp>

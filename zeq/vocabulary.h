@@ -61,12 +61,6 @@ ZEQ_API Event serializeRequest( const uint128_t& eventType );
  * @return an uint128_t to identify the zeq event that should be published.
  */
 ZEQ_API uint128_t deserializeRequest( const Event& event );
-
-/** Serialize the given zerobuf::Schema into an Event. */
-ZEQ_API Event serializeSchemas( const zerobuf::Schemas& schemas );
-
-/** Deserialize the given event into zerobuf::Schema. */
-ZEQ_API zerobuf::Schemas deserializeSchemas( const Event& event );
 //@}
 
 /**
