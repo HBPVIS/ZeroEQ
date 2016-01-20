@@ -37,10 +37,10 @@ private:
     }
 };
 
-class Socket
+class Client
 {
 public:
-    Socket( const servus::URI& uri )
+    Client( const servus::URI& uri )
         : _ctx( ::zmq_ctx_new ( ))
         , _socket( ::zmq_socket( _ctx, ZMQ_STREAM ))
     {
@@ -48,7 +48,7 @@ public:
             throw std::runtime_error( "Connect failed" );
     }
 
-    ~Socket()
+    ~Client()
     {
         if( _socket )
             ::zmq_close( _socket );
@@ -56,7 +56,7 @@ public:
             ::zmq_ctx_destroy( _ctx );
     }
 
-    std::string send( const std::string& request )
+    void test( const std::string& request, const std::string& expected )
     {
         // Get server identity
         uint8_t id[256];
@@ -71,13 +71,19 @@ public:
             throw std::runtime_error( "Send failed" );
         }
 
-        if( ::zmq_recv( _socket, id, idSize, 0 ) != int( idSize ))
-            throw std::runtime_error( "Recv failed" );
+        std::string response;
+        while( response.size() < expected.size( ))
+        {
+            if( ::zmq_recv( _socket, id, idSize, 0 ) != int( idSize ))
+                throw std::runtime_error( "Recv failed" );
 
-        std::string response( 256, '\0' );
-        response.resize(
-            ::zmq_recv( _socket, &response[0], response.size(), 0 ));
-        return response;
+            char msg[256];
+            const int read = ::zmq_recv( _socket, msg, sizeof( msg ), 0 );
+            BOOST_REQUIRE( read > 0 );
+            response.append( msg, read );
+        }
+
+        BOOST_CHECK_EQUAL( response, expected );
     }
 
 private:
@@ -128,13 +134,12 @@ BOOST_AUTO_TEST_CASE(get)
 
     std::thread thread( [ & ]() { while( running ) server.receive( 100 ); });
 
-    Socket client( server.getURI( ));
-    std::string reply = client.send( "GET /test/Foo HTTP/1.0\r\n\r\n" );
-    BOOST_CHECK_EQUAL( reply,
-                       std::string( "HTTP/1.0 200 OK\r\n\r\n" ) + jsonGet );
-    reply = client.send( "GET /unknown HTTP/1.0\r\n\r\n" );
-    BOOST_CHECK_EQUAL( reply,
-                       std::string( "HTTP/1.0 404 Not Found\r\n\r\n" ));
+    Client client( server.getURI( ));
+    client.test( "GET /test/Foo HTTP/1.0\r\n\r\n",
+                 std::string( "HTTP/1.0 200 OK\r\nContent-Length: 54\r\n\r\n" ) +
+                 jsonGet );
+    client.test( "GET /unknown HTTP/1.0\r\n\r\n",
+                 std::string( "HTTP/1.0 404 Not Found\r\n\r\n" ));
 
     running = false;
     thread.join();
@@ -151,50 +156,14 @@ BOOST_AUTO_TEST_CASE(shared)
 
     std::thread thread( [ & ]() { while( running ) subscriber.receive( 100 );});
 
-    Socket client1( server1.getURI( ));
-    Socket client2( server2.getURI( ));
+    Client client1( server1.getURI( ));
+    Client client2( server2.getURI( ));
 
-    std::string reply = client1.send( "GET /test/Foo HTTP/1.0\r\n\r\n" );
-    BOOST_CHECK_EQUAL( reply,
-                       std::string( "HTTP/1.0 404 Not Found\r\n\r\n" ));
-
-    reply = client2.send( "GET /test/Foo HTTP/1.0\r\n\r\n" );
-    BOOST_CHECK_EQUAL( reply,
-                       std::string( "HTTP/1.0 200 OK\r\n\r\n" ) + jsonGet );
-    running = false;
-    thread.join();
-}
-
-BOOST_AUTO_TEST_CASE(post)
-{
-    bool running = true;
-    zeq::http::Server server;
-    Foo foo;
-    server.subscribe( foo );
-
-    std::thread thread( [ & ]() { while( running ) server.receive( 100 ); });
-
-    Socket client( server.getURI( ));
-    std::string reply = client.send(
-        std::string( "POST /test/Foo HTTP/1.0\r\n\r\n" ) + jsonPut );
-    BOOST_CHECK_EQUAL( reply,
-                       std::string( "HTTP/1.0 411 Length Required\r\n\r\n" ));
-
-    reply = client.send(
-        std::string( "POST /test/Foo HTTP/1.0\r\nContent-Length: " ) +
-        std::to_string( jsonPut.length( )) + "\r\n\r\n" + jsonPut );
-    BOOST_CHECK_EQUAL( reply, std::string( "HTTP/1.0 200 OK\r\n\r\n" ));
-
-    reply = client.send( std::string(
-        "POST /test/Foo HTTP/1.0\r\nContent-Length: 3\r\n\r\nFoo" ));
-    BOOST_CHECK_EQUAL( reply, std::string( "HTTP/1.0 400 Bad Request\r\n\r\n"));
-
-    reply = client.send(
-        std::string( "POST /test/Bar HTTP/1.0\r\nContent-Length: " ) +
-        std::to_string( jsonPut.length( )) + "\r\n\r\n" + jsonPut );
-    BOOST_CHECK_EQUAL( reply,
-                       std::string( "HTTP/1.0 404 Not Found\r\n\r\n" ));
-
+    client1.test( "GET /test/Foo HTTP/1.0\r\n\r\n",
+                  std::string( "HTTP/1.0 404 Not Found\r\n\r\n" ));
+    client2.test( "GET /test/Foo HTTP/1.0\r\n\r\n",
+                  std::string( "HTTP/1.0 200 OK\r\nContent-Length: 54\r\n\r\n" ) +
+                  jsonGet );
     running = false;
     thread.join();
 }
@@ -204,16 +173,40 @@ BOOST_AUTO_TEST_CASE(put)
     bool running = true;
     zeq::http::Server server;
     Foo foo;
+    server.subscribe( foo );
+
+    std::thread thread( [ & ]() { while( running ) server.receive( 100 ); });
+
+    Client client( server.getURI( ));
+    client.test( std::string( "PUT /test/Foo HTTP/1.0\r\n\r\n" ) + jsonPut,
+                 std::string( "HTTP/1.0 411 Length Required\r\n\r\n" ));
+    client.test( std::string( "PUT /test/Foo HTTP/1.0\r\nContent-Length: " ) +
+                 std::to_string( jsonPut.length( )) + "\r\n\r\n" + jsonPut,
+                 std::string( "HTTP/1.0 200 OK\r\n\r\n" ));
+    client.test(
+        std::string( "PUT /test/Foo HTTP/1.0\r\nContent-Length: 3\r\n\r\nFoo" ),
+        std::string( "HTTP/1.0 400 Bad Request\r\n\r\n" ));
+    client.test( std::string( "PUT /test/Bar HTTP/1.0\r\nContent-Length: " ) +
+                 std::to_string( jsonPut.length( )) + "\r\n\r\n" + jsonPut,
+                 std::string( "HTTP/1.0 404 Not Found\r\n\r\n" ));
+
+    running = false;
+    thread.join();
+}
+
+BOOST_AUTO_TEST_CASE(post)
+{
+    bool running = true;
+    zeq::http::Server server;
+    Foo foo;
     server.register_( foo );
 
     std::thread thread( [ & ]() { while( running ) server.receive( 100 ); });
 
-    Socket client( server.getURI( ));
-    std::string reply = client.send(
-        std::string( "PUT /test/Foo HTTP/1.0\r\nContent-Length: " ) +
-        std::to_string( jsonPut.length( )) + "\r\n\r\n" + jsonPut );
-    BOOST_CHECK_EQUAL( reply,
-                       std::string( "HTTP/1.0 405 Method Not Allowed\r\n\r\n"));
+    Client client( server.getURI( ));
+    client.test( std::string( "POST /test/Foo HTTP/1.0\r\nContent-Length: " ) +
+                 std::to_string( jsonPut.length( )) + "\r\n\r\n" + jsonPut,
+                 std::string( "HTTP/1.0 405 Method Not Allowed\r\n\r\n"));
 
     running = false;
     thread.join();

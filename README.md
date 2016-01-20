@@ -20,7 +20,7 @@ ZeroEQ provides the following major features:
 
 ## List of RFCs {#RFC}
 
-* [HTTP GET and POST server](@ref httpserver)
+* [HTTP GET and PUT server](@ref httpserver)
 * [Session filtering and management port](@ref Sessions)
 
 # Building {#Building}

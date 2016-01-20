@@ -16,4 +16,8 @@ flatbuffers_generate_c_headers(FBS_BINARY_EVENT binary.fbs)
 set_source_files_properties(
   serialization.cpp PROPERTIES OBJECT_DEPENDS ${FBS_BINARY_EVENT_OUTPUTS})
 
+if(NOT HTTPXX_FOUND)
+  set(EXCLUDE_FROM_TESTS http/server.cpp)
+endif()
+
 include(CommonCTest)

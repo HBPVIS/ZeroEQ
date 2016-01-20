@@ -10,14 +10,14 @@ tracks the implementation.
 ## Requirements
 
 * Translate Zerobufs to and from JSON
-* Accept POST requests to update subscribed Zerobuf in the same
+* Accept PUT requests to update subscribed Zerobuf in the same
   way as a zeq::Subscriber
 * Accept GET requests and reply with the current state of registered
   Zerobuf in the same way as a Publisher::publish().
 * Allow custom code execution while handling a GET request, e.g., to
   render a new frame before serving a ImageJPEG request
 * Implement the same client REST API as the current RESTBridge
-* Do not accept PUT requests (as RestBridge does for updates): They are
+* Do not accept POST requests (as RestBridge does for updates): They are
   for adding objects, which we might introduce later.
 
 ## Dependency Changes
@@ -78,7 +78,7 @@ tracks the implementation.
         static std::unique_ptr< Server > parse( argc, argv );
         static std::unique_ptr< Server > parse( argc, argv, Receiver& shared );
 
-        // For PUT and POST requests:
+        // For PUT requests:
         bool subscribe( servus::Serializable& object );
         bool unsubscribe( const servus::Serializable& object );
 
@@ -127,7 +127,7 @@ tracks the implementation.
     {
         zmq_recv, feed to message
         if message is complete
-             for PUT/POST:
+             for PUT:
                  _subscribed[ type ].fromJSON( message.body( ))
                  _subscribed[ type ].notifyUpdated()
                  zmq_send( 200/404 )

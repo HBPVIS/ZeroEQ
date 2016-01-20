@@ -112,7 +112,7 @@ public:
         httpxx::ResponseBuilder response;
         if( request.method() == httpxx::Method::get( ))
             body = _processGet( request, response );
-        else if( request.method() == httpxx::Method::post( ))
+        else if( request.method() == httpxx::Method::put( ))
         {
             if( request.has_header( "Content-Length" ))
                 _processPut( request, response );
@@ -126,10 +126,13 @@ public:
             body.clear(); // no response body
         }
 
-        const std::string& rep = response.to_string();
-        const int more = body.empty() ? 0 : ZMQ_SNDMORE;
+        if( !body.empty( ))
+            response.headers()[ "Content-Length" ] =
+                std::to_string( body.length( ));
 
         // response header
+        const std::string& rep = response.to_string();
+        const int more = body.empty() ? 0 : ZMQ_SNDMORE;
         if( ::zmq_send( socket, id, idSize, ZMQ_SNDMORE ) != idSize ||
             ::zmq_send( socket, rep.c_str(), rep.length(), more ) !=
             int( rep.length( )))

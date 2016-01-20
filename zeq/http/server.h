@@ -30,7 +30,10 @@ public:
     /**
      * Construct a new HTTP server.
      *
-     * To process requests on the incoming port, call receive().
+     * To process requests on the incoming port, call receive(). If no hostname
+     * is given, the server listens on all interfaces (INADDR_ANY). If no port
+     * is given, the server selects a random port. Use getURI() to retrieve the
+     * chosen parameters.
      *
      * @param uri The server address in the form "[tcp://][hostname][:port]"
      * @param shared a shared receiver, see Receiver constructor.
@@ -49,8 +52,9 @@ public:
      *
      * The creation and parameters depend on the following command line
      * parameters:
-     * * --http-server [host][:port]: Enable the server. Optional parameters
-     *   configure the web server, running by default on :4020
+     * * --http-server [host][:port]: Enable the server. The optional parameters
+     *   configure the web server, running by default on INADDR_ANY and a
+     *   randomly chosen port
      */
     ZEQ_API static std::unique_ptr< Server > parse( int argc, char* argv[] );
     ZEQ_API static std::unique_ptr< Server > parse( int argc, char* argv[],
