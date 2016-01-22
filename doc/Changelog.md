@@ -2,6 +2,8 @@
 
 # git master
 
+* [116](https://github.com/HBPVIS/zeq/issues/115):
+  Add zeq::http::Server
 * [116](https://github.com/HBPVIS/zeq/pull/116):
   Generalize Zerobuf support into abstract servus::Serializable
 * [109](https://github.com/HBPVIS/zeq/pull/109):

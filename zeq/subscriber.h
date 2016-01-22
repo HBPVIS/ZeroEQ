@@ -13,9 +13,6 @@
 
 namespace zeq
 {
-
-namespace detail { class Subscriber; }
-
 /**
  * Subscribes to Publisher to receive events.
  *
@@ -194,7 +191,8 @@ public:
     ZEQ_API const std::string& getSession() const;
 
 private:
-    std::unique_ptr< detail::Subscriber > _impl;
+    class Impl;
+    std::unique_ptr< Impl > _impl;
 
     // Receiver API
     void addSockets( std::vector< detail::Socket >& entries ) final;

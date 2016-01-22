@@ -56,8 +56,10 @@ set(ZEQ_LINK_LIBRARIES PUBLIC Servus
 if(MSVC)
   list(APPEND ZEQ_LINK_LIBRARIES Ws2_32)
 endif()
-if(ZEROBUF_FOUND)
-  list(APPEND ZEQ_LINK_LIBRARIES PUBLIC ZeroBuf)
+if(HTTPXX_FOUND)
+  list(APPEND ZEQ_PUBLIC_HEADERS http/server.h)
+  list(APPEND ZEQ_SOURCES http/server.cpp)
+  list(APPEND ZEQ_LINK_LIBRARIES ${HTTPXX_LIBRARIES})
 endif()
 
 common_library(zeq)

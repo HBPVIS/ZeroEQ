@@ -6,22 +6,8 @@ if(NOT BOOST_FOUND)
   return()
 endif()
 
-set(TEST_LIBRARIES ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} zeq zeqHBP ${CMAKE_THREAD_LIBS_INIT})
-if(ZEROBUF_FOUND)
-  include(zerobufGenerateCxx)
-  zerobuf_generate_cxx(TESTEVENT ${CMAKE_CURRENT_BINARY_DIR} ../zeq/detail/echo.fbs)
-  include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
-  set(TESTEVENT_LINK_LIBRARIES ZeroBuf)
-  set(TESTEVENT_LIBRARY_TYPE STATIC)
-  set(TESTEVENT_OMIT_EXPORT ON)
-  set(TESTEVENT_INCLUDE_NAME testevent)
-  common_library(testevent)
-
-  list(APPEND TEST_LIBRARIES testevent ZeroBufRender)
-else()
-  list(APPEND EXCLUDE_FROM_TESTS receiverZeroBuf.cpp)
-endif()
+set(TEST_LIBRARIES ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} zeq zeqHBP
+  ${CMAKE_THREAD_LIBS_INIT} ${LIBZMQ_LIBRARIES})
 flatbuffers_generate_c_headers(FBS_NEW_EVENT newEvent.fbs)
 set_source_files_properties(
   newEvent.cpp PROPERTIES OBJECT_DEPENDS ${FBS_NEW_EVENT_OUTPUTS})
@@ -29,5 +15,9 @@ set_source_files_properties(
 flatbuffers_generate_c_headers(FBS_BINARY_EVENT binary.fbs)
 set_source_files_properties(
   serialization.cpp PROPERTIES OBJECT_DEPENDS ${FBS_BINARY_EVENT_OUTPUTS})
+
+if(NOT HTTPXX_FOUND)
+  set(EXCLUDE_FROM_TESTS http/server.cpp)
+endif()
 
 include(CommonCTest)

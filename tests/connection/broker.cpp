@@ -33,10 +33,6 @@ public:
     void run()
     {
         zeq::Subscriber subscriber( test::buildURI( "127.0.0.1", *_publisher ));
-#ifdef ZEQ_USE_ZEROBUF
-        test::EchoIn echo;
-        BOOST_CHECK( subscriber.subscribe( echo ));
-#endif
         BOOST_CHECK( subscriber.registerHandler( zeq::vocabulary::EVENT_ECHO,
            std::bind( &Subscriber::onEchoEvent, this, std::placeholders::_1 )));
 
@@ -53,17 +49,9 @@ public:
             _condition.notify_all();
         }
 
-        // test receive of data for echo event (flatbuffers, 'received') and
-        // echo object (zerobuf, 'echo.gotData')
+        // test receive of data for echo event
         for( size_t i = 0; i < 100 && !received ; ++i )
-        {
-            if( subscriber.receive( 100 ))
-            {
-#ifdef ZEQ_USE_ZEROBUF
-                received = echo.gotData && received;
-#endif
-            }
-        }
+            subscriber.receive( 100 );
     }
 
     void waitStarted() const
@@ -123,14 +111,8 @@ BOOST_AUTO_TEST_CASE( broker )
     subscriber.waitStarted();
 
     BOOST_CHECK( zeq::connection::Service::subscribe( _broker, publisher ));
-#ifdef ZEQ_USE_ZEROBUF
-    const zeq::vocabulary::Echo echo( test::echoMessage );
-#endif
     for( size_t i = 0; i < 100 && !subscriber.received; ++i )
     {
-#ifdef ZEQ_USE_ZEROBUF
-        BOOST_CHECK( publisher.publish( echo ));
-#endif
         BOOST_CHECK( publisher.publish(
                          zeq::vocabulary::serializeEcho( test::echoMessage )));
         std::this_thread::sleep_for( std::chrono::milliseconds( 100 ));
@@ -190,14 +172,8 @@ BOOST_AUTO_TEST_CASE( named_broker )
                      "127.0.0.1", "zeq::connection::test_named_broker",
                      publisher ));
 
-#ifdef ZEQ_USE_ZEROBUF
-    const zeq::vocabulary::Echo echo( test::echoMessage );
-#endif
     for( size_t i = 0; i < 100 && !subscriber1.received; ++i )
     {
-#ifdef ZEQ_USE_ZEROBUF
-        BOOST_CHECK( publisher.publish( echo ));
-#endif
         BOOST_CHECK( publisher.publish(
                          zeq::vocabulary::serializeEcho( test::echoMessage )));
         std::this_thread::sleep_for( std::chrono::milliseconds( 100 ));

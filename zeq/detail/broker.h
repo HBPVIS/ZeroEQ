@@ -25,7 +25,7 @@
 namespace
 {
 inline std::string buildZmqURI( const std::string& schema,
-                         std::string host, const uint16_t port )
+                                std::string host, const uint16_t port )
 {
     if( host.empty( ))
         host = "*";
