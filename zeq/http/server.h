@@ -14,9 +14,9 @@ namespace zeq
 namespace http
 {
 /**
- * Serves HTTP GET and POST requests for servus::Serializable objects.
+ * Serves HTTP GET and PUT requests for servus::Serializable objects.
  *
- * Behaves semantically like a Publisher (for GET) and Subscriber (for POST),
+ * Behaves semantically like a Publisher (for GET) and Subscriber (for PUT),
  * except uses HTTP with JSON payload as the protocol. Requests are served
  * synchronously (as per HTTP spec).
  *
@@ -27,6 +27,8 @@ namespace http
 class Server : public zeq::Receiver
 {
 public:
+    /** @name Setup */
+    //@{
     /**
      * Construct a new HTTP server.
      *
@@ -70,6 +72,17 @@ public:
      *       adaptions. Also make zeq::URI( const servus::URI& from ) explicit.
      */
     ZEQ_API const servus::URI& getURI() const;
+    //@}
+
+    /** @name Object registration for PUT and GET requests */
+    //@{
+    /** Subscribe and register the given object. */
+    bool add( servus::Serializable& object )
+        { return subscribe( object ) && register_( object );}
+
+    /** Unsubscribe and unregister the given object. */
+    bool remove( const servus::Serializable& object )
+        { return unsubscribe( object ) && unregister( object );}
 
     /**
      * Subscribe a serializable object to receive updates from HTTP PUT
@@ -105,6 +118,7 @@ public:
 
     /** Unsubscribe the given object for GET requests. */
     ZEQ_API bool unregister( const servus::Serializable& object );
+    //@}
 
 private:
     class Impl;

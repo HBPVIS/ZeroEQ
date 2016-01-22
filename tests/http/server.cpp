@@ -123,6 +123,11 @@ BOOST_AUTO_TEST_CASE(registration)
     BOOST_CHECK( !server.subscribe( foo ));
     BOOST_CHECK( server.unsubscribe( foo ));
     BOOST_CHECK( !server.unsubscribe( foo ));
+
+    BOOST_CHECK( server.add( foo ));
+    BOOST_CHECK( !server.add( foo ));
+    BOOST_CHECK( server.remove( foo ));
+    BOOST_CHECK( !server.remove( foo ));
 }
 
 BOOST_AUTO_TEST_CASE(get)
