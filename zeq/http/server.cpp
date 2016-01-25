@@ -80,32 +80,39 @@ public:
 
     void process( detail::Socket& )
     {
-        uint8_t id[256];
-        const int idSize = ::zmq_recv( socket, id, sizeof( id ), 0 );
-        if( idSize <= 0 )
-        {
-            ZEQWARN << "HTTP server receive failed: "
-                    << zmq_strerror( zmq_errno( )) << std::endl;
-            return;
-        }
-
         // Read request and body
         httpxx::BufferedRequest request;
         std::string body;
+        uint8_t id[256];
+        int idSize = 0;
         while( !request.complete( ))
         {
-            char msg[256];
-            const int msgSize = ::zmq_recv( socket, msg, sizeof( msg ), 0 );
-            if( msgSize < 0 )
+            // id of client (used for reply)
+            idSize = ::zmq_recv( socket, id, sizeof( id ), 0 );
+            if( idSize <= 0 )
             {
                 ZEQWARN << "HTTP server receive failed: "
                         << zmq_strerror( zmq_errno( )) << std::endl;
                 return;
             }
 
-            int consumed = 0;
+            // msg body
+            zmq_msg_t msg;
+            zmq_msg_init( &msg );
+            zmq_msg_recv( &msg, socket, 0 );
+            const char* data = (const char*)zmq_msg_data( &msg );
+            const size_t msgSize = zmq_msg_size( &msg );
+
+            if( msgSize == 0 )
+            {
+                ZEQWARN << "HTTP server receive failed: "
+                        << zmq_strerror( zmq_errno( )) << std::endl;
+                return;
+            }
+
+            size_t consumed = 0;
             while( !request.complete() && msgSize > consumed )
-                consumed += request.feed( msg + consumed, msgSize - consumed );
+                consumed += request.feed( data + consumed, msgSize - consumed );
         }
 
         // Handle
