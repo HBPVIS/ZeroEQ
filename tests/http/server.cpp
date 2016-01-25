@@ -216,3 +216,21 @@ BOOST_AUTO_TEST_CASE(post)
     running = false;
     thread.join();
 }
+
+BOOST_AUTO_TEST_CASE(largeGet)
+{
+    bool running = true;
+    zeq::http::Server server;
+    Foo foo;
+    server.register_( foo );
+
+    std::thread thread( [ & ]() { while( running ) server.receive( 100 ); });
+
+    Client client( server.getURI( ));
+    client.test( "GET" + std::string( 4096, ' ' ) + "/test/Foo HTTP/1.0\r\n\r\n",
+                 std::string( "HTTP/1.0 200 OK\r\nContent-Length: 54\r\n\r\n" ) +
+                 jsonGet );
+
+    running = false;
+    thread.join();
+}
