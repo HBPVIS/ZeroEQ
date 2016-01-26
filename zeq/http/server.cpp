@@ -113,6 +113,7 @@ public:
             size_t consumed = 0;
             while( !request.complete() && msgSize > consumed )
                 consumed += request.feed( data + consumed, msgSize - consumed );
+            zmq_msg_close( &msg );
         }
 
         // Handle
