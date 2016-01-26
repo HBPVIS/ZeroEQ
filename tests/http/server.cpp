@@ -144,7 +144,7 @@ BOOST_AUTO_TEST_CASE(get)
                  std::string( "HTTP/1.0 200 OK\r\nContent-Length: 54\r\n\r\n" ) +
                  jsonGet );
     client.test( "GET /unknown HTTP/1.0\r\n\r\n",
-                 std::string( "HTTP/1.0 404 Not Found\r\n\r\n" ));
+                 std::string( "HTTP/1.0 404 Not Found\r\nContent-Length: 0\r\n\r\n" ));
 
     running = false;
     thread.join();
@@ -165,7 +165,7 @@ BOOST_AUTO_TEST_CASE(shared)
     Client client2( server2.getURI( ));
 
     client1.test( "GET /test/Foo HTTP/1.0\r\n\r\n",
-                  std::string( "HTTP/1.0 404 Not Found\r\n\r\n" ));
+                  std::string( "HTTP/1.0 404 Not Found\r\nContent-Length: 0\r\n\r\n" ));
     client2.test( "GET /test/Foo HTTP/1.0\r\n\r\n",
                   std::string( "HTTP/1.0 200 OK\r\nContent-Length: 54\r\n\r\n" ) +
                   jsonGet );
@@ -184,16 +184,16 @@ BOOST_AUTO_TEST_CASE(put)
 
     Client client( server.getURI( ));
     client.test( std::string( "PUT /test/Foo HTTP/1.0\r\n\r\n" ) + jsonPut,
-                 std::string( "HTTP/1.0 411 Length Required\r\n\r\n" ));
+                 std::string( "HTTP/1.0 411 Length Required\r\nContent-Length: 0\r\n\r\n" ));
     client.test( std::string( "PUT /test/Foo HTTP/1.0\r\nContent-Length: " ) +
                  std::to_string( jsonPut.length( )) + "\r\n\r\n" + jsonPut,
-                 std::string( "HTTP/1.0 200 OK\r\n\r\n" ));
+                 std::string( "HTTP/1.0 200 OK\r\nContent-Length: 0\r\n\r\n" ));
     client.test(
         std::string( "PUT /test/Foo HTTP/1.0\r\nContent-Length: 3\r\n\r\nFoo" ),
-        std::string( "HTTP/1.0 400 Bad Request\r\n\r\n" ));
+        std::string( "HTTP/1.0 400 Bad Request\r\nContent-Length: 0\r\n\r\n" ));
     client.test( std::string( "PUT /test/Bar HTTP/1.0\r\nContent-Length: " ) +
                  std::to_string( jsonPut.length( )) + "\r\n\r\n" + jsonPut,
-                 std::string( "HTTP/1.0 404 Not Found\r\n\r\n" ));
+                 std::string( "HTTP/1.0 404 Not Found\r\nContent-Length: 0\r\n\r\n" ));
 
     running = false;
     thread.join();
@@ -211,7 +211,7 @@ BOOST_AUTO_TEST_CASE(post)
     Client client( server.getURI( ));
     client.test( std::string( "POST /test/Foo HTTP/1.0\r\nContent-Length: " ) +
                  std::to_string( jsonPut.length( )) + "\r\n\r\n" + jsonPut,
-                 std::string( "HTTP/1.0 405 Method Not Allowed\r\n\r\n"));
+                 std::string( "HTTP/1.0 405 Method Not Allowed\r\nContent-Length: 0\r\n\r\n"));
 
     running = false;
     thread.join();

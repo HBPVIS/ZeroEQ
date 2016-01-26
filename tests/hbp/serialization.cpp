@@ -72,16 +72,6 @@ BOOST_AUTO_TEST_CASE( toggleRequestEvent )
         deserialized_toggleRequest.begin(), deserialized_toggleRequest.end( ));
 }
 
-BOOST_AUTO_TEST_CASE( lookupTable1D )
-{
-    const std::vector< uint8_t > lut( 1024 );
-    const zeq::Event& lookupTableEvent = zeq::hbp::serializeLookupTable1D( lut );
-    const std::vector< uint8_t >& deserializedLut =
-            zeq::hbp::deserializeLookupTable1D( lookupTableEvent );
-    BOOST_CHECK_EQUAL_COLLECTIONS(
-        lut.begin(), lut.end(), deserializedLut.begin(), deserializedLut.end());
-}
-
 BOOST_AUTO_TEST_CASE( imageJPEGEvent )
 {
     const size_t size = 24;
