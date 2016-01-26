@@ -134,11 +134,9 @@ public:
             body.clear(); // no response body
         }
 
-        if( !body.empty( ))
-            response.headers()[ "Content-Length" ] =
-                std::to_string( body.length( ));
 
         // response header
+        response.headers()[ "Content-Length" ] = std::to_string( body.length( ));
         const std::string& rep = response.to_string();
         const int more = body.empty() ? 0 : ZMQ_SNDMORE;
         if( ::zmq_send( socket, id, idSize, ZMQ_SNDMORE ) != idSize ||
