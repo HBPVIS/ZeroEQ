@@ -23,6 +23,11 @@ BOOST_AUTO_TEST_CASE(port_only)
     BOOST_CHECK_EQUAL( portOnly.getHost(), "*" );
     BOOST_CHECK_EQUAL( portOnly.getPort(), 1234 );
     BOOST_CHECK_EQUAL( portOnly.getScheme(), "tcp" );
+
+    portOnly = zeq::URI( ":1234" );
+    BOOST_CHECK_EQUAL( portOnly.getHost(), "*" );
+    BOOST_CHECK_EQUAL( portOnly.getPort(), 1234 );
+    BOOST_CHECK_EQUAL( portOnly.getScheme(), "tcp" );
 }
 
 BOOST_AUTO_TEST_CASE(host_port)
