@@ -7,7 +7,6 @@ flatbuffers_generate_c_headers(HBP_FBS
   detail/cellSetBinaryOp.fbs
   detail/frame.fbs
   detail/imageJPEG.fbs
-  detail/lookupTable1D.fbs
   detail/selections.fbs
 )
 
