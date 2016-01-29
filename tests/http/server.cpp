@@ -234,3 +234,16 @@ BOOST_AUTO_TEST_CASE(largeGet)
     running = false;
     thread.join();
 }
+
+BOOST_AUTO_TEST_CASE(garbage)
+{
+    bool running = true;
+    zeq::http::Server server;
+    std::thread thread( [ & ]() { while( running ) server.receive( 100 ); });
+
+    Client client( server.getURI( ));
+    client.test( "ramble mumble foo bar", "" );
+
+    running = false;
+    thread.join();
+}

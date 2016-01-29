@@ -11,6 +11,7 @@
 #include "../detail/socket.h"
 #include <servus/serializable.h>
 #include <httpxx/BufferedMessage.hpp>
+#include <httpxx/Error.hpp>
 #include <httpxx/Message.hpp>
 #include <httpxx/ResponseBuilder.hpp>
 
@@ -31,10 +32,14 @@ public:
     {
         const std::string& zmqURI = buildZmqURI( uri );
         if( ::zmq_bind( socket, zmqURI.c_str( )) == -1 )
+        {
             ZEQTHROW( std::runtime_error(
                       std::string( "Cannot bind http server socket '" ) +
                                    zmqURI + "': " +
-                                   zmq_strerror( zmq_errno( ))));
+                                   zmq_strerror( zmq_errno( )) +
+                                   ( zmq_errno() == ENODEV ?
+                                   ": host name instead of device used?" : "" )));
+        }
         initURI();
     }
 
@@ -111,8 +116,17 @@ public:
             }
 
             size_t consumed = 0;
-            while( !request.complete() && msgSize > consumed )
-                consumed += request.feed( data + consumed, msgSize - consumed );
+            try
+            {
+                while( !request.complete() && msgSize > consumed )
+                    consumed += request.feed( data + consumed,
+                                              msgSize - consumed );
+            }
+            catch( const httpxx::Error& )
+            {
+                zmq_msg_close( &msg );
+                return; // garbage from client, ignore
+            }
             zmq_msg_close( &msg );
         }
 

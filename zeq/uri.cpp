@@ -13,11 +13,15 @@ namespace zeq
 {
 namespace
 {
-servus::URI createURI( const std::string& string )
+servus::URI createURI( std::string string )
 {
     servus::URI uri( string );
     if( uri.getScheme().empty( ))
+    {
+        if( string.empty() || string[0] == ':' )
+            string = std::string( "*" ) + string;
         return servus::URI( DEFAULT_SCHEMA + "://" + string );
+    }
 
     // TODO: only for compatibility for hbp schemas, remove after downstreams
     // are fixed
