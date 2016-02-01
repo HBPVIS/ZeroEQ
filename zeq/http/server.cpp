@@ -150,6 +150,8 @@ public:
 
 
         // response header
+        if( response.status() >= 400 && response.status() < 500 )
+            body = response.to_string();
         response.headers()[ "Content-Length" ] = std::to_string( body.length( ));
         const std::string& rep = response.to_string();
         const int more = body.empty() ? 0 : ZMQ_SNDMORE;

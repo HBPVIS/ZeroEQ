@@ -16,8 +16,13 @@
 
 namespace
 {
-std::string jsonGet( "Not JSON, but I just want to see that the data is a-ok" );
-std::string jsonPut( "See what my stepbrother jsonGet says" );
+const std::string jsonGet( "Not JSON, just want to see that the is data a-ok" );
+const std::string jsonPut( "See what my stepbrother jsonGet says" );
+
+const std::string error400( "HTTP/1.0 400 Bad Request\r\nContent-Length: 28\r\n\r\nHTTP/1.0 400 Bad Request\r\n\r\n" );
+const std::string error404( "HTTP/1.0 404 Not Found\r\nContent-Length: 26\r\n\r\nHTTP/1.0 404 Not Found\r\n\r\n" );
+const std::string error405( "HTTP/1.0 405 Method Not Allowed\r\nContent-Length: 35\r\n\r\nHTTP/1.0 405 Method Not Allowed\r\n\r\n" );
+const std::string error411( "HTTP/1.0 411 Length Required\r\nContent-Length: 32\r\n\r\nHTTP/1.0 411 Length Required\r\n\r\n" );
 
 class Foo : public servus::Serializable
 {
@@ -56,7 +61,8 @@ public:
             ::zmq_ctx_destroy( _ctx );
     }
 
-    void test( const std::string& request, const std::string& expected )
+    void test( const std::string& request, const std::string& expected,
+               const int line )
     {
         // Get server identity
         uint8_t id[256];
@@ -83,7 +89,9 @@ public:
             response.append( msg, read );
         }
 
-        BOOST_CHECK_EQUAL( response, expected );
+        BOOST_CHECK_MESSAGE( response == expected,
+                             "At l." + std::to_string( line ) + ": " + response +
+                             " != " + expected);
     }
 
 private:
@@ -141,10 +149,9 @@ BOOST_AUTO_TEST_CASE(get)
 
     Client client( server.getURI( ));
     client.test( "GET /test/Foo HTTP/1.0\r\n\r\n",
-                 std::string( "HTTP/1.0 200 OK\r\nContent-Length: 54\r\n\r\n" ) +
-                 jsonGet );
-    client.test( "GET /unknown HTTP/1.0\r\n\r\n",
-                 std::string( "HTTP/1.0 404 Not Found\r\nContent-Length: 0\r\n\r\n" ));
+                 std::string( "HTTP/1.0 200 OK\r\nContent-Length: 48\r\n\r\n" ) +
+                 jsonGet, __LINE__ );
+    client.test( "GET /unknown HTTP/1.0\r\n\r\n", error404, __LINE__ );
 
     running = false;
     thread.join();
@@ -164,11 +171,10 @@ BOOST_AUTO_TEST_CASE(shared)
     Client client1( server1.getURI( ));
     Client client2( server2.getURI( ));
 
-    client1.test( "GET /test/Foo HTTP/1.0\r\n\r\n",
-                  std::string( "HTTP/1.0 404 Not Found\r\nContent-Length: 0\r\n\r\n" ));
+    client1.test( "GET /test/Foo HTTP/1.0\r\n\r\n", error404, __LINE__ );
     client2.test( "GET /test/Foo HTTP/1.0\r\n\r\n",
-                  std::string( "HTTP/1.0 200 OK\r\nContent-Length: 54\r\n\r\n" ) +
-                  jsonGet );
+                  std::string( "HTTP/1.0 200 OK\r\nContent-Length: 48\r\n\r\n" ) +
+                  jsonGet, __LINE__ );
     running = false;
     thread.join();
 }
@@ -184,16 +190,17 @@ BOOST_AUTO_TEST_CASE(put)
 
     Client client( server.getURI( ));
     client.test( std::string( "PUT /test/Foo HTTP/1.0\r\n\r\n" ) + jsonPut,
-                 std::string( "HTTP/1.0 411 Length Required\r\nContent-Length: 0\r\n\r\n" ));
+                 error411, __LINE__ );
     client.test( std::string( "PUT /test/Foo HTTP/1.0\r\nContent-Length: " ) +
                  std::to_string( jsonPut.length( )) + "\r\n\r\n" + jsonPut,
-                 std::string( "HTTP/1.0 200 OK\r\nContent-Length: 0\r\n\r\n" ));
+                 std::string( "HTTP/1.0 200 OK\r\nContent-Length: 0\r\n\r\n" ),
+                 __LINE__);
     client.test(
         std::string( "PUT /test/Foo HTTP/1.0\r\nContent-Length: 3\r\n\r\nFoo" ),
-        std::string( "HTTP/1.0 400 Bad Request\r\nContent-Length: 0\r\n\r\n" ));
+        error400, __LINE__ );
     client.test( std::string( "PUT /test/Bar HTTP/1.0\r\nContent-Length: " ) +
                  std::to_string( jsonPut.length( )) + "\r\n\r\n" + jsonPut,
-                 std::string( "HTTP/1.0 404 Not Found\r\nContent-Length: 0\r\n\r\n" ));
+                 error404, __LINE__ );
 
     running = false;
     thread.join();
@@ -211,7 +218,7 @@ BOOST_AUTO_TEST_CASE(post)
     Client client( server.getURI( ));
     client.test( std::string( "POST /test/Foo HTTP/1.0\r\nContent-Length: " ) +
                  std::to_string( jsonPut.length( )) + "\r\n\r\n" + jsonPut,
-                 std::string( "HTTP/1.0 405 Method Not Allowed\r\nContent-Length: 0\r\n\r\n"));
+                 error405, __LINE__ );
 
     running = false;
     thread.join();
@@ -228,8 +235,8 @@ BOOST_AUTO_TEST_CASE(largeGet)
 
     Client client( server.getURI( ));
     client.test( "GET" + std::string( 4096, ' ' ) + "/test/Foo HTTP/1.0\r\n\r\n",
-                 std::string( "HTTP/1.0 200 OK\r\nContent-Length: 54\r\n\r\n" ) +
-                 jsonGet );
+                 std::string( "HTTP/1.0 200 OK\r\nContent-Length: 48\r\n\r\n" ) +
+                 jsonGet, __LINE__ );
 
     running = false;
     thread.join();
@@ -242,7 +249,7 @@ BOOST_AUTO_TEST_CASE(garbage)
     std::thread thread( [ & ]() { while( running ) server.receive( 100 ); });
 
     Client client( server.getURI( ));
-    client.test( "ramble mumble foo bar", "" );
+    client.test( "ramble mumble foo bar", "", __LINE__ );
 
     running = false;
     thread.join();
