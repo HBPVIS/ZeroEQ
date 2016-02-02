@@ -11,6 +11,7 @@
 #include <zeq/hbp/frame_generated.h>
 #include <zeq/hbp/imageJPEG_generated.h>
 #include <zeq/hbp/selections_generated.h>
+#include <zeq/hbp/lookupTable1D_generated.h>
 #include <zeq/event.h>
 #include <zeq/vocabulary.h>
 
@@ -137,6 +138,21 @@ zeq::Event serializeToggleIDRequest( const uint32_ts& ids )
 uints deserializeToggleIDRequest( const zeq::Event& event )
 {
     return deserializeVector( event, &ToggleIDRequest::ids );
+}
+
+zeq::Event serializeLookupTable1D( const std::vector< uint8_t >& lut )
+{
+    assert( lut.size() == 1024 );
+    zeq::Event event( EVENT_LOOKUPTABLE1D );
+    BUILD_VECTOR_ONLY_BUFFER( event, LookupTable1D, lut );
+    return event;
+}
+
+std::vector< uint8_t > deserializeLookupTable1D( const Event& event )
+{
+    auto data = GetLookupTable1D( event.getData( ));
+    assert( data->lut()->Length() == 1024 );
+    return deserializeVector( data->lut( ));
 }
 
 Event serializeCellSetBinaryOp( const data::CellSetBinaryOp& cellSetBinaryOp )
