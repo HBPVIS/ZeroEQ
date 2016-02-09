@@ -254,3 +254,26 @@ BOOST_AUTO_TEST_CASE(garbage)
     running = false;
     thread.join();
 }
+
+BOOST_AUTO_TEST_CASE(urlcasesensitivity)
+{
+    bool running = true;
+    zeq::http::Server server;
+    Foo foo;
+    server.register_( foo );
+
+    std::thread thread( [ & ]() { while( running ) server.receive( 100 ); });
+
+    Client client( server.getURI( ));
+    client.test( "GET" + std::string( 4096, ' ' ) + "/TEST/FOO HTTP/1.0\r\n\r\n",
+                 std::string( "HTTP/1.0 200 OK\r\nContent-Length: 48\r\n\r\n" ) +
+                 jsonGet, __LINE__ );
+
+    client.test( "GET" + std::string( 4096, ' ' ) + "/test/foo HTTP/1.0\r\n\r\n",
+                 std::string( "HTTP/1.0 200 OK\r\nContent-Length: 48\r\n\r\n" ) +
+                 jsonGet, __LINE__ );
+
+    running = false;
+    thread.join();
+}
+
