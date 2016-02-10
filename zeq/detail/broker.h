@@ -16,7 +16,9 @@
 
 // getlogin()
 #ifdef _MSC_VER
-#  include <sys/syscall.h>
+#define WIN32_LEAN_AND_MEAN
+#  include <windows.h>
+#  include <Lmcons.h>
 #else
 #  include <limits.h>
 #  include <unistd.h>
@@ -44,7 +46,13 @@ inline std::string buildZmqURI( const zeq::URI& uri )
 
 inline std::string getUserName()
 {
+#ifdef _MSC_VER
+    char user[UNLEN+1];
+    DWORD userLength = UNLEN+1;
+    GetUserName( user, &userLength );
+#else
     const char* user = getlogin();
+#endif
     return user ? user : UNKNOWN_USER;
 }
 
