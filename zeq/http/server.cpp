@@ -14,8 +14,18 @@
 #include <httpxx/Error.hpp>
 #include <httpxx/Message.hpp>
 #include <httpxx/ResponseBuilder.hpp>
+#include <algorithm>
 
 namespace httpxx = ::http; // avoid confusion between httpxx and zeq::http
+
+namespace
+{
+std::string _toLower( std::string value )
+{
+    std::transform( value.begin(), value.end(), value.begin(), ::tolower );
+    return value;
+}
+}
 
 namespace zeq
 {
@@ -45,7 +55,7 @@ public:
 
     bool subscribe( servus::Serializable& serializable )
     {
-        const std::string& name = serializable.getTypeName();
+        const std::string& name = _toLower( serializable.getTypeName( ));
         if( _subscriptions.count( name ) != 0 )
             return false;
 
@@ -55,13 +65,13 @@ public:
 
     bool unsubscribe( const servus::Serializable& serializable )
     {
-        const std::string& name = serializable.getTypeName();
-        return _subscriptions.erase( name ) != 0;
+        return _subscriptions.erase(
+            _toLower( serializable.getTypeName( ))) != 0;
     }
 
     bool register_( servus::Serializable& serializable )
     {
-        const std::string& name = serializable.getTypeName();
+        const std::string& name = _toLower( serializable.getTypeName( ));
         if( _registrations.count( name ) != 0 )
             return false;
 
@@ -71,8 +81,8 @@ public:
 
     bool unregister( const servus::Serializable& serializable )
     {
-        const std::string& name = serializable.getTypeName();
-        return _registrations.erase( name ) != 0;
+        return _registrations.erase(
+            _toLower( serializable.getTypeName( ))) != 0;
     }
 
     void addSockets( std::vector< detail::Socket >& entries )
@@ -199,7 +209,7 @@ protected:
     std::string _processGet( const httpxx::BufferedRequest& request,
                              httpxx::ResponseBuilder& response )
     {
-        const std::string& type = _getTypeName( request.url( ));
+        const std::string& type = _toLower( _getTypeName( request.url( )));
         const auto& i = _registrations.find( type );
 
         if( i == _registrations.end( ))
@@ -215,7 +225,7 @@ protected:
     void _processPut( const httpxx::BufferedRequest& request,
                       httpxx::ResponseBuilder& response )
     {
-        const std::string& type = _getTypeName( request.url( ));
+        const std::string& type = _toLower( _getTypeName( request.url( )));
         const auto& i = _subscriptions.find( type );
 
         if( i == _subscriptions.end( ))
@@ -225,6 +235,7 @@ protected:
         else
             response.set_status( 400 );
     }
+
 };
 
 namespace
