@@ -45,9 +45,7 @@ BOOST_AUTO_TEST_CASE(create_invalid_uri_publisher)
 BOOST_AUTO_TEST_CASE(publish)
 {
     zeq::Publisher publisher( zeq::NULL_SESSION );
-#ifdef ZEQ_USE_ZEROBUF
-    BOOST_CHECK( publisher.publish( zeq::vocabulary::Echo( test::echoMessage)));
-#endif
+    BOOST_CHECK( publisher.publish( test::Echo( test::echoMessage )));
     BOOST_CHECK( publisher.publish(
                      zeq::vocabulary::serializeEcho( test::echoMessage )));
 }
@@ -58,9 +56,7 @@ BOOST_AUTO_TEST_CASE(publish_update_uri)
     const zeq::URI& uri = publisher.getURI();
     BOOST_CHECK_MESSAGE( uri.getPort() != 0, uri );
     BOOST_CHECK_MESSAGE( !uri.getHost().empty(), uri );
-#ifdef ZEQ_USE_ZEROBUF
-    BOOST_CHECK( publisher.publish( zeq::vocabulary::Echo( test::echoMessage)));
-#endif
+    BOOST_CHECK( publisher.publish( test::Echo( test::echoMessage )));
     BOOST_CHECK( publisher.publish(
                      zeq::vocabulary::serializeEcho( test::echoMessage )));
 }
@@ -82,7 +78,7 @@ BOOST_AUTO_TEST_CASE(multiple_publisher_on_same_host)
 
     servus::Servus service( PUBLISHER_SERVICE );
     const servus::Strings& instances =
-            service.discover( servus::Servus::IF_ALL, 1000 );
+            service.discover( servus::Servus::IF_LOCAL, 1000 );
     BOOST_CHECK_EQUAL( instances.size(), 3 );
 }
 
@@ -95,7 +91,7 @@ BOOST_AUTO_TEST_CASE(zeroconf_record)
 
     servus::Servus service( PUBLISHER_SERVICE );
     const servus::Strings& instances =
-            service.discover( servus::Servus::IF_ALL, 1000 );
+            service.discover( servus::Servus::IF_LOCAL, 1000 );
     BOOST_REQUIRE_EQUAL( instances.size(), 1 );
 
     const std::string& instance = instances[0];
@@ -116,7 +112,7 @@ BOOST_AUTO_TEST_CASE(custom_session)
 
     servus::Servus service( PUBLISHER_SERVICE );
     const servus::Strings& instances =
-            service.discover( servus::Servus::IF_ALL, 1000 );
+            service.discover( servus::Servus::IF_LOCAL, 1000 );
     BOOST_REQUIRE_EQUAL( instances.size(), 1 );
 
     const std::string& instance = instances[0];
@@ -134,7 +130,7 @@ BOOST_AUTO_TEST_CASE(different_session_at_runtime)
 
     servus::Servus service( PUBLISHER_SERVICE );
     const servus::Strings& instances =
-            service.discover( servus::Servus::IF_ALL, 1000 );
+            service.discover( servus::Servus::IF_LOCAL, 1000 );
     BOOST_REQUIRE_EQUAL( instances.size(), 1 );
 
     const std::string& instance = instances[0];
@@ -168,7 +164,7 @@ BOOST_AUTO_TEST_CASE(fixed_uri_and_session)
                                     test::buildUniqueSession( ));
     servus::Servus service( PUBLISHER_SERVICE );
     const servus::Strings& instances =
-            service.discover( servus::Servus::IF_ALL, 1000 );
+            service.discover( servus::Servus::IF_LOCAL, 1000 );
     BOOST_REQUIRE_EQUAL( instances.size(), 1 );
 }
 
@@ -181,7 +177,7 @@ BOOST_AUTO_TEST_CASE(legacy_ctor)
 
     servus::Servus service( PUBLISHER_SERVICE );
     const servus::Strings& instances =
-            service.discover( servus::Servus::IF_ALL, 1000 );
+            service.discover( servus::Servus::IF_LOCAL, 1000 );
     BOOST_CHECK_EQUAL( instances.size(), 1 );
     BOOST_CHECK_EQUAL( service.get( instances[0], KEY_SESSION ),
                        getUserName( ));

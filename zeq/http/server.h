@@ -7,6 +7,7 @@
 #define ZEQ_HTTP_SERVER_H
 
 #include <zeq/receiver.h> // base class
+#include <zeq/log.h>
 
 namespace zeq
 {
@@ -58,8 +59,10 @@ public:
      *   configure the web server, running by default on INADDR_ANY and a
      *   randomly chosen port
      */
-    ZEQ_API static std::unique_ptr< Server > parse( int argc, char* argv[] );
-    ZEQ_API static std::unique_ptr< Server > parse( int argc, char* argv[],
+    ZEQ_API static std::unique_ptr< Server > parse( int argc,
+                                                    const char* argv[] );
+    ZEQ_API static std::unique_ptr< Server > parse( int argc,
+                                                    const char* argv[],
                                                     Receiver& shared );
     /**
      * Get the publisher URI.
@@ -127,10 +130,7 @@ private:
     // Receiver API
     void addSockets( std::vector< detail::Socket >& entries ) final;
     void process( detail::Socket& socket ) final;
-    void addConnection( const std::string& ) final
-    {
-        throw std::runtime_error( "Add connection to HTTP server unsupported" );
-    }
+    void addConnection( const std::string& ) final { ZEQDONTCALL; } // LCOV_EXCL_LINE
 };
 }
 }
