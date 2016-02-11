@@ -219,6 +219,7 @@ protected:
         }
 
         response.set_status( 200 );
+        i->second->notifyRequested();
         return i->second->toJSON();
     }
 
@@ -230,10 +231,14 @@ protected:
 
         if( i == _subscriptions.end( ))
             response.set_status( 404 );
-        else if( i->second->fromJSON( request.body( )))
-            response.set_status( 200 );
         else
-            response.set_status( 400 );
+        {
+            i->second->notifyUpdated();
+            if( i->second->fromJSON( request.body( )))
+                response.set_status( 200 );
+            else
+                response.set_status( 400 );
+        }
     }
 
 };

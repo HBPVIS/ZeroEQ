@@ -26,6 +26,12 @@ const std::string error411( "HTTP/1.0 411 Length Required\r\nContent-Length: 32\
 
 class Foo : public servus::Serializable
 {
+public:
+    Foo() { _notified = false; }
+
+    void setNotified( const bool value ) { _notified = value; }
+    bool getNotified( ) const { return _notified; }
+
 private:
     std::string getTypeName() const final { return "test::Foo"; }
     virtual zeq::uint128_t getTypeIdentifier() const final
@@ -40,6 +46,8 @@ private:
     {
         return jsonGet;
     }
+
+    bool _notified;
 };
 
 class Client
@@ -333,5 +341,63 @@ BOOST_AUTO_TEST_CASE(urlcasesensitivity)
 
     running = false;
     thread.join();
+}
+
+// Function called with Foo object is notified
+void onNotified( Foo* foo )
+{
+    foo->setNotified( true );
+}
+
+BOOST_AUTO_TEST_CASE(getRequestedNotification)
+{
+    bool running = true;
+    zeq::http::Server server;
+    Foo foo;
+
+    server.register_( foo );
+
+    foo.setRequestedFunction(
+        std::bind( &onNotified, &foo ));
+
+    std::thread thread( [ & ]() { while( running ) server.receive( 100 ); });
+
+    Client client( server.getURI( ));
+    client.test( "GET" + std::string( 4096, ' ' ) + "/test/foo HTTP/1.0\r\n\r\n",
+                 std::string( "HTTP/1.0 200 OK\r\nContent-Length: 48\r\n\r\n" ) +
+                 jsonGet, __LINE__ );
+
+    running = false;
+    thread.join();
+    BOOST_CHECK( foo.getNotified( ));
+}
+
+BOOST_AUTO_TEST_CASE(getUpdatedNotification)
+{
+    bool running = true;
+    zeq::http::Server server;
+    Foo foo;
+
+    server.register_( foo );
+    server.subscribe( foo );
+
+    foo.setUpdatedFunction(
+        std::bind( &onNotified, &foo ));
+
+    std::thread thread( [ & ]() { while( running ) server.receive( 100 ); });
+
+    Client client( server.getURI( ));
+    client.test( "GET" + std::string( 4096, ' ' ) + "/test/foo HTTP/1.0\r\n\r\n",
+                 std::string( "HTTP/1.0 200 OK\r\nContent-Length: 48\r\n\r\n" ) +
+                 jsonGet, __LINE__ );
+
+    client.test( std::string( "PUT /test/foo HTTP/1.0\r\nContent-Length: " ) +
+                 std::to_string( jsonPut.length( )) + "\r\n\r\n" + jsonPut,
+                 std::string( "HTTP/1.0 200 OK\r\nContent-Length: 0\r\n\r\n" ),
+                 __LINE__);
+
+    running = false;
+    thread.join();
+    BOOST_CHECK( foo.getNotified( ));
 }
 
