@@ -80,7 +80,7 @@ public:
         }
     }
 
-    static uint128_t& getUUID();
+    ZEQ_API static uint128_t& getUUID();
 
     URI uri;
     void* socket;
