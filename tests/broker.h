@@ -8,10 +8,7 @@
 #include <zeq/detail/port.h>
 #include <zeq/zeq.h>
 
-#ifdef ZEQ_USE_ZEROBUF
-#  include <echo.h>
-#endif
-
+#include <servus/serializable.h>
 #include <servus/uri.h>
 #include <boost/test/unit_test.hpp>
 #include <string>
@@ -52,28 +49,40 @@ void onEchoEvent( const zeq::Event& event )
     BOOST_CHECK_EQUAL( echoMessage, message );
 }
 
-#ifdef ZEQ_USE_ZEROBUF
-class EchoIn : public zeq::vocabulary::Echo
-{
-public:
-    bool gotData;
-
-    EchoIn() : gotData( false )
-    {
-        setUpdatedFunction(
-            [this]()
-            {
-                BOOST_CHECK_EQUAL( getMessageString(), echoMessage );
-                gotData = true;
-            });
-    }
-};
-#endif
-
 void onExitEvent( const zeq::Event& event )
 {
     BOOST_CHECK_EQUAL( event.getType(), zeq::vocabulary::EVENT_EXIT );
     BOOST_CHECK_EQUAL( event.getSize(), 0 );
 }
+
+class Echo : public servus::Serializable
+{
+public:
+    std::string getTypeName() const final { return "zeq::test::Echo"; }
+
+    Echo() {}
+    Echo( const std::string& message ) : _message( message ) {}
+    const std::string& getMessage() const { return _message; }
+
+    bool operator == ( const Echo& rhs ) const { return _message == rhs._message; }
+
+private:
+    bool _fromBinary( const void* data, const size_t ) final
+    {
+        _message = std::string( static_cast< const char* >( data ));
+        return true;
+    }
+
+    Data _toBinary() const final
+    {
+        Data data;
+        data.ptr = std::shared_ptr< const void >( _message.c_str(),
+                                                  []( const void* ){} );
+        data.size = _message.length();
+        return data;
+    }
+
+    std::string _message;
+};
 
 }

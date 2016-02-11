@@ -95,6 +95,24 @@ BOOST_AUTO_TEST_CASE(test_invalid_deregisterhandler)
     BOOST_CHECK( !subscriber.deregisterHandler(zeq::vocabulary::EVENT_EXIT ));
 }
 
+BOOST_AUTO_TEST_CASE(invalid_subscribe)
+{
+    zeq::Subscriber subscriber;
+    test::Echo echo;
+    BOOST_CHECK( subscriber.subscribe( echo ));
+    BOOST_CHECK( !subscriber.subscribe( echo ));
+}
+
+BOOST_AUTO_TEST_CASE(test_invalid_unsubscribe)
+{
+    zeq::Subscriber subscriber;
+    test::Echo echo;
+    BOOST_CHECK( !subscriber.unsubscribe( echo ));
+    BOOST_CHECK( subscriber.subscribe( echo ));
+    BOOST_CHECK( subscriber.unsubscribe( echo ));
+    BOOST_CHECK( !subscriber.unsubscribe( echo ));
+}
+
 BOOST_AUTO_TEST_CASE(not_implemented_servus )
 {
     if( servus::Servus::isAvailable( ) )

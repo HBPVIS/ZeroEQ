@@ -40,6 +40,28 @@ BOOST_AUTO_TEST_CASE(publish_receive)
     BOOST_CHECK( received );
 }
 
+BOOST_AUTO_TEST_CASE(publish_receive_serializable)
+{
+    test::Echo echoOut( "The quick brown fox" );
+    test::Echo echoIn;
+
+    zeq::Publisher publisher( zeq::NULL_SESSION );
+    zeq::Subscriber subscriber( zeq::URI( publisher.getURI( )));
+    BOOST_CHECK( subscriber.subscribe( echoIn ));
+
+    for( size_t i = 0; i < 10; ++i )
+    {
+        BOOST_CHECK( publisher.publish( echoOut ));
+
+        if( subscriber.receive( 100 ))
+        {
+            BOOST_CHECK_EQUAL( echoIn.getMessage(), echoOut.getMessage( ));
+            return;
+        }
+    }
+    BOOST_CHECK( !"reachable" );
+}
+
 BOOST_AUTO_TEST_CASE(no_receive)
 {
     zeq::Subscriber subscriber( zeq::URI( "1.2.3.4:1234" ));
@@ -246,19 +268,19 @@ namespace
 class Publisher
 {
 public:
-    Publisher( const std::string& session )
-        : running( true )
-        , _publisher( session )
+    Publisher()
+        : running( false )
     {}
 
-    void run()
+    void run( const std::string& session )
     {
+        zeq::Publisher publisher( session );
         running = true;
         size_t i = 0;
         while( running )
         {
             BOOST_CHECK(
-                _publisher.publish( serializeEcho( test::echoMessage )));
+                publisher.publish( serializeEcho( test::echoMessage )));
             std::this_thread::sleep_for( std::chrono::milliseconds( 100 ));
             ++i;
 
@@ -268,9 +290,6 @@ public:
     }
 
     bool running;
-
-private:
-    zeq::Publisher _publisher;
 };
 }
 
@@ -280,44 +299,18 @@ BOOST_AUTO_TEST_CASE(publish_blocking_receive_zeroconf)
     if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
         return;
 
-
     zeq::Subscriber subscriber( test::buildUniqueSession( ));
     zeq::detail::Sender::getUUID() = servus::make_UUID(); // different machine
-    Publisher publisher( subscriber.getSession( ));
 
     BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
                        std::bind( &test::onEchoEvent, std::placeholders::_1 )));
 
-    std::thread thread( std::bind( &Publisher::run, &publisher ));
+    Publisher publisher;
+    std::thread thread( std::bind( &Publisher::run, &publisher,
+                                   subscriber.getSession( )));
+
     BOOST_CHECK( subscriber.receive( ));
 
     publisher.running = false;
     thread.join( );
 }
-
-#ifdef ZEQ_USE_ZEROBUF
-BOOST_AUTO_TEST_CASE(publish_receive_zerobuf)
-{
-    zeq::vocabulary::Echo echoOut;
-    zeq::vocabulary::Echo echoIn;
-
-    echoOut.setMessage( "The quick brown fox" );
-
-    zeq::Publisher publisher( zeq::NULL_SESSION );
-    zeq::Subscriber subscriber( zeq::URI( publisher.getURI( )));
-    BOOST_CHECK( subscriber.subscribe( echoIn ));
-
-    for( size_t i = 0; i < 10; ++i )
-    {
-        BOOST_CHECK( publisher.publish( echoOut ));
-
-        if( subscriber.receive( 100 ))
-        {
-            BOOST_CHECK_EQUAL( echoIn.getMessageString(),
-                               echoOut.getMessageString( ));
-            return;
-        }
-    }
-    BOOST_CHECK( !"reachable" );
-}
-#endif
