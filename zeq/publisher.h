@@ -122,7 +122,7 @@ public:
     /** @return the session name that is announced */
     ZEQ_API const std::string& getSession() const;
 
-    std::string getAddress() const; //!< @internal
+    ZEQ_API std::string getAddress() const; //!< @internal
 
 private:
     class Impl;

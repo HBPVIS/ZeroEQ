@@ -45,7 +45,7 @@ public:
     ZEQ_API explicit Server( const URI& uri );
     ZEQ_API explicit Server( Receiver& shared );
     ZEQ_API explicit Server();
-    explicit Server( Server& shared )
+    ZEQ_API explicit Server( Server& shared )
         : Server( static_cast< Receiver& >( shared )) {}
     ZEQ_API virtual ~Server();
 
