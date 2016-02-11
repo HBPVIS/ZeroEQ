@@ -47,12 +47,20 @@ tracks the implementation.
         virtual void fromJSON( const std::string& json );
         virtual std::string toJSON() const;
 
-        /** Called after the object has been updated. */
-        virtual void notifyUpdated() {}
+        /**
+         * Set a new function called after the object has been updated.
+         *
+         * @return the previously set function.
+         */
+        ChangeFunc setUpdatedFunction( const ChangeFunc& func );
 
-        /** Called when a request for the object has been received,
-          * before the object is published. */
-        virtual void notifyRequested() {}
+        /**
+         * Set a new function called when a request has been received.
+         *
+         * Invoked before the object is published.
+         * @return the previously set function.
+         */
+        ChangeFunc setRequestedFunction( const ChangeFunc& func );
     };
     }
 
