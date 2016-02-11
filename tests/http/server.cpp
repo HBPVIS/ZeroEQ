@@ -118,6 +118,64 @@ BOOST_AUTO_TEST_CASE(construction)
                        std::runtime_error );
 }
 
+BOOST_AUTO_TEST_CASE(construction_argv_host_port)
+{
+    const char* app = boost::unit_test::framework::master_test_suite().argv[0];
+    const char* argv[] = { app, "--http-server", "127.0.0.1:0" };
+    const int argc = sizeof(argv)/sizeof(char*);
+
+    std::unique_ptr< zeq::http::Server > server1 =
+            zeq::http::Server::parse( argc, argv );
+
+    BOOST_CHECK_EQUAL( server1->getURI().getHost(), "127.0.0.1" );
+    BOOST_CHECK_NE( server1->getURI().getPort(), 0 );
+
+    zeq::Subscriber shared;
+    std::unique_ptr< zeq::http::Server > server2 =
+            zeq::http::Server::parse( argc, argv, shared );
+
+    BOOST_CHECK_EQUAL( server2->getURI().getHost(), "127.0.0.1" );
+    BOOST_CHECK_NE( server2->getURI().getPort(), 0 );
+}
+
+BOOST_AUTO_TEST_CASE(construction_argv)
+{
+    const char* app = boost::unit_test::framework::master_test_suite().argv[0];
+    const char* argv[] = { app, "--http-server" };
+    const int argc = sizeof(argv)/sizeof(char*);
+
+    std::unique_ptr< zeq::http::Server > server1 =
+            zeq::http::Server::parse( argc, argv );
+
+    BOOST_CHECK( !server1->getURI().getHost().empty( ));
+    BOOST_CHECK_NE( server1->getURI().getPort(), 0 );
+
+    zeq::Subscriber shared;
+    std::unique_ptr< zeq::http::Server > server2 =
+            zeq::http::Server::parse( argc, argv, shared );
+
+    BOOST_CHECK( !server2->getURI().getHost().empty( ));
+    BOOST_CHECK_NE( server2->getURI().getPort(), 0 );
+}
+
+BOOST_AUTO_TEST_CASE(construction_empty_argv)
+{
+    const char* app = boost::unit_test::framework::master_test_suite().argv[0];
+    const char* argv[] = { app };
+    const int argc = sizeof(argv)/sizeof(char*);
+
+    std::unique_ptr< zeq::http::Server > server1 =
+            zeq::http::Server::parse( argc, argv );
+
+    BOOST_CHECK( !server1 );
+
+    zeq::Subscriber shared;
+    std::unique_ptr< zeq::http::Server > server2 =
+            zeq::http::Server::parse( argc, argv, shared );
+
+    BOOST_CHECK( !server2 );
+}
+
 BOOST_AUTO_TEST_CASE(registration)
 {
     zeq::http::Server server;
