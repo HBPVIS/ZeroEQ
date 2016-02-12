@@ -233,9 +233,11 @@ protected:
             response.set_status( 404 );
         else
         {
-            i->second->notifyUpdated();
             if( i->second->fromJSON( request.body( )))
+            {
+                i->second->notifyUpdated();
                 response.set_status( 200 );
+            }
             else
                 response.set_status( 400 );
         }

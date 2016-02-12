@@ -29,8 +29,8 @@ class Foo : public servus::Serializable
 public:
     Foo() { _notified = false; }
 
-    void setNotified( const bool value ) { _notified = value; }
-    bool getNotified( ) const { return _notified; }
+    void setNotified() { _notified = true; }
+    bool getNotified() const { return _notified; }
 
 private:
     std::string getTypeName() const final { return "test::Foo"; }
@@ -209,15 +209,21 @@ BOOST_AUTO_TEST_CASE(get)
     bool running = true;
     zeq::http::Server server;
     Foo foo;
+
+    foo.setRequestedFunction( [&]{ foo.setNotified(); });
     server.register_( foo );
 
     std::thread thread( [ & ]() { while( running ) server.receive( 100 ); });
 
     Client client( server.getURI( ));
-    client.test( "GET /test/Foo HTTP/1.0\r\n\r\n",
-                 std::string( "HTTP/1.0 200 OK\r\nContent-Length: 48\r\n\r\n" ) +
-                 jsonGet, __LINE__ );
+
     client.test( "GET /unknown HTTP/1.0\r\n\r\n", error404, __LINE__ );
+    BOOST_CHECK( !foo.getNotified( ));
+
+    client.test( "GET /test/Foo HTTP/1.0\r\n\r\n",
+                 std::string( "HTTP/1.0 200 OK\r\nContent-Length: 48\r\n\r\n" )+
+                 jsonGet, __LINE__ );
+    BOOST_CHECK( foo.getNotified( ));
 
     running = false;
     thread.join();
@@ -250,6 +256,8 @@ BOOST_AUTO_TEST_CASE(put)
     bool running = true;
     zeq::http::Server server;
     Foo foo;
+
+    foo.setUpdatedFunction( [&]{ foo.setNotified(); });
     server.subscribe( foo );
 
     std::thread thread( [ & ]() { while( running ) server.receive( 100 ); });
@@ -257,16 +265,19 @@ BOOST_AUTO_TEST_CASE(put)
     Client client( server.getURI( ));
     client.test( std::string( "PUT /test/Foo HTTP/1.0\r\n\r\n" ) + jsonPut,
                  error411, __LINE__ );
-    client.test( std::string( "PUT /test/Foo HTTP/1.0\r\nContent-Length: " ) +
-                 std::to_string( jsonPut.length( )) + "\r\n\r\n" + jsonPut,
-                 std::string( "HTTP/1.0 200 OK\r\nContent-Length: 0\r\n\r\n" ),
-                 __LINE__);
     client.test(
         std::string( "PUT /test/Foo HTTP/1.0\r\nContent-Length: 3\r\n\r\nFoo" ),
         error400, __LINE__ );
     client.test( std::string( "PUT /test/Bar HTTP/1.0\r\nContent-Length: " ) +
                  std::to_string( jsonPut.length( )) + "\r\n\r\n" + jsonPut,
                  error404, __LINE__ );
+    BOOST_CHECK( !foo.getNotified( ));
+
+    client.test( std::string( "PUT /test/Foo HTTP/1.0\r\nContent-Length: " ) +
+                 std::to_string( jsonPut.length( )) + "\r\n\r\n" + jsonPut,
+                 std::string( "HTTP/1.0 200 OK\r\nContent-Length: 0\r\n\r\n" ),
+                 __LINE__);
+    BOOST_CHECK( foo.getNotified( ));
 
     running = false;
     thread.join();
@@ -300,8 +311,9 @@ BOOST_AUTO_TEST_CASE(largeGet)
     std::thread thread( [ & ]() { while( running ) server.receive( 100 ); });
 
     Client client( server.getURI( ));
-    client.test( "GET" + std::string( 4096, ' ' ) + "/test/Foo HTTP/1.0\r\n\r\n",
-                 std::string( "HTTP/1.0 200 OK\r\nContent-Length: 48\r\n\r\n" ) +
+    client.test( "GET" + std::string( 4096, ' ' ) +
+                 "/test/Foo HTTP/1.0\r\n\r\n",
+                 std::string( "HTTP/1.0 200 OK\r\nContent-Length: 48\r\n\r\n" )+
                  jsonGet, __LINE__ );
 
     running = false;
@@ -342,62 +354,3 @@ BOOST_AUTO_TEST_CASE(urlcasesensitivity)
     running = false;
     thread.join();
 }
-
-// Function called with Foo object is notified
-void onNotified( Foo* foo )
-{
-    foo->setNotified( true );
-}
-
-BOOST_AUTO_TEST_CASE(getRequestedNotification)
-{
-    bool running = true;
-    zeq::http::Server server;
-    Foo foo;
-
-    server.register_( foo );
-
-    foo.setRequestedFunction(
-        std::bind( &onNotified, &foo ));
-
-    std::thread thread( [ & ]() { while( running ) server.receive( 100 ); });
-
-    Client client( server.getURI( ));
-    client.test( "GET" + std::string( 4096, ' ' ) + "/test/foo HTTP/1.0\r\n\r\n",
-                 std::string( "HTTP/1.0 200 OK\r\nContent-Length: 48\r\n\r\n" ) +
-                 jsonGet, __LINE__ );
-
-    running = false;
-    thread.join();
-    BOOST_CHECK( foo.getNotified( ));
-}
-
-BOOST_AUTO_TEST_CASE(getUpdatedNotification)
-{
-    bool running = true;
-    zeq::http::Server server;
-    Foo foo;
-
-    server.register_( foo );
-    server.subscribe( foo );
-
-    foo.setUpdatedFunction(
-        std::bind( &onNotified, &foo ));
-
-    std::thread thread( [ & ]() { while( running ) server.receive( 100 ); });
-
-    Client client( server.getURI( ));
-    client.test( "GET" + std::string( 4096, ' ' ) + "/test/foo HTTP/1.0\r\n\r\n",
-                 std::string( "HTTP/1.0 200 OK\r\nContent-Length: 48\r\n\r\n" ) +
-                 jsonGet, __LINE__ );
-
-    client.test( std::string( "PUT /test/foo HTTP/1.0\r\nContent-Length: " ) +
-                 std::to_string( jsonPut.length( )) + "\r\n\r\n" + jsonPut,
-                 std::string( "HTTP/1.0 200 OK\r\nContent-Length: 0\r\n\r\n" ),
-                 __LINE__);
-
-    running = false;
-    thread.join();
-    BOOST_CHECK( foo.getNotified( ));
-}
-
