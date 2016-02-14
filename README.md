@@ -3,9 +3,12 @@
 # Introduction {#Introduction}
 
 A cross-platform C++ library to publish and subscribe for events. Applications
-can discover each other automatically through the integrated ZeroConf protocol,
-or through explicit addressing using hostname and port. A defined vocabulary
-defines semantics for the published events.
+communicate using ZeroMQ, discover each other automatically through the
+integrated ZeroConf protocol or through explicit addressing using hostname and
+port. A defined vocabulary defines semantics for the published events, provided
+by [ZeroBuf](https://github.com/HBPVIS/ZeroBuf) or using a simple Serializable
+interface. An optional http::Server provides a web service API in C++
+applications.
 
 ## Features {#Features}
 
@@ -13,7 +16,7 @@ ZeroEQ provides the following major features:
 
 * Publish events using zeq::Publisher
 * Subscribe to events using zeq::Subscriber
-* Update and get events using zeq::http::Server using REST and JSON
+* Web service GET and PUT events using zeq::http::Server using REST and JSON
 * Asynchronous, reliable transport using ZMQ
 * Automatic publisher discovery using Zeroconf
 * Serialization of events using [ZeroBuf](https://github.com/HBPVIS/ZeroBuf)

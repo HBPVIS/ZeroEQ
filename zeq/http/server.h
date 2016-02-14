@@ -19,7 +19,10 @@ namespace http
  *
  * Behaves semantically like a Publisher (for GET) and Subscriber (for PUT),
  * except uses HTTP with JSON payload as the protocol. Requests are served
- * synchronously (as per HTTP spec).
+ * synchronously (as per HTTP spec). Objects are available under their
+ * Serializable::getTypeName(), with '::' replaced by '/'. The REST API is case
+ * insensitive. For example, zerobuf::render::Camera is served at
+ * 'GET|PUT [uri]/zerobuf/render/camera'.
  *
  * Not thread safe.
  *
@@ -106,7 +109,7 @@ public:
     ZEQ_API bool unsubscribe( const servus::Serializable& object );
 
     /**
-     * Subscribe ther serializable object to serve HTTP GET requests.
+     * Subscribe a serializable object to serve HTTP GET requests.
      *
      * Every request will be directly handled during receive() by using
      * toJSON(). To track updates on the object, the serializable's received
