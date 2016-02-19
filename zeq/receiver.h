@@ -52,6 +52,8 @@ public:
     /**
      * Receive at least one event from all shared receivers.
      *
+     * Using receive( 0 ) is equivalent to polling the receivers for data.
+     *
      * @param timeout timeout in ms for poll, default blocking poll until at
      *                least one event is received
      * @return true if at least one event was received
