@@ -58,9 +58,9 @@ public:
      *
      * The creation and parameters depend on the following command line
      * parameters:
-     * * --http-server [host][:port]: Enable the server. The optional parameters
-     *   configure the web server, running by default on INADDR_ANY and a
-     *   randomly chosen port
+     * * --zeq-http-server [host][:port]: Enable the server. The optional
+     *   parameters configure the web server, running by default on INADDR_ANY
+     *   and a randomly chosen port
      */
     ZEQ_API static std::unique_ptr< Server > parse( int argc,
                                                     const char* argv[] );
