@@ -38,7 +38,10 @@ public:
         : _context( nullptr )
         , uri( uri_ )
         , socket( zmq_socket( _createContext( context ), type ))
-    {}
+    {
+        const int hwm = 0;
+        zmq_setsockopt( socket, ZMQ_SNDHWM, &hwm, sizeof( hwm ));
+    }
 
     ~Sender()
     {

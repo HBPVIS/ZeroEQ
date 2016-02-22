@@ -271,6 +271,8 @@ public:
             return true;
 
         _subscribers[zmqURI] = zmq_socket( context, ZMQ_SUB );
+        const int hwm = 0;
+        zmq_setsockopt( _subscribers[zmqURI], ZMQ_RCVHWM, &hwm, sizeof( hwm ));
 
         if( zmq_connect( _subscribers[zmqURI], zmqURI.c_str( )) == -1 )
         {
