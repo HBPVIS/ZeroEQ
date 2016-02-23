@@ -31,8 +31,6 @@ public:
 private:
     bool _fromBinary( const void*, const size_t ) final
     {
-        // BOOST_REQUIRE_EQUAL( size, _bottle.length( ));
-        // ::memcpy( &_bottle[0], data, size );
         return true;
     }
 

@@ -129,12 +129,13 @@ BOOST_AUTO_TEST_CASE(construction)
 BOOST_AUTO_TEST_CASE(construction_argv_host_port)
 {
     const char* app = boost::unit_test::framework::master_test_suite().argv[0];
-    const char* argv[] = { app, "--http-server", "127.0.0.1:0" };
+    const char* argv[] = { app, "--zeq-http-server", "127.0.0.1:0" };
     const int argc = sizeof(argv)/sizeof(char*);
 
     std::unique_ptr< zeq::http::Server > server1 =
             zeq::http::Server::parse( argc, argv );
 
+    BOOST_REQUIRE( server1 );
     BOOST_CHECK_EQUAL( server1->getURI().getHost(), "127.0.0.1" );
     BOOST_CHECK_NE( server1->getURI().getPort(), 0 );
 
@@ -142,6 +143,7 @@ BOOST_AUTO_TEST_CASE(construction_argv_host_port)
     std::unique_ptr< zeq::http::Server > server2 =
             zeq::http::Server::parse( argc, argv, shared );
 
+    BOOST_REQUIRE( server2 );
     BOOST_CHECK_EQUAL( server2->getURI().getHost(), "127.0.0.1" );
     BOOST_CHECK_NE( server2->getURI().getPort(), 0 );
 }
@@ -149,12 +151,13 @@ BOOST_AUTO_TEST_CASE(construction_argv_host_port)
 BOOST_AUTO_TEST_CASE(construction_argv)
 {
     const char* app = boost::unit_test::framework::master_test_suite().argv[0];
-    const char* argv[] = { app, "--http-server" };
+    const char* argv[] = { app, "--zeq-http-server" };
     const int argc = sizeof(argv)/sizeof(char*);
 
     std::unique_ptr< zeq::http::Server > server1 =
             zeq::http::Server::parse( argc, argv );
 
+    BOOST_REQUIRE( server1 );
     BOOST_CHECK( !server1->getURI().getHost().empty( ));
     BOOST_CHECK_NE( server1->getURI().getPort(), 0 );
 
@@ -162,6 +165,7 @@ BOOST_AUTO_TEST_CASE(construction_argv)
     std::unique_ptr< zeq::http::Server > server2 =
             zeq::http::Server::parse( argc, argv, shared );
 
+    BOOST_REQUIRE( server2 );
     BOOST_CHECK( !server2->getURI().getHost().empty( ));
     BOOST_CHECK_NE( server2->getURI().getPort(), 0 );
 }
