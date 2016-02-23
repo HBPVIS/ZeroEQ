@@ -145,6 +145,7 @@ public:
      *
      * Only one callback per event is possible in the current implementation.
      *
+     * @deprecated Use subscribe()
      * @param event the event type of interest
      * @param func the callback function on receive of event
      * @return true if callback could be registered
@@ -155,12 +156,13 @@ public:
     /**
      * Deregister a callback for an event.
      *
+     * @deprecated Use unsubscribe()
      * @param event the event type of interest
      * @return true if callback could be deregistered
      */
     ZEQ_API bool deregisterHandler( const uint128_t& event );
 
-    /** @return true if a handler is registered for the given event. */
+    /** @deprecated */
     ZEQ_API bool hasHandler( const uint128_t& event ) const;
 
     /**
