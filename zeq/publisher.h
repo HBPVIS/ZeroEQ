@@ -92,6 +92,7 @@ public:
      *
      * If there is no subscriber for that event, no event will be send.
      *
+     * @deprecated Use publish() with serializable.
      * @param event the serialized event to publish
      * @return true if publish was successful
      */

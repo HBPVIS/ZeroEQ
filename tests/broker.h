@@ -76,7 +76,7 @@ private:
     Data _toBinary() const final
     {
         Data data;
-        data.ptr = std::shared_ptr< const void >( _message.c_str(),
+        data.ptr = std::shared_ptr< const void >( _message.data(),
                                                   []( const void* ){} );
         data.size = _message.length();
         return data;

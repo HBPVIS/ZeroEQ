@@ -80,8 +80,8 @@ tracks the implementation.
          *
          * The creation and parameters depend on the following command line
          * parameters:
-         * * --http-server [host][:port]: Enable the server. Optional parameters
-         *   configure the web server, running by default on :4020
+         * * --zeq-http-server [host][:port]: Enable the server. Optional
+         *   parameters configure the web server, running by default on :4020
          */
         static std::unique_ptr< Server > parse( argc, argv );
         static std::unique_ptr< Server > parse( argc, argv, Receiver& shared );

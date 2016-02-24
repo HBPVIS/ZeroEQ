@@ -251,7 +251,7 @@ std::string _getServerParameter( const int argc, const char* argv[] )
 {
     for( int i = 0; i < argc; ++i  )
     {
-        if( std::string( argv[i] ) == "--http-server" )
+        if( std::string( argv[i] ) == "--zeq-http-server" )
         {
             if( i == argc - 1 || argv[ i + 1 ][0] == '-' )
                 return "tcp://";

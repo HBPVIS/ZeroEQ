@@ -1,6 +1,6 @@
 
-/* Copyright (c) 2015, Human Brain Project
- *                     Stefan.Eilemann@epfl.ch
+/* Copyright (c) 2015-2016, Human Brain Project
+ *                          Stefan.Eilemann@epfl.ch
  */
 
 #ifndef ZEQ_DETAIL_SENDER_H
@@ -31,15 +31,17 @@ class Sender
 
 public:
     Sender( void* context, const int type )
-        : _context( 0 )
-        , socket( zmq_socket( _createContext( context ), type ))
+        : Sender( URI(), context, type )
     {}
 
     Sender( const URI& uri_, void* context, const int type )
-        : _context( 0 )
+        : _context( nullptr )
         , uri( uri_ )
         , socket( zmq_socket( _createContext( context ), type ))
-    {}
+    {
+        const int hwm = 0;
+        zmq_setsockopt( socket, ZMQ_SNDHWM, &hwm, sizeof( hwm ));
+    }
 
     ~Sender()
     {
