@@ -100,7 +100,6 @@ BOOST_AUTO_TEST_CASE(send)
                                         endTime = high_resolution_clock::now();
                                     });
         subscriber.subscribe( message );
-        const size_t wait = ( ( i / 2000000 ) + 1 ) * 100;
 
         const auto startTime = high_resolution_clock::now();
         std::thread thread( [&]{ runner.run( publisher ); });
@@ -110,6 +109,7 @@ BOOST_AUTO_TEST_CASE(send)
         {
             subscriber.receive();
         }
+        const uint64_t wait = ( ( i / 2000000 ) + 1 ) * 100;
         runner.running = false;
         while( received < runner.sent && subscriber.receive( wait ))
             /* nop */;
