@@ -2,6 +2,14 @@
 
 # git master
 
+# Release 0.5 (10-03-2016)
+
+* [132](https://github.com/HBPVIS/zeq/pull/132):
+  Deprecate FlatBuffers based API in publisher/subscriber
+* [129](https://github.com/HBPVIS/zeq/pull/129):
+  Added GET and PUT notifications to http server
+* [121](https://github.com/HBPVIS/zeq/pull/121):
+  zeq::URI allows to use ":port" only
 * [116](https://github.com/HBPVIS/zeq/issues/115):
   Add zeq::http::Server
 * [116](https://github.com/HBPVIS/zeq/pull/116):
