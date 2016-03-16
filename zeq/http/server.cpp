@@ -247,7 +247,7 @@ protected:
 
 namespace
 {
-std::string _getServerParameter( const int argc, const char* argv[] )
+std::string _getServerParameter( const int argc, const char* const* argv )
 {
     for( int i = 0; i < argc; ++i  )
     {
@@ -286,7 +286,7 @@ Server::~Server()
 {}
 
 
-std::unique_ptr< Server > Server::parse( const int argc, const char* argv[] )
+std::unique_ptr< Server > Server::parse( const int argc, const char* const* argv )
 {
     const std::string& param = _getServerParameter( argc, argv );
     if( param.empty( ))
@@ -295,7 +295,7 @@ std::unique_ptr< Server > Server::parse( const int argc, const char* argv[] )
     return std::unique_ptr< Server >( new Server( URI( param )));
 }
 
-std::unique_ptr< Server > Server::parse( const int argc, const char* argv[],
+std::unique_ptr< Server > Server::parse( const int argc, const char* const* argv,
                                          Receiver& shared )
 {
     const std::string& param = _getServerParameter( argc, argv );
