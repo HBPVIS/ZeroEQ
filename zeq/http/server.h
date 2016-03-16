@@ -63,9 +63,9 @@ public:
      *   and a randomly chosen port
      */
     ZEQ_API static std::unique_ptr< Server > parse( int argc,
-                                                    const char* argv[] );
+                                                    const char* const* argv );
     ZEQ_API static std::unique_ptr< Server > parse( int argc,
-                                                    const char* argv[],
+                                                    const char* const* argv,
                                                     Receiver& shared );
     /**
      * Get the publisher URI.
