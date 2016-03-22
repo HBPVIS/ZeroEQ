@@ -78,6 +78,17 @@ public:
      *       adaptions. Also make zeq::URI( const servus::URI& from ) explicit.
      */
     ZEQ_API const servus::URI& getURI() const;
+
+    /**
+     * Get the underlying socket descriptor.
+     *
+     * Can be used by client code to be notified when new data is available and
+     * subsequently call receive.
+     *
+     * @return the socket descriptor.
+     * @throw std::runtime_error if the descriptor could not be obtained.
+     */
+    ZEQ_API SocketDescriptor getSocketDescriptor() const;
     //@}
 
     /** @name Object registration for PUT and GET requests */

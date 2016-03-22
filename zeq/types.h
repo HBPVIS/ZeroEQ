@@ -44,6 +44,12 @@ typedef std::shared_ptr< const uint8_t > ConstByteArray;
 typedef std::vector< EventDescriptor > EventDescriptors;
 typedef std::function< void( const Event& ) > EventFunc;
 
+#ifdef WIN32
+typedef SOCKET SocketDescriptor;
+#else
+typedef int SocketDescriptor;
+#endif
+
 /** Constant defining 'wait forever' in methods with wait parameters. */
 // Attn: identical to Win32 INFINITE!
 static const uint32_t TIMEOUT_INDEFINITE = 0xffffffffu;
