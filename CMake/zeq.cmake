@@ -4,7 +4,7 @@ set(ZEQ_REPO_URL https://github.com/HBPVIS/zeq.git)
 set(ZEQ_DEPENDS hbpvis REQUIRED Threads libzmq FlatBuffers Boost Servus)
 set(ZEQ_OPTIONAL ON)
 set(ZEQ_BOOST_COMPONENTS "unit_test_framework")
-set(ZEQ_DEB_DEPENDS libboost-test-dev)
+set(ZEQ_DEB_DEPENDS libboost-test-dev libzmq3-dev)
 
 if(CI_BUILD_COMMIT)
   set(ZEQ_REPO_TAG ${CI_BUILD_COMMIT})
