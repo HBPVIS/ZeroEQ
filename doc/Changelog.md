@@ -2,6 +2,9 @@
 
 # git master
 
+* [138](https://github.com/HBPVIS/zeq/pull/138):
+  Command line progress monitor
+
 # Release 0.5 (10-03-2016)
 
 * [132](https://github.com/HBPVIS/zeq/pull/132):

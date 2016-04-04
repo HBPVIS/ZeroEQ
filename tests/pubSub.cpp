@@ -17,7 +17,6 @@
 
 using namespace zeq::vocabulary;
 
-
 BOOST_AUTO_TEST_CASE(publish_receive)
 {
     zeq::Publisher publisher( zeq::NULL_SESSION );
