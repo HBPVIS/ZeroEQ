@@ -5,6 +5,7 @@
 
 #include <zeq/subscriber.h>
 #include <zerobuf/data/Progress.h>
+#include <chrono>
 #include <iostream>
 #include <map>
 

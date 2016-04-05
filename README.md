@@ -1,6 +1,6 @@
 [TOC]
 
-# Introduction {#Introduction}
+# Introduction
 
 A cross-platform C++ library to publish and subscribe for events. Applications
 communicate using ZeroMQ, discover each other automatically through the
@@ -10,7 +10,7 @@ by [ZeroBuf](https://github.com/HBPVIS/ZeroBuf) or using a simple Serializable
 interface. An optional http::Server provides a web service API in C++
 applications.
 
-## Features {#Features}
+## Features
 
 ZeroEQ provides the following major features:
 
@@ -21,12 +21,12 @@ ZeroEQ provides the following major features:
 * Automatic publisher discovery using Zeroconf
 * Serialization of events using [ZeroBuf](https://github.com/HBPVIS/ZeroBuf)
 
-## List of RFCs {#RFC}
+## List of RFCs
 
 * [HTTP GET and PUT server](@ref httpserver)
 * [Session filtering and management port](@ref Sessions)
 
-# Building {#Building}
+# Building
 
 ZeroEQ is a cross-platform toolkit, designed to run on any modern operating
 system, including all Unix variants. ZeroEQ uses CMake to create a
