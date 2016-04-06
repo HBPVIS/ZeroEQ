@@ -10,7 +10,7 @@ set(ZEROEQEVENTGENERATOR_SOURCES eventGenerator.cpp)
 set(ZEROEQEVENTGENERATOR_LINK_LIBRARIES ZeroEQ ZeroEQHBP)
 common_application(zeroeqEventGenerator)
 
-common_package(ZeroBuf)
+common_find_package(ZeroBuf)
 if(TARGET ZeroBufData)
   set(ZEROEQPROGRESSMONITOR_HEADERS)
   set(ZEROEQPROGRESSMONITOR_SOURCES progressMonitor.cpp)

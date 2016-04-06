@@ -1,7 +1,5 @@
 # Copyright (c) HBP 2014-2015 Daniel.Nachbaur@epfl.ch
 
-source_group(\\ FILES CMakeLists.txt)
-
 flatbuffers_generate_c_headers(ZEROEQ_FBS
   detail/echo.fbs
   detail/exit.fbs

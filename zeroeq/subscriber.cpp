@@ -184,7 +184,7 @@ public:
 
         uint128_t type;
         memcpy( &type, zmq_msg_data( &msg ), sizeof(type) );
-#ifndef COMMON_LITTLEENDIAN
+#ifndef ZEROEQ_LITTLEENDIAN
         detail::byteswap( type ); // convert from little endian wire
 #endif
         const bool payload = zmq_msg_more( &msg );
