@@ -167,18 +167,3 @@ BOOST_AUTO_TEST_CASE(fixed_uri_and_session)
             service.discover( servus::Servus::IF_LOCAL, 1000 );
     BOOST_REQUIRE_EQUAL( instances.size(), 1 );
 }
-
-BOOST_AUTO_TEST_CASE(legacy_ctor)
-{
-    if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
-        return;
-
-    const zeq::Publisher publisher( servus::URI( "foo://" ));
-
-    servus::Servus service( PUBLISHER_SERVICE );
-    const servus::Strings& instances =
-            service.discover( servus::Servus::IF_LOCAL, 1000 );
-    BOOST_CHECK_EQUAL( instances.size(), 1 );
-    BOOST_CHECK_EQUAL( service.get( instances[0], KEY_SESSION ),
-                       getUserName( ));
-}

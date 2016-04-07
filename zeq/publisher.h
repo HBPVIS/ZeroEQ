@@ -81,10 +81,6 @@ public:
      */
     ZEQ_API Publisher( const URI& uri, const std::string& session );
 
-    /** @deprecated */
-    ZEQ_API Publisher( const servus::URI& uri,
-                       uint32_t announceMode = ANNOUNCE_ALL );
-
     ZEQ_API ~Publisher();
 
     /**

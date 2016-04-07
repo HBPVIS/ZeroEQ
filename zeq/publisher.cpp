@@ -67,26 +67,6 @@ std::string _getApplicationName()
 class Publisher::Impl : public detail::Sender
 {
 public:
-    Impl( servus::URI uri_, const uint32_t announceMode )
-        : detail::Sender( uri_, 0, ZMQ_PUB )
-        , _service( PUBLISHER_SERVICE )
-        , _session( getDefaultSession( ))
-    {
-        uri_.setScheme( "" );
-        const std::string& zmqURI = buildZmqURI( uri_ );
-        if( zmq_bind( socket, zmqURI.c_str( )) == -1 )
-        {
-            zmq_close( socket );
-            socket = 0;
-            ZEQTHROW( std::runtime_error(
-                          std::string( "Cannot bind publisher socket '" ) +
-                          zmqURI + "': " + zmq_strerror( zmq_errno( ))));
-        }
-
-        initURI();
-        _initService( announceMode );
-    }
-
     Impl( const URI& uri_, const std::string& session )
         : detail::Sender( uri_, 0, ZMQ_PUB )
         , _service( PUBLISHER_SERVICE )
@@ -196,17 +176,12 @@ public:
     const std::string& getSession() const { return _session; }
 
 private:
-    void _initService( const uint32_t announceMode = ANNOUNCE_REQUIRED )
+    void _initService()
     {
-        if( !( announceMode & (ANNOUNCE_ZEROCONF | ANNOUNCE_REQUIRED) ))
-            return;
-
-        const bool required = announceMode & ANNOUNCE_REQUIRED;
         if( !servus::Servus::isAvailable( ))
         {
-            if( required )
-                ZEQTHROW( std::runtime_error(
-                              "No zeroconf implementation available" ));
+            ZEQTHROW( std::runtime_error(
+                          "No zeroconf implementation available" ));
             return;
         }
 
@@ -219,7 +194,7 @@ private:
         const servus::Servus::Result& result =
             _service.announce( uri.getPort(), getAddress( ));
 
-        if( required && !result )
+        if( !result )
         {
             ZEQTHROW( std::runtime_error( "Zeroconf announce failed: " +
                                           result.getString( )));
@@ -246,13 +221,6 @@ Publisher::Publisher( const URI& uri )
 Publisher::Publisher( const URI& uri, const std::string& session )
     : _impl( new Impl( uri, session ))
 {}
-
-Publisher::Publisher( const servus::URI& uri, const uint32_t announceMode )
-    : _impl( new Impl( uri, announceMode ))
-{
-    ZEQWARN << "zeq::Publisher( const servus::URI&, uint32_t ) is deprecated"
-            << std::endl;
-}
 
 Publisher::~Publisher()
 {

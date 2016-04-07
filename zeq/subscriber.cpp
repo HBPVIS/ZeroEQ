@@ -419,24 +419,6 @@ Subscriber::Subscriber( const URI& uri, const std::string& session, Receiver& sh
 {
 }
 
-Subscriber::Subscriber( const servus::URI& uri )
-    : Receiver()
-    , _impl( new Impl( URI( uri ), DEFAULT_SESSION,
-                                     getZMQContext( )))
-{
-    ZEQWARN << "zeq::Subscriber( const servus::URI& ) is deprecated"
-            << std::endl;
-}
-
-Subscriber::Subscriber( const servus::URI& uri, Receiver& shared )
-    : Receiver( shared )
-    , _impl( new Impl( URI( uri ), DEFAULT_SESSION,
-                                     getZMQContext( )))
-{
-    ZEQWARN << "zeq::Subscriber( const servus::URI&, Receiver& shared ) is "
-               "deprecated" << std::endl;
-}
-
 Subscriber::~Subscriber()
 {
 }
