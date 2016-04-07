@@ -2,6 +2,8 @@
 
 # git master
 
+* [139](https://github.com/HBPVIS/zeq/pull/139):
+  Added getSocketDescriptor() to http::server
 * [138](https://github.com/HBPVIS/zeq/pull/138):
   Command line progress monitor
 

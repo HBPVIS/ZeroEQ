@@ -310,6 +310,18 @@ const servus::URI& Server::getURI() const
     return _impl->uri.toServusURI();
 }
 
+SocketDescriptor Server::getSocketDescriptor() const
+{
+    SocketDescriptor fd = 0;
+    size_t fdLength = sizeof(fd);
+    if( ::zmq_getsockopt( _impl->socket, ZMQ_FD, &fd, &fdLength ) == -1 )
+    {
+        ZEQTHROW( std::runtime_error(
+                  std::string( "Could not get socket descriptor'" )));
+    }
+    return fd;
+}
+
 bool Server::subscribe( servus::Serializable& object )
 {
     return _impl->subscribe( object );
