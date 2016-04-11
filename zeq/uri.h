@@ -33,11 +33,8 @@ public:
     /** Create URI from string, set schema to "tcp" if empty */
     ZEQ_API explicit URI( const char* uri );
 
-    /**
-     * Convert from servus::URI, set schema to "tcp" if empty
-     * @todo make this explicit once zeq::Publisher::getURI() returns zeq::URI
-     */
-    ZEQ_API URI( const servus::URI& from );
+    /** Convert from servus::URI, set schema to "tcp" if empty */
+    ZEQ_API explicit URI( const servus::URI& from );
 
     ZEQ_API URI& operator = ( const URI& rhs );
 

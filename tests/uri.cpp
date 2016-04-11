@@ -38,12 +38,12 @@ BOOST_AUTO_TEST_CASE(host_port)
     BOOST_CHECK_EQUAL( hostPort.getScheme(), "tcp" );
 }
 
-BOOST_AUTO_TEST_CASE(custom_schema_not_supported_yet)
+BOOST_AUTO_TEST_CASE(custom_schema)
 {
     zeq::URI customSchema( "inproc://" );
     BOOST_CHECK_EQUAL( customSchema.getHost(), "" );
     BOOST_CHECK_EQUAL( customSchema.getPort(), 0 );
-    BOOST_CHECK_EQUAL( customSchema.getScheme(), "tcp" );
+    BOOST_CHECK_EQUAL( customSchema.getScheme(), "inproc" );
 }
 
 BOOST_AUTO_TEST_CASE(servus_host_only)

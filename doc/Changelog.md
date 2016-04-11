@@ -2,6 +2,10 @@
 
 # git master
 
+* [141](https://github.com/HBPVIS/zeq/pull/141):
+  * Removed deprecated servus::URI based constructors from the pub/sub API
+  * The returned URIs from pub/sub and http server is zeq::URI
+  * The zeq::URI construction from servus::URI is explicit
 * [139](https://github.com/HBPVIS/zeq/pull/139):
   Added getSocketDescriptor() to http::server
 * [138](https://github.com/HBPVIS/zeq/pull/138):

@@ -74,10 +74,8 @@ public:
      * constructor uri.
      *
      * @return the publisher URI.
-     * @todo change signature to return zeq::URI, needs downstream project
-     *       adaptions. Also make zeq::URI( const servus::URI& from ) explicit.
      */
-    ZEQ_API const servus::URI& getURI() const;
+    ZEQ_API const URI& getURI() const;
 
     /**
      * Get the underlying socket descriptor.

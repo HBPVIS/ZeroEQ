@@ -81,10 +81,6 @@ public:
      */
     ZEQ_API Publisher( const URI& uri, const std::string& session );
 
-    /** @deprecated */
-    ZEQ_API Publisher( const servus::URI& uri,
-                       uint32_t announceMode = ANNOUNCE_ALL );
-
     ZEQ_API ~Publisher();
 
     /**
@@ -115,10 +111,8 @@ public:
      * constructor uri.
      *
      * @return the publisher URI.
-     * @todo change signature to return zeq::URI, needs downstream project
-     *       adaptions. Also make zeq::URI( const servus::URI& from ) explicit.
      */
-    ZEQ_API const servus::URI& getURI() const;
+    ZEQ_API const URI& getURI() const;
 
     /** @return the session name that is announced */
     ZEQ_API const std::string& getSession() const;

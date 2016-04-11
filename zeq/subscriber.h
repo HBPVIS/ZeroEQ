@@ -130,13 +130,6 @@ public:
     ZEQ_API Subscriber( const URI& uri, const std::string& session,
                         Receiver& shared );
 
-
-    /** @deprecated */
-    ZEQ_API explicit Subscriber( const servus::URI& uri );
-
-    /** @deprecated */
-    ZEQ_API Subscriber( const servus::URI& uri, Receiver& shared );
-
     /** Destroy this subscriber and withdraw any subscriptions. */
     ZEQ_API ~Subscriber();
 
