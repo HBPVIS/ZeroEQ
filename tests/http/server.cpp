@@ -5,9 +5,9 @@
 
 #define BOOST_TEST_MODULE http_server
 
-#include <zeq/http/server.h>
-#include <zeq/subscriber.h>
-#include <zeq/uri.h>
+#include <zeroeq/http/server.h>
+#include <zeroeq/subscriber.h>
+#include <zeroeq/uri.h>
 #include <zmq.h>
 #include <servus/serializable.h>
 #include <servus/uri.h>
@@ -38,7 +38,7 @@ public:
 
 private:
     std::string getTypeName() const final { return "test::Foo"; }
-    virtual zeq::uint128_t getTypeIdentifier() const final
+    virtual zeroeq::uint128_t getTypeIdentifier() const final
         { return servus::make_uint128( getTypeName( )); }
 
     bool _fromJSON( const std::string& json ) final
@@ -57,7 +57,7 @@ private:
 class Client
 {
 public:
-    Client( const zeq::URI& uri )
+    Client( const zeroeq::URI& uri )
         : _ctx( ::zmq_ctx_new ( ))
         , _socket( ::zmq_socket( _ctx, ZMQ_STREAM ))
     {
@@ -102,8 +102,8 @@ public:
         }
 
         BOOST_CHECK_MESSAGE( response == expected,
-                             "At l." + std::to_string( line ) + ": " + response +
-                             " != " + expected);
+                             "At l." + std::to_string( line ) + ": " +
+                             response + " != " + expected);
     }
 
 private:
@@ -115,20 +115,20 @@ private:
 
 BOOST_AUTO_TEST_CASE(construction)
 {
-    zeq::http::Server server1;
+    zeroeq::http::Server server1;
     BOOST_CHECK_NE( server1.getURI().getHost(), "" );
     BOOST_CHECK_NE( server1.getURI().getHost(), "*" );
     BOOST_CHECK_NE( server1.getURI().getPort(), 0 );
     BOOST_CHECK_NO_THROW( server1.getSocketDescriptor( ));
     BOOST_CHECK_GT( server1.getSocketDescriptor(), 0 );
 
-    const zeq::URI uri( "tcp://" );
-    zeq::http::Server server2( uri );
-    zeq::http::Server server3( uri );
+    const zeroeq::URI uri( "tcp://" );
+    zeroeq::http::Server server2( uri );
+    zeroeq::http::Server server3( uri );
     BOOST_CHECK_NE( server2.getURI(), server3.getURI( ));
     BOOST_CHECK_NE( server2.getURI().getPort(), 0 );
 
-    BOOST_CHECK_THROW( zeq::http::Server( server2.getURI( )),
+    BOOST_CHECK_THROW( zeroeq::http::Server( server2.getURI( )),
                        std::runtime_error );
     BOOST_CHECK_NO_THROW( server2.getSocketDescriptor( ));
     BOOST_CHECK_GT( server1.getSocketDescriptor(), 0 );
@@ -137,19 +137,19 @@ BOOST_AUTO_TEST_CASE(construction)
 BOOST_AUTO_TEST_CASE(construction_argv_host_port)
 {
     const char* app = boost::unit_test::framework::master_test_suite().argv[0];
-    const char* argv[] = { app, "--zeq-http-server", "127.0.0.1:0" };
+    const char* argv[] = { app, "--zeroeq-http-server", "127.0.0.1:0" };
     const int argc = sizeof(argv)/sizeof(char*);
 
-    std::unique_ptr< zeq::http::Server > server1 =
-            zeq::http::Server::parse( argc, argv );
+    std::unique_ptr< zeroeq::http::Server > server1 =
+            zeroeq::http::Server::parse( argc, argv );
 
     BOOST_REQUIRE( server1 );
     BOOST_CHECK_EQUAL( server1->getURI().getHost(), "127.0.0.1" );
     BOOST_CHECK_NE( server1->getURI().getPort(), 0 );
 
-    zeq::Subscriber shared;
-    std::unique_ptr< zeq::http::Server > server2 =
-            zeq::http::Server::parse( argc, argv, shared );
+    zeroeq::Subscriber shared;
+    std::unique_ptr< zeroeq::http::Server > server2 =
+            zeroeq::http::Server::parse( argc, argv, shared );
 
     BOOST_REQUIRE( server2 );
     BOOST_CHECK_EQUAL( server2->getURI().getHost(), "127.0.0.1" );
@@ -159,19 +159,19 @@ BOOST_AUTO_TEST_CASE(construction_argv_host_port)
 BOOST_AUTO_TEST_CASE(construction_argv)
 {
     const char* app = boost::unit_test::framework::master_test_suite().argv[0];
-    const char* argv[] = { app, "--zeq-http-server" };
+    const char* argv[] = { app, "--zeroeq-http-server" };
     const int argc = sizeof(argv)/sizeof(char*);
 
-    std::unique_ptr< zeq::http::Server > server1 =
-            zeq::http::Server::parse( argc, argv );
+    std::unique_ptr< zeroeq::http::Server > server1 =
+            zeroeq::http::Server::parse( argc, argv );
 
     BOOST_REQUIRE( server1 );
     BOOST_CHECK( !server1->getURI().getHost().empty( ));
     BOOST_CHECK_NE( server1->getURI().getPort(), 0 );
 
-    zeq::Subscriber shared;
-    std::unique_ptr< zeq::http::Server > server2 =
-            zeq::http::Server::parse( argc, argv, shared );
+    zeroeq::Subscriber shared;
+    std::unique_ptr< zeroeq::http::Server > server2 =
+            zeroeq::http::Server::parse( argc, argv, shared );
 
     BOOST_REQUIRE( server2 );
     BOOST_CHECK( !server2->getURI().getHost().empty( ));
@@ -184,21 +184,21 @@ BOOST_AUTO_TEST_CASE(construction_empty_argv)
     const char* argv[] = { app };
     const int argc = sizeof(argv)/sizeof(char*);
 
-    std::unique_ptr< zeq::http::Server > server1 =
-            zeq::http::Server::parse( argc, argv );
+    std::unique_ptr< zeroeq::http::Server > server1 =
+            zeroeq::http::Server::parse( argc, argv );
 
     BOOST_CHECK( !server1 );
 
-    zeq::Subscriber shared;
-    std::unique_ptr< zeq::http::Server > server2 =
-            zeq::http::Server::parse( argc, argv, shared );
+    zeroeq::Subscriber shared;
+    std::unique_ptr< zeroeq::http::Server > server2 =
+            zeroeq::http::Server::parse( argc, argv, shared );
 
     BOOST_CHECK( !server2 );
 }
 
 BOOST_AUTO_TEST_CASE(registration)
 {
-    zeq::http::Server server;
+    zeroeq::http::Server server;
     Foo foo;
     BOOST_CHECK( server.register_( foo ));
     BOOST_CHECK( !server.register_( foo ));
@@ -219,7 +219,7 @@ BOOST_AUTO_TEST_CASE(registration)
 BOOST_AUTO_TEST_CASE(get)
 {
     bool running = true;
-    zeq::http::Server server;
+    zeroeq::http::Server server;
     Foo foo;
 
     foo.setRequestedFunction( [&]{ foo.setNotified(); });
@@ -244,9 +244,9 @@ BOOST_AUTO_TEST_CASE(get)
 BOOST_AUTO_TEST_CASE(shared)
 {
     bool running = true;
-    zeq::Subscriber subscriber;
-    zeq::http::Server server1( subscriber );
-    zeq::http::Server server2( server1 );
+    zeroeq::Subscriber subscriber;
+    zeroeq::http::Server server1( subscriber );
+    zeroeq::http::Server server2( server1 );
     Foo foo;
     server2.register_( foo );
 
@@ -266,7 +266,7 @@ BOOST_AUTO_TEST_CASE(shared)
 BOOST_AUTO_TEST_CASE(put)
 {
     bool running = true;
-    zeq::http::Server server;
+    zeroeq::http::Server server;
     Foo foo;
 
     foo.setUpdatedFunction( [&]{ foo.setNotified(); });
@@ -298,7 +298,7 @@ BOOST_AUTO_TEST_CASE(put)
 BOOST_AUTO_TEST_CASE(post)
 {
     bool running = true;
-    zeq::http::Server server;
+    zeroeq::http::Server server;
     Foo foo;
     server.register_( foo );
 
@@ -316,7 +316,7 @@ BOOST_AUTO_TEST_CASE(post)
 BOOST_AUTO_TEST_CASE(largeGet)
 {
     bool running = true;
-    zeq::http::Server server;
+    zeroeq::http::Server server;
     Foo foo;
     server.register_( foo );
 
@@ -335,7 +335,7 @@ BOOST_AUTO_TEST_CASE(largeGet)
 BOOST_AUTO_TEST_CASE(garbage)
 {
     bool running = true;
-    zeq::http::Server server;
+    zeroeq::http::Server server;
     std::thread thread( [ & ]() { while( running ) server.receive( 100 ); });
 
     Client client( server.getURI( ));
@@ -348,7 +348,7 @@ BOOST_AUTO_TEST_CASE(garbage)
 BOOST_AUTO_TEST_CASE(urlcasesensitivity)
 {
     bool running = true;
-    zeq::http::Server server;
+    zeroeq::http::Server server;
     Foo foo;
     server.register_( foo );
 

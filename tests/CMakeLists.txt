@@ -6,7 +6,7 @@ if(NOT BOOST_FOUND)
   return()
 endif()
 
-set(TEST_LIBRARIES ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} zeq zeqHBP
+set(TEST_LIBRARIES ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ZeroEQ ZeroEQHBP
   ${CMAKE_THREAD_LIBS_INIT} ${LIBZMQ_LIBRARIES})
 flatbuffers_generate_c_headers(FBS_NEW_EVENT newEvent.fbs)
 set_source_files_properties(

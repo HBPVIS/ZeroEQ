@@ -3,7 +3,7 @@
  *                          Stefan.Eilemann@epfl.ch
  *                          Daniel.Nachbaur@epfl.ch
  *
- * This file is part of ZeroEQ (https://github.com/HBPVIS/zeq)
+ * This file is part of ZeroEQ (https://github.com/HBPVIS/ZeroEQ)
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -30,20 +30,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#define BOOST_TEST_MODULE zeq_new_event
+#define BOOST_TEST_MODULE zeroeq_new_event
 
 #include "broker.h"
 
 #include <tests/newEvent_generated.h>
-#include <tests/newEvent_zeq_generated.h>
+#include <tests/newEvent_zeroeq_generated.h>
 
-namespace zeqtest
+namespace zeroeqtest
 {
 static const std::string message( "So long, and thanks for all the fish" );
 
-zeq::Event serializeString( const std::string& string )
+zeroeq::Event serializeString( const std::string& string )
 {
-    ::zeq::Event event( EVENT_NEWEVENT );
+    ::zeroeq::Event event( EVENT_NEWEVENT );
 
     flatbuffers::FlatBufferBuilder& fbb = event.getFBB();
     auto data = fbb.CreateString( string );
@@ -54,7 +54,7 @@ zeq::Event serializeString( const std::string& string )
     return event;
 }
 
-std::string deserializeString( const ::zeq::Event& event )
+std::string deserializeString( const ::zeroeq::Event& event )
 {
     BOOST_CHECK_EQUAL( event.getType(), EVENT_NEWEVENT );
 
@@ -62,7 +62,7 @@ std::string deserializeString( const ::zeq::Event& event )
     return std::string( data->message()->c_str( ));
 }
 
-void onMessageEvent( const zeq::Event& event )
+void onMessageEvent( const zeroeq::Event& event )
 {
     BOOST_CHECK_EQUAL( deserializeString( event ), message );
 }
@@ -70,16 +70,17 @@ void onMessageEvent( const zeq::Event& event )
 
 BOOST_AUTO_TEST_CASE(new_event)
 {
-    zeq::Publisher publisher( zeq::NULL_SESSION );
-    zeq::Subscriber subscriber( zeq::URI( publisher.getURI( )));
-    BOOST_CHECK( subscriber.registerHandler( zeqtest::EVENT_NEWEVENT,
-                 std::bind( &zeqtest::onMessageEvent, std::placeholders::_1 )));
+    zeroeq::Publisher publisher( zeroeq::NULL_SESSION );
+    zeroeq::Subscriber subscriber( zeroeq::URI( publisher.getURI( )));
+    BOOST_CHECK( subscriber.registerHandler( zeroeqtest::EVENT_NEWEVENT,
+                 std::bind( &zeroeqtest::onMessageEvent,
+                            std::placeholders::_1 )));
 
     bool received = false;
     for( size_t i = 0; i < 10; ++i )
     {
-        BOOST_CHECK(
-            publisher.publish( zeqtest::serializeString( zeqtest::message )));
+        BOOST_CHECK( publisher.publish(
+                         zeroeqtest::serializeString( zeroeqtest::message )));
 
         if( subscriber.receive( 100 ))
         {

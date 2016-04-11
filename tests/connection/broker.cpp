@@ -4,10 +4,10 @@
  *                          Juan Hernando <jhernando@fi.upm.es>
  */
 
-#define BOOST_TEST_MODULE zeq_connection_broker
+#define BOOST_TEST_MODULE zeroeq_connection_broker
 
 #include "../broker.h"
-#include <zeq/connection/broker.h>
+#include <zeroeq/connection/broker.h>
 
 #include <servus/servus.h>
 
@@ -16,9 +16,9 @@
 #include <mutex>
 #include <thread>
 
-typedef std::unique_ptr< zeq::connection::Broker > BrokerPtr;
+typedef std::unique_ptr< zeroeq::connection::Broker > BrokerPtr;
 std::string _broker;
-zeq::Publisher* _publisher = 0;
+zeroeq::Publisher* _publisher = 0;
 
 class Subscriber
 {
@@ -32,8 +32,9 @@ public:
 
     void run()
     {
-        zeq::Subscriber subscriber( test::buildURI( "127.0.0.1", *_publisher ));
-        BOOST_CHECK( subscriber.registerHandler( zeq::vocabulary::EVENT_ECHO,
+        zeroeq::Subscriber subscriber( test::buildURI( "127.0.0.1",
+                                                       *_publisher ));
+        BOOST_CHECK( subscriber.registerHandler( zeroeq::vocabulary::EVENT_ECHO,
            std::bind( &Subscriber::onEchoEvent, this, std::placeholders::_1 )));
 
         // Using the connection broker in place of zeroconf
@@ -87,22 +88,22 @@ protected:
         STATE_RUN
     } _state;
 
-    void onEchoEvent( const zeq::Event& event )
+    void onEchoEvent( const zeroeq::Event& event )
     {
         test::onEchoEvent( event );
         received = true;
     }
 
-    virtual BrokerPtr createBroker( zeq::Subscriber& subscriber )
+    virtual BrokerPtr createBroker( zeroeq::Subscriber& subscriber )
     {
         return BrokerPtr(
-            new zeq::connection::Broker( "127.0.0.1:0", subscriber ));
+            new zeroeq::connection::Broker( "127.0.0.1:0", subscriber ));
     }
 };
 
 BOOST_AUTO_TEST_CASE( broker )
 {
-    zeq::Publisher publisher( zeq::NULL_SESSION );
+    zeroeq::Publisher publisher( zeroeq::NULL_SESSION );
     _publisher = &publisher;
     _broker.clear();
 
@@ -110,11 +111,11 @@ BOOST_AUTO_TEST_CASE( broker )
     std::thread thread( std::bind( &Subscriber::run, &subscriber ));
     subscriber.waitStarted();
 
-    BOOST_CHECK( zeq::connection::Service::subscribe( _broker, publisher ));
+    BOOST_CHECK( zeroeq::connection::Service::subscribe( _broker, publisher ));
     for( size_t i = 0; i < 100 && !subscriber.received; ++i )
     {
         BOOST_CHECK( publisher.publish(
-                         zeq::vocabulary::serializeEcho( test::echoMessage )));
+                       zeroeq::vocabulary::serializeEcho( test::echoMessage )));
         std::this_thread::sleep_for( std::chrono::milliseconds( 100 ));
     }
 
@@ -123,10 +124,10 @@ BOOST_AUTO_TEST_CASE( broker )
     _publisher = 0;
 }
 
-template< zeq::connection::Broker::PortSelection mode >
+template< zeroeq::connection::Broker::PortSelection mode >
 class NamedSubscriber : public Subscriber
 {
-    BrokerPtr createBroker( zeq::Subscriber& subscriber ) override
+    BrokerPtr createBroker( zeroeq::Subscriber& subscriber ) override
     {
         // Multiple instances of the test may run concurrently. Try until we get
         // the well-defined port
@@ -135,9 +136,9 @@ class NamedSubscriber : public Subscriber
         {
             try
             {
-                return BrokerPtr(
-                    new zeq::connection::Broker(
-                      "zeq::connection::test_named_broker", subscriber, mode ));
+                return BrokerPtr( new zeroeq::connection::Broker(
+                                      "zeroeq::connection::test_named_broker",
+                                      subscriber, mode ));
             }
             catch( ... ) {}
 
@@ -147,14 +148,14 @@ class NamedSubscriber : public Subscriber
     }
 };
 
-typedef NamedSubscriber< zeq::connection::Broker::PORT_FIXED >
+typedef NamedSubscriber< zeroeq::connection::Broker::PORT_FIXED >
     FixedNamedSubscriber;
-typedef NamedSubscriber< zeq::connection::Broker::PORT_FIXED_OR_RANDOM >
+typedef NamedSubscriber< zeroeq::connection::Broker::PORT_FIXED_OR_RANDOM >
     RandomNamedSubscriber;
 
 BOOST_AUTO_TEST_CASE( named_broker )
 {
-    zeq::Publisher publisher( zeq::NULL_SESSION );
+    zeroeq::Publisher publisher( zeroeq::NULL_SESSION );
     _publisher = &publisher;
 
     FixedNamedSubscriber subscriber1;
@@ -168,14 +169,14 @@ BOOST_AUTO_TEST_CASE( named_broker )
     subscriber1.setRun();
     subscriber2.setRun();
 
-    BOOST_CHECK( zeq::connection::Service::subscribe(
-                     "127.0.0.1", "zeq::connection::test_named_broker",
+    BOOST_CHECK( zeroeq::connection::Service::subscribe(
+                     "127.0.0.1", "zeroeq::connection::test_named_broker",
                      publisher ));
 
     for( size_t i = 0; i < 100 && !subscriber1.received; ++i )
     {
         BOOST_CHECK( publisher.publish(
-                         zeq::vocabulary::serializeEcho( test::echoMessage )));
+                       zeroeq::vocabulary::serializeEcho( test::echoMessage )));
         std::this_thread::sleep_for( std::chrono::milliseconds( 100 ));
     }
 
@@ -187,18 +188,18 @@ BOOST_AUTO_TEST_CASE( named_broker )
 
 class FailingNamedSubscriber : public Subscriber
 {
-    BrokerPtr createBroker( zeq::Subscriber& subscriber ) override
+    BrokerPtr createBroker( zeroeq::Subscriber& subscriber ) override
     {
-        BOOST_CHECK_THROW(
-            new zeq::connection::Broker( "zeq::connection::test_named_broker",
-                                         subscriber,
-                                         zeq::connection::Broker::PORT_FIXED ),
-            std::runtime_error );
+        BOOST_CHECK_THROW( new zeroeq::connection::Broker(
+                               "zeroeq::connection::test_named_broker",
+                               subscriber,
+                               zeroeq::connection::Broker::PORT_FIXED ),
+                           std::runtime_error );
 
         return BrokerPtr(
-            new zeq::connection::Broker(
-                "zeq::connection::test_named_broker", subscriber,
-                zeq::connection::Broker::PORT_FIXED_OR_RANDOM ));
+            new zeroeq::connection::Broker(
+                "zeroeq::connection::test_named_broker", subscriber,
+                zeroeq::connection::Broker::PORT_FIXED_OR_RANDOM ));
     }
 };
 
@@ -207,7 +208,7 @@ BOOST_AUTO_TEST_CASE( named_broker_port_used )
     if( getenv( "TRAVIS" ))
         return;
 
-    zeq::Publisher publisher( zeq::NULL_SESSION );
+    zeroeq::Publisher publisher( zeroeq::NULL_SESSION );
     _publisher = &publisher;
 
     FixedNamedSubscriber subscriber1;
@@ -229,8 +230,8 @@ BOOST_AUTO_TEST_CASE( named_broker_port_used )
 
 BOOST_AUTO_TEST_CASE( invalid_broker )
 {
-    zeq::Subscriber subscriber( zeq::URI( "127.0.0.1:1234" ));
-    BOOST_CHECK_THROW( zeq::connection::Broker( std::string( "invalidIP" ),
-                                                subscriber ),
+    zeroeq::Subscriber subscriber( zeroeq::URI( "127.0.0.1:1234" ));
+    BOOST_CHECK_THROW( zeroeq::connection::Broker( std::string( "invalidIP" ),
+                                                   subscriber ),
                        std::runtime_error );
 }
