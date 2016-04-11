@@ -23,13 +23,6 @@ servus::URI createURI( std::string string )
         return servus::URI( DEFAULT_SCHEMA + "://" + string );
     }
 
-    // TODO: only for compatibility for hbp schemas, remove after downstreams
-    // are fixed
-    if( uri.getScheme() != DEFAULT_SCHEMA )
-    {
-        ZEQWARN << "Unsupported schema " << uri.getScheme() << std::endl;
-        uri.setScheme( DEFAULT_SCHEMA );
-    }
     return uri;
 }
 }

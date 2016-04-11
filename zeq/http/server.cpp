@@ -305,9 +305,9 @@ std::unique_ptr< Server > Server::parse( const int argc, const char* const* argv
     return std::unique_ptr< Server >( new Server( URI( param ), shared ));
 }
 
-const servus::URI& Server::getURI() const
+const URI& Server::getURI() const
 {
-    return _impl->uri.toServusURI();
+    return _impl->uri;
 }
 
 SocketDescriptor Server::getSocketDescriptor() const

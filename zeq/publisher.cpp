@@ -246,9 +246,9 @@ const std::string& Publisher::getSession() const
     return _impl->getSession();
 }
 
-const servus::URI& Publisher::getURI() const
+const URI& Publisher::getURI() const
 {
-    return _impl->uri.toServusURI();
+    return _impl->uri;
 }
 
 }

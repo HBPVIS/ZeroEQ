@@ -19,10 +19,14 @@ namespace
 const std::string jsonGet( "Not JSON, just want to see that the is data a-ok" );
 const std::string jsonPut( "See what my stepbrother jsonGet says" );
 
-const std::string error400( "HTTP/1.0 400 Bad Request\r\nContent-Length: 28\r\n\r\nHTTP/1.0 400 Bad Request\r\n\r\n" );
-const std::string error404( "HTTP/1.0 404 Not Found\r\nContent-Length: 26\r\n\r\nHTTP/1.0 404 Not Found\r\n\r\n" );
-const std::string error405( "HTTP/1.0 405 Method Not Allowed\r\nContent-Length: 35\r\n\r\nHTTP/1.0 405 Method Not Allowed\r\n\r\n" );
-const std::string error411( "HTTP/1.0 411 Length Required\r\nContent-Length: 32\r\n\r\nHTTP/1.0 411 Length Required\r\n\r\n" );
+const std::string error400( "HTTP/1.0 400 Bad Request\r\nContent-Length: 28\r\n\r\nHTTP/1.0"
+                            " 400 Bad Request\r\n\r\n" );
+const std::string error404( "HTTP/1.0 404 Not Found\r\nContent-Length: 26\r\n\r\nHTTP/1.0"
+                            " 404 Not Found\r\n\r\n" );
+const std::string error405( "HTTP/1.0 405 Method Not Allowed\r\nContent-Length: 35\r\n\r\nHTTP/1.0"
+                            " 405 Method Not Allowed\r\n\r\n" );
+const std::string error411( "HTTP/1.0 411 Length Required\r\nContent-Length: 32\r\n\r\nHTTP/1.0"
+                            " 411 Length Required\r\n\r\n" );
 
 class Foo : public servus::Serializable
 {
@@ -53,7 +57,7 @@ private:
 class Client
 {
 public:
-    Client( const servus::URI& uri )
+    Client( const zeq::URI& uri )
         : _ctx( ::zmq_ctx_new ( ))
         , _socket( ::zmq_socket( _ctx, ZMQ_STREAM ))
     {
