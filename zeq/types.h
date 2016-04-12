@@ -13,6 +13,11 @@
 #include <functional>
 #include <memory>
 
+#ifdef _WIN32
+#  define NOMINMAX
+#  include <winsock2.h> // SOCKET
+#endif
+
 /**
  * Publish-subscribe classes for typed events.
  *
