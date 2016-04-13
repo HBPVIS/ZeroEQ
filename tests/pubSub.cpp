@@ -4,10 +4,10 @@
  *                          Stefan.Eilemann@epfl.ch
  */
 
-#define BOOST_TEST_MODULE zeq_pub_sub
+#define BOOST_TEST_MODULE zeroeq_pub_sub
 
 #include "broker.h"
-#include <zeq/detail/sender.h>
+#include <zeroeq/detail/sender.h>
 
 #include <servus/servus.h>
 #include <servus/uri.h>
@@ -15,12 +15,12 @@
 #include <thread>
 #include <chrono>
 
-using namespace zeq::vocabulary;
+using namespace zeroeq::vocabulary;
 
 BOOST_AUTO_TEST_CASE(publish_receive)
 {
-    zeq::Publisher publisher( zeq::NULL_SESSION );
-    zeq::Subscriber subscriber( zeq::URI( publisher.getURI( )));
+    zeroeq::Publisher publisher( zeroeq::NULL_SESSION );
+    zeroeq::Subscriber subscriber( zeroeq::URI( publisher.getURI( )));
     BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
                        std::bind( &test::onEchoEvent, std::placeholders::_1 )));
 
@@ -44,8 +44,8 @@ BOOST_AUTO_TEST_CASE(publish_receive_serializable)
     test::Echo echoOut( "The quick brown fox" );
     test::Echo echoIn;
 
-    zeq::Publisher publisher( zeq::NULL_SESSION );
-    zeq::Subscriber subscriber( zeq::URI( publisher.getURI( )));
+    zeroeq::Publisher publisher( zeroeq::NULL_SESSION );
+    zeroeq::Subscriber subscriber( zeroeq::URI( publisher.getURI( )));
     BOOST_CHECK( subscriber.subscribe( echoIn ));
 
     for( size_t i = 0; i < 10; ++i )
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(publish_receive_serializable)
 
 BOOST_AUTO_TEST_CASE(no_receive)
 {
-    zeq::Subscriber subscriber( zeq::URI( "1.2.3.4:1234" ));
+    zeroeq::Subscriber subscriber( zeroeq::URI( "1.2.3.4:1234" ));
     BOOST_CHECK( !subscriber.receive( 100 ));
 }
 
@@ -72,9 +72,9 @@ BOOST_AUTO_TEST_CASE( subscribe_to_same_session_zeroconf )
     if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
         return;
 
-    zeq::Publisher publisher( test::buildUniqueSession( ));
+    zeroeq::Publisher publisher( test::buildUniqueSession( ));
     BOOST_CHECK_NO_THROW(
-        zeq::Subscriber subscriber( publisher.getSession( )));
+        zeroeq::Subscriber subscriber( publisher.getSession( )));
 }
 
 BOOST_AUTO_TEST_CASE(subscribe_to_different_session_zeroconf)
@@ -82,9 +82,9 @@ BOOST_AUTO_TEST_CASE(subscribe_to_different_session_zeroconf)
     if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
         return;
 
-    zeq::Publisher publisher( test::buildUniqueSession( ));
+    zeroeq::Publisher publisher( test::buildUniqueSession( ));
     BOOST_CHECK_NO_THROW(
-                zeq::Subscriber subscriber( publisher.getSession() + "bar" ));
+               zeroeq::Subscriber subscriber( publisher.getSession() + "bar" ));
 }
 
 BOOST_AUTO_TEST_CASE(no_receive_zeroconf)
@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE(no_receive_zeroconf)
     if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
         return;
 
-    zeq::Subscriber subscriber( test::buildUniqueSession( ));
+    zeroeq::Subscriber subscriber( test::buildUniqueSession( ));
     BOOST_CHECK( !subscriber.receive( 100 ));
 }
 
@@ -101,10 +101,10 @@ BOOST_AUTO_TEST_CASE(publish_receive_zeroconf)
     if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
         return;
 
-    zeq::Publisher publisher( test::buildUniqueSession( ));
-    zeq::Subscriber noSubscriber( publisher.getSession( ));
-    zeq::detail::Sender::getUUID() = servus::make_UUID(); // different machine
-    zeq::Subscriber subscriber( publisher.getSession( ));
+    zeroeq::Publisher publisher( test::buildUniqueSession( ));
+    zeroeq::Subscriber noSubscriber( publisher.getSession( ));
+    zeroeq::detail::Sender::getUUID() = servus::make_UUID(); //different machine
+    zeroeq::Subscriber subscriber( publisher.getSession( ));
 
     BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
                        std::bind( &test::onEchoEvent, std::placeholders::_1 )));
@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE(publish_receive_zeroconf)
     for( size_t i = 0; i < 20; ++i )
     {
         BOOST_CHECK( publisher.publish(
-                         zeq::vocabulary::serializeEcho( test::echoMessage )));
+                       zeroeq::vocabulary::serializeEcho( test::echoMessage )));
 
         BOOST_CHECK( !noSubscriber.receive( 100 ));
         if( subscriber.receive( 0 ))
@@ -132,8 +132,8 @@ BOOST_AUTO_TEST_CASE(publish_receive_zeroconf_disabled)
     if( getenv("TRAVIS"))
         return;
 
-    zeq::Publisher publisher( zeq::NULL_SESSION );
-    zeq::Subscriber subscriber( test::buildUniqueSession( ));
+    zeroeq::Publisher publisher( zeroeq::NULL_SESSION );
+    zeroeq::Subscriber subscriber( test::buildUniqueSession( ));
 
     BOOST_CHECK( subscriber.registerHandler(
                      EVENT_ECHO, std::bind( &test::onEchoEvent,
@@ -143,7 +143,7 @@ BOOST_AUTO_TEST_CASE(publish_receive_zeroconf_disabled)
     for( size_t i = 0; i < 20; ++i )
     {
         BOOST_CHECK( publisher.publish(
-                         zeq::vocabulary::serializeEcho( test::echoMessage )));
+                       zeroeq::vocabulary::serializeEcho( test::echoMessage )));
 
         if( subscriber.receive( 100 ))
         {
@@ -154,9 +154,9 @@ BOOST_AUTO_TEST_CASE(publish_receive_zeroconf_disabled)
     BOOST_CHECK( !received );
 }
 
-void onLargeEcho( const zeq::Event& event )
+void onLargeEcho( const zeroeq::Event& event )
 {
-    BOOST_CHECK( event.getType() == zeq::vocabulary::EVENT_ECHO );
+    BOOST_CHECK( event.getType() == zeroeq::vocabulary::EVENT_ECHO );
 }
 
 BOOST_AUTO_TEST_CASE(publish_receive_filters)
@@ -164,8 +164,9 @@ BOOST_AUTO_TEST_CASE(publish_receive_filters)
     // The publisher needs to be destroyed before the subscriber otherwise
     // zmq_ctx_destroy() can hang forever. For more details see
     // zmq_ctx_destroy() documentation.
-    zeq::Publisher* publisher = new zeq::Publisher( zeq::NULL_SESSION );
-    zeq::Subscriber subscriber( zeq::URI( publisher->getURI( )));
+    zeroeq::Publisher* publisher =
+            new zeroeq::Publisher( zeroeq::NULL_SESSION );
+    zeroeq::Subscriber subscriber( zeroeq::URI( publisher->getURI( )));
     const std::string message( 60000, 'a' );
 
     // Make sure we're connected
@@ -174,14 +175,14 @@ BOOST_AUTO_TEST_CASE(publish_receive_filters)
     for( size_t i = 0; i < 20; ++i )
     {
         BOOST_CHECK( publisher->publish(
-                         zeq::vocabulary::serializeEcho( test::echoMessage )));
+                       zeroeq::vocabulary::serializeEcho( test::echoMessage )));
         if( subscriber.receive( 100 ))
             break;
     }
     BOOST_CHECK( subscriber.deregisterHandler( EVENT_ECHO ));
 
     // benchmark with no data to be transmitted
-    const zeq::Event& event = serializeEcho( message );
+    const zeroeq::Event& event = serializeEcho( message );
     auto startTime = std::chrono::high_resolution_clock::now();
     for( size_t i = 0; i < 20000; ++i )
     {
@@ -216,9 +217,9 @@ BOOST_AUTO_TEST_CASE(publish_receive_late_zeroconf)
     if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
         return;
 
-    zeq::Subscriber subscriber( test::buildUniqueSession( ));
-    zeq::detail::Sender::getUUID() = servus::make_UUID(); // different machine
-    zeq::Publisher publisher( subscriber.getSession( ));
+    zeroeq::Subscriber subscriber( test::buildUniqueSession( ));
+    zeroeq::detail::Sender::getUUID() = servus::make_UUID(); //different machine
+    zeroeq::Publisher publisher( subscriber.getSession( ));
 
     BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
                        std::bind( &test::onEchoEvent, std::placeholders::_1 )));
@@ -241,14 +242,14 @@ BOOST_AUTO_TEST_CASE(publish_receive_empty_event_zeroconf)
     if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
         return;
 
-    zeq::Publisher publisher( test::buildUniqueSession( ));
-    zeq::detail::Sender::getUUID() = servus::make_UUID(); // different machine
-    zeq::Subscriber subscriber( publisher.getSession( ));
+    zeroeq::Publisher publisher( test::buildUniqueSession( ));
+    zeroeq::detail::Sender::getUUID() = servus::make_UUID(); //different machine
+    zeroeq::Subscriber subscriber( publisher.getSession( ));
 
     BOOST_CHECK( subscriber.registerHandler( EVENT_EXIT,
                        std::bind( &test::onExitEvent, std::placeholders::_1 )));
     bool received = false;
-    const zeq::Event event( EVENT_EXIT );
+    const zeroeq::Event event( EVENT_EXIT );
     for( size_t i = 0; i < 20; ++i )
     {
         BOOST_CHECK( publisher.publish( event ));
@@ -273,7 +274,7 @@ public:
 
     void run( const std::string& session )
     {
-        zeq::Publisher publisher( session );
+        zeroeq::Publisher publisher( session );
         running = true;
         size_t i = 0;
         while( running )
@@ -284,7 +285,8 @@ public:
             ++i;
 
             if( i > 200 )
-                ZEQTHROW( std::runtime_error( "Publisher giving up after 20s"));
+                ZEROEQTHROW( std::runtime_error(
+                                 "Publisher giving up after 20s" ));
         }
     }
 
@@ -298,8 +300,8 @@ BOOST_AUTO_TEST_CASE(publish_blocking_receive_zeroconf)
     if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
         return;
 
-    zeq::Subscriber subscriber( test::buildUniqueSession( ));
-    zeq::detail::Sender::getUUID() = servus::make_UUID(); // different machine
+    zeroeq::Subscriber subscriber( test::buildUniqueSession( ));
+    zeroeq::detail::Sender::getUUID() = servus::make_UUID(); //different machine
 
     BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
                        std::bind( &test::onEchoEvent, std::placeholders::_1 )));

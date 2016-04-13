@@ -3,8 +3,8 @@
  *                     Juan Hernando <jhernando@fi.upm.es>
  */
 
-#include <zeq/zeq.h>
-#include <zeq/hbp/hbp.h>
+#include <zeroeq/zeroeq.h>
+#include <zeroeq/hbp/hbp.h>
 
 #include <chrono>
 #include <thread>
@@ -15,7 +15,7 @@
 
 const char* scriptFile = 0;
 
-typedef std::pair< float, zeq::Event > PauseEventPair;
+typedef std::pair< float, zeroeq::Event > PauseEventPair;
 typedef std::vector< PauseEventPair > Events;
 typedef std::vector< uint32_t > uint32_ts;
 
@@ -26,7 +26,7 @@ int main( int argc, char** argv )
 {
     parseArguments( argc, argv );
 
-    zeq::Publisher publisher;
+    zeroeq::Publisher publisher;
     Events events;
     parseScript( scriptFile, events );
     for( Events::const_iterator i = events.begin(); i != events.end(); ++i )
@@ -40,11 +40,11 @@ int main( int argc, char** argv )
         }
 
         std::cout << "Sending event ";
-        const zeq::Event& event = i->second;
-        if( event.getType() == zeq::hbp::EVENT_TOGGLEIDREQUEST )
-            std::cout << zeq::hbp::TOGGLEIDREQUEST << std::endl;
-        else if( event.getType() == zeq::hbp::EVENT_CELLSETBINARYOP )
-            std::cout << zeq::hbp::CELLSETBINARYOP << std::endl;
+        const zeroeq::Event& event = i->second;
+        if( event.getType() == zeroeq::hbp::EVENT_TOGGLEIDREQUEST )
+            std::cout << zeroeq::hbp::TOGGLEIDREQUEST << std::endl;
+        else if( event.getType() == zeroeq::hbp::EVENT_CELLSETBINARYOP )
+            std::cout << zeroeq::hbp::CELLSETBINARYOP << std::endl;
         else
             std::cout << " unknown type" << std::endl;
 
@@ -85,11 +85,11 @@ std::string trim( const std::string& trim )
     return back <= front ? std::string() : std::string( front, back );
 }
 
-zeq::Event parseCellSetBinaryOp( std::istream& input )
+zeroeq::Event parseCellSetBinaryOp( std::istream& input )
 {
     uint32_ts first;
     uint32_ts second;
-    zeq::hbp::CellSetBinaryOpType operation;
+    zeroeq::hbp::CellSetBinaryOpType operation;
 
     if( !parseUint32_ts( input, first ))
     {
@@ -112,7 +112,7 @@ zeq::Event parseCellSetBinaryOp( std::istream& input )
     }
     std::string operationName = trim(line);
     if( operationName == "SYNAPTIC_PROJECTIONS" )
-        operation = zeq::hbp::CELLSETOP_SYNAPTIC_PROJECTIONS;
+        operation = zeroeq::hbp::CELLSETOP_SYNAPTIC_PROJECTIONS;
     else
     {
         std::cerr << "Unknown operation for CELLSETBINARYOP: " << operationName
@@ -120,10 +120,10 @@ zeq::Event parseCellSetBinaryOp( std::istream& input )
         exit( -1 );
     }
 
-    return zeq::hbp::serializeCellSetBinaryOp( first, second, operation );
+    return zeroeq::hbp::serializeCellSetBinaryOp( first, second, operation );
 }
 
-zeq::Event parseToggleIDRequest( std::istream& input )
+zeroeq::Event parseToggleIDRequest( std::istream& input )
 {
     uint32_ts ids;
 
@@ -132,7 +132,7 @@ zeq::Event parseToggleIDRequest( std::istream& input )
         std::cerr << "Error parsing TOGGLEIDREQUEST parameter" << std::endl;
         exit( -1 );
     }
-    return zeq::hbp::serializeToggleIDRequest( ids );
+    return zeroeq::hbp::serializeToggleIDRequest( ids );
 }
 
 void parseScript( std::istream& input, Events& events )
@@ -152,12 +152,12 @@ void parseScript( std::istream& input, Events& events )
         // The pause parameter is optional, if the extraction fails it will
         // be zero
         buffer >> eventName >> pause;
-        if( eventName == zeq::hbp::CELLSETBINARYOP )
+        if( eventName == zeroeq::hbp::CELLSETBINARYOP )
         {
             events.push_back( std::make_pair( pause,
                                               parseCellSetBinaryOp( input )));
         }
-        else if ( eventName == zeq::hbp::TOGGLEIDREQUEST )
+        else if ( eventName == zeroeq::hbp::TOGGLEIDREQUEST )
         {
             events.push_back( std::make_pair( pause,
                                               parseToggleIDRequest( input )));
@@ -243,4 +243,3 @@ void parseArguments( int argc, char** argv )
         }
     }
 }
-

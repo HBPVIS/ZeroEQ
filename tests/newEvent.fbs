@@ -1,5 +1,5 @@
 
-namespace zeqtest;
+namespace zeroeqtest;
 
 table NewEvent {
   message:string;

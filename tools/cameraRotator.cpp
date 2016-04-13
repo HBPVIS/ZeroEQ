@@ -29,8 +29,8 @@
 // Emits a camera which is rotating around the Y axis
 // Usage: ./cameraRotator [updateIntervalInMs [rotationAngle]]
 
-#include <zeq/zeq.h>
-#include <zeq/hbp/hbp.h>
+#include <zeroeq/zeroeq.h>
+#include <zeroeq/hbp/hbp.h>
 #include <servus/uri.h>
 
 #include <cmath>
@@ -41,14 +41,14 @@ int main( const int argc, char** argv )
     const int time = (argc > 1) ? ::atoi( argv[1] ) : 50;
     const float angle = (argc > 2) ? ::atof( argv[2] ) : 0.1f;
 
-    zeq::Publisher publisher;
+    zeroeq::Publisher publisher;
     std::vector< float > matrix( 16, 0 );
     matrix[ 0 ] = 1;
     matrix[ 5 ] = 1;
     matrix[ 9 ] = 1;
     matrix[ 15 ] = 1;
 
-    while( publisher.publish( zeq::hbp::serializeCamera( matrix )))
+    while( publisher.publish( zeroeq::hbp::serializeCamera( matrix )))
     {
         const float sin = std::sin( angle );
         const float cos = std::cos( angle );

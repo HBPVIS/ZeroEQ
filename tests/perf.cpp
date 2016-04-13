@@ -5,7 +5,7 @@
 
 // Performance test measuring pub-sub throughput
 
-#define BOOST_TEST_MODULE zeq_perf
+#define BOOST_TEST_MODULE zeroeq_perf
 
 #include "broker.h"
 #include <servus/servus.h>
@@ -26,7 +26,7 @@ class Message : public servus::Serializable
 {
 public:
     Message( const size_t size ) : _bottle( size, '0' ) {}
-    std::string getTypeName() const final { return "zeq::test::Message"; }
+    std::string getTypeName() const final { return "zeroeq::test::Message"; }
 
 private:
     bool _fromBinary( const void*, const size_t ) final
@@ -51,7 +51,7 @@ class Runner
 public:
     Runner( const size_t size ) : message( size ), sent( 0 ), running( false ){}
 
-    void run( zeq::Publisher& publisher )
+    void run( zeroeq::Publisher& publisher )
     {
         running = true;
         sent = 0;
@@ -72,8 +72,9 @@ public:
 
 BOOST_AUTO_TEST_CASE(throughput)
 {
-    zeq::Publisher publisher( zeq::URI( "127.0.0.1" ), zeq::NULL_SESSION );
-    zeq::Subscriber subscriber( zeq::URI( publisher.getURI( )));
+    zeroeq::Publisher publisher( zeroeq::URI( "127.0.0.1" ),
+                                 zeroeq::NULL_SESSION );
+    zeroeq::Subscriber subscriber( zeroeq::URI( publisher.getURI( )));
     {
         // establish subscription
         Message message( 4096 );

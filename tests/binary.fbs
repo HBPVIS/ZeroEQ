@@ -1,4 +1,4 @@
-namespace zeqtest;
+namespace zeroeqtest;
 
 table Binary {
   data: [ubyte];

@@ -3,12 +3,11 @@
  *                     Stefan.Eilemann@epfl.ch
  */
 
-#include <zeq/subscriber.h>
+#include <zeroeq/subscriber.h>
 #include <zerobuf/data/Progress.h>
 #include <chrono>
 #include <iostream>
 #include <map>
-
 
 using std::chrono::duration_cast;
 using std::chrono::high_resolution_clock;
@@ -77,7 +76,7 @@ private:
     ProgressMonitor& operator = ( const ProgressMonitor& ) = delete;
     ProgressMonitor& operator = ( ProgressMonitor&& ) = delete;
 
-    zeq::Subscriber _subscriber;
+    zeroeq::Subscriber _subscriber;
     zerobuf::data::Progress _progress;
     const high_resolution_clock::time_point _startTime;
 
