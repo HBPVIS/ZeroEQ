@@ -70,7 +70,7 @@ public:
 }
 
 
-BOOST_AUTO_TEST_CASE(send)
+BOOST_AUTO_TEST_CASE(throughput)
 {
     zeq::Publisher publisher( zeq::URI( "127.0.0.1" ), zeq::NULL_SESSION );
     zeq::Subscriber subscriber( zeq::URI( publisher.getURI( )));
