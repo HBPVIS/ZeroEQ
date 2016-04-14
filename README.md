@@ -14,9 +14,9 @@ applications.
 
 ZeroEQ provides the following major features:
 
-* Publish events using zeq::Publisher
-* Subscribe to events using zeq::Subscriber
-* Web service GET and PUT events using zeq::http::Server using REST and JSON
+* Publish events using zeroeq::Publisher
+* Subscribe to events using zeroeq::Subscriber
+* Web service GET and PUT events using zeroeq::http::Server using REST and JSON
 * Asynchronous, reliable transport using ZMQ
 * Automatic publisher discovery using Zeroconf
 * Serialization of events using [ZeroBuf](https://github.com/HBPVIS/ZeroBuf)
@@ -44,8 +44,8 @@ ZeroEQ requires the following external, pre-installed dependencies:
 
 Building from source is as simple as:
 
-    git clone https://github.com/HBPVIS/zeq.git
-    mkdir zeq/build
-    cd zeq/build
+    git clone https://github.com/HBPVIS/ZeroEQ.git
+    mkdir ZeroEQ/build
+    cd ZeroEQ/build
     cmake ..
     make

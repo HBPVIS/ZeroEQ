@@ -1,9 +1,9 @@
 HTTP Server for ZeroEq Events {#httpserver}
 ============
 
-The http::Server implements a zeq::Receiver and Sender to serve ZeroBuf
+The http::Server implements a zeroeq::Receiver and Sender to serve ZeroBuf
 objects through a REST interface with JSON payload. It is the evolution
-of the RESTBridge. [Issue 115](https://github.com/HBPVIS/zeq/issues/115)
+of the RESTBridge. [Issue 115](https://github.com/HBPVIS/ZeroEQ/issues/115)
 tracks the implementation.
 
 
@@ -11,7 +11,7 @@ tracks the implementation.
 
 * Translate Zerobufs to and from JSON
 * Accept PUT requests to update subscribed Zerobuf in the same
-  way as a zeq::Subscriber
+  way as a zeroeq::Subscriber
 * Accept GET requests and reply with the current state of registered
   Zerobuf in the same way as a Publisher::publish().
 * Allow custom code execution while handling a GET request, e.g., to
@@ -64,11 +64,11 @@ tracks the implementation.
     };
     }
 
-    namespace zeq
+    namespace zeroeq
     {
     namespace http
     {
-    class Server : public zeq::Receiver
+    class Server : public zeroeq::Receiver
     {
     public:
         // throws if scheme is not empty or tcp
@@ -80,7 +80,7 @@ tracks the implementation.
          *
          * The creation and parameters depend on the following command line
          * parameters:
-         * * --zeq-http-server [host][:port]: Enable the server. Optional
+         * * --zeroeq-http-server [host][:port]: Enable the server. Optional
          *   parameters configure the web server, running by default on :4020
          */
         static std::unique_ptr< Server > parse( argc, argv );
@@ -101,7 +101,7 @@ tracks the implementation.
 
     void livre::Communicator::_setupRESTBridge( const int argc, char** argv )
     {
-        _httpServer = zeq::http::Server::parse( argc, argv );
+        _httpServer = zeroeq::http::Server::parse( argc, argv );
         if( !_httpServer )
             return;
 
@@ -110,7 +110,7 @@ tracks the implementation.
         _httpServer.register( camera, LUT, vrParams, frame );
     }
 
-    class livre::ImageJPEG : public zeq::hbp::ImageJPEG
+    class livre::ImageJPEG : public zeroeq::hbp::ImageJPEG
     {
     protected:
         void notifyRequested() final
@@ -131,7 +131,7 @@ tracks the implementation.
   * Remove Schema and JsonConverter
 
 ### Server pseudo-code
-    void http::Server::process( zeq::detail::Socket& socket )
+    void http::Server::process( zeroeq::detail::Socket& socket )
     {
         zmq_recv, feed to message
         if message is complete
@@ -160,7 +160,7 @@ separate process.
 
 To not impose Zerobuf on other applications (e.g. for the visualization
 web services), the servus::Serializable interface defines the minimal API used
-by the zeq::Subscriber and zeq::http::Server, to be implemented by
+by the zeroeq::Subscriber and zeroeq::http::Server, to be implemented by
 applications (and ZeroBuf).
 
 ### 2: How do we parse HTTP?

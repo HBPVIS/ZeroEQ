@@ -5,8 +5,8 @@
  *                          Juan Hernando <jhernando@fi.upm.es>
  */
 
-#include <zeq/detail/port.h>
-#include <zeq/zeq.h>
+#include <zeroeq/detail/port.h>
+#include <zeroeq/zeroeq.h>
 
 #include <servus/serializable.h>
 #include <servus/uri.h>
@@ -31,10 +31,10 @@ std::string buildUniqueSession()
     return name + std::to_string( getpid( ));
 }
 
-zeq::URI buildURI( const std::string& hostname, const zeq::Publisher& to )
+zeroeq::URI buildURI( const std::string& hostname, const zeroeq::Publisher& to )
 {
     assert( to.getURI().getPort( ));
-    zeq::URI uri;
+    zeroeq::URI uri;
     uri.setHost( hostname );
     uri.setPort( to.getURI().getPort( ));
     return uri;
@@ -42,29 +42,32 @@ zeq::URI buildURI( const std::string& hostname, const zeq::Publisher& to )
 
 const std::string echoMessage( "So long, and thanks for all the fish!" );
 
-void onEchoEvent( const zeq::Event& event )
+void onEchoEvent( const zeroeq::Event& event )
 {
-    BOOST_CHECK( event.getType() == zeq::vocabulary::EVENT_ECHO );
-    const std::string message = zeq::vocabulary::deserializeEcho( event );
+    BOOST_CHECK( event.getType() == zeroeq::vocabulary::EVENT_ECHO );
+    const std::string message = zeroeq::vocabulary::deserializeEcho( event );
     BOOST_CHECK_EQUAL( echoMessage, message );
 }
 
-void onExitEvent( const zeq::Event& event )
+void onExitEvent( const zeroeq::Event& event )
 {
-    BOOST_CHECK_EQUAL( event.getType(), zeq::vocabulary::EVENT_EXIT );
+    BOOST_CHECK_EQUAL( event.getType(), zeroeq::vocabulary::EVENT_EXIT );
     BOOST_CHECK_EQUAL( event.getSize(), 0 );
 }
 
 class Echo : public servus::Serializable
 {
 public:
-    std::string getTypeName() const final { return "zeq::test::Echo"; }
+    std::string getTypeName() const final { return "zeroeq::test::Echo"; }
 
     Echo() {}
     Echo( const std::string& message ) : _message( message ) {}
     const std::string& getMessage() const { return _message; }
 
-    bool operator == ( const Echo& rhs ) const { return _message == rhs._message; }
+    bool operator == ( const Echo& rhs ) const
+    {
+        return _message == rhs._message;
+    }
 
 private:
     bool _fromBinary( const void* data, const size_t ) final

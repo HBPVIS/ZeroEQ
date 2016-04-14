@@ -3,7 +3,7 @@
  *                     Stefan.Eilemann@epfl.ch
  */
 
-#define BOOST_TEST_MODULE zeq_receiver
+#define BOOST_TEST_MODULE zeroeq_receiver
 
 #include "broker.h"
 
@@ -12,13 +12,13 @@
 bool gotOne = false;
 bool gotTwo = false;
 
-void onEvent1( const zeq::Event& ) { gotOne = true; }
-void onEvent2( const zeq::Event& ) { gotTwo = true; }
+void onEvent1( const zeroeq::Event& ) { gotOne = true; }
+void onEvent2( const zeroeq::Event& ) { gotTwo = true; }
 
-void testReceive( zeq::Publisher& publisher, zeq::Receiver& receiver,
+void testReceive( zeroeq::Publisher& publisher, zeroeq::Receiver& receiver,
                   bool& var1, bool& var2, const int line )
 {
-    using zeq::vocabulary::serializeEcho;
+    using zeroeq::vocabulary::serializeEcho;
     gotOne = false;
     gotTwo = false;
 
@@ -43,7 +43,7 @@ void testReceive( zeq::Publisher& publisher, zeq::Receiver& receiver,
         BOOST_CHECK_MESSAGE( var2, (&var2 == &gotOne ? "Event 1" : "Event 2") <<
                                    " not received (l." << line << ")" );
 }
-void testReceive( zeq::Publisher& publisher, zeq::Receiver& receiver,
+void testReceive( zeroeq::Publisher& publisher, zeroeq::Receiver& receiver,
                   bool& var, const int line )
 {
     testReceive( publisher, receiver, var, var, line );
@@ -51,14 +51,14 @@ void testReceive( zeq::Publisher& publisher, zeq::Receiver& receiver,
 
 BOOST_AUTO_TEST_CASE(test_two_subscribers)
 {
-    zeq::Publisher publisher( zeq::NULL_SESSION );
-    zeq::Subscriber subscriber1( test::buildURI( "localhost", publisher ));
-    zeq::Subscriber subscriber2( test::buildURI( "localhost", publisher ),
+    zeroeq::Publisher publisher( zeroeq::NULL_SESSION );
+    zeroeq::Subscriber subscriber1( test::buildURI( "localhost", publisher ));
+    zeroeq::Subscriber subscriber2( test::buildURI( "localhost", publisher ),
                                  subscriber1 );
 
-    BOOST_CHECK( subscriber1.registerHandler( zeq::vocabulary::EVENT_ECHO,
+    BOOST_CHECK( subscriber1.registerHandler( zeroeq::vocabulary::EVENT_ECHO,
                                 std::bind( &onEvent1, std::placeholders::_1 )));
-    BOOST_CHECK( subscriber2.registerHandler( zeq::vocabulary::EVENT_ECHO,
+    BOOST_CHECK( subscriber2.registerHandler( zeroeq::vocabulary::EVENT_ECHO,
                                 std::bind( &onEvent2, std::placeholders::_1 )));
 
     testReceive( publisher, subscriber1, gotOne, gotTwo, __LINE__ );
@@ -67,16 +67,16 @@ BOOST_AUTO_TEST_CASE(test_two_subscribers)
 
 BOOST_AUTO_TEST_CASE(test_publisher_routing)
 {
-    zeq::Publisher publisher( zeq::NULL_SESSION );
-    zeq::Publisher silentPublisher( zeq::NULL_SESSION );
-    zeq::Subscriber* subscriber1 =
-        new zeq::Subscriber( test::buildURI( "localhost", silentPublisher ));
-    zeq::Subscriber subscriber2( test::buildURI( "localhost", publisher ),
+    zeroeq::Publisher publisher( zeroeq::NULL_SESSION );
+    zeroeq::Publisher silentPublisher( zeroeq::NULL_SESSION );
+    zeroeq::Subscriber* subscriber1 =
+        new zeroeq::Subscriber( test::buildURI( "localhost", silentPublisher ));
+    zeroeq::Subscriber subscriber2( test::buildURI( "localhost", publisher ),
                                  *subscriber1 );
 
-    BOOST_CHECK( subscriber1->registerHandler( zeq::vocabulary::EVENT_ECHO,
+    BOOST_CHECK( subscriber1->registerHandler( zeroeq::vocabulary::EVENT_ECHO,
                                 std::bind( &onEvent1, std::placeholders::_1 )));
-    BOOST_CHECK( subscriber2.registerHandler( zeq::vocabulary::EVENT_ECHO,
+    BOOST_CHECK( subscriber2.registerHandler( zeroeq::vocabulary::EVENT_ECHO,
                                 std::bind( &onEvent2, std::placeholders::_1 )));
 
     testReceive( publisher, *subscriber1, gotTwo, __LINE__ );

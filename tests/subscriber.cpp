@@ -4,65 +4,70 @@
  *                     Stefan.Eilemann@epfl.ch
  */
 
-#define BOOST_TEST_MODULE zeq_subscriber
+#define BOOST_TEST_MODULE zeroeq_subscriber
 
 #include "broker.h"
 
 #include <servus/servus.h>
 
-using namespace zeq::vocabulary;
+using namespace zeroeq::vocabulary;
 
 BOOST_AUTO_TEST_CASE(construction)
 {
-    BOOST_CHECK_NO_THROW( zeq::Subscriber( ));
-    BOOST_CHECK_NO_THROW(
-                zeq::Subscriber subscriber( test::buildUniqueSession( )));
-    BOOST_CHECK_NO_THROW( zeq::Subscriber( zeq::URI( "localhost:1234" )));
-    BOOST_CHECK_NO_THROW( zeq::Subscriber( zeq::URI( "localhost" ),
-                                           zeq::DEFAULT_SESSION ));
+    BOOST_CHECK_NO_THROW( zeroeq::Subscriber( ));
+    BOOST_CHECK_NO_THROW( zeroeq::Subscriber subscriber(
+                              test::buildUniqueSession( )));
+    BOOST_CHECK_NO_THROW( zeroeq::Subscriber( zeroeq::URI( "localhost:1234" )));
+    BOOST_CHECK_NO_THROW( zeroeq::Subscriber( zeroeq::URI( "localhost" ),
+                                              zeroeq::DEFAULT_SESSION ));
 
-    zeq::Subscriber shared;
-    BOOST_CHECK_NO_THROW( zeq::Subscriber( (zeq::Receiver&)shared ));
-    BOOST_CHECK_NO_THROW(
-                zeq::Subscriber( test::buildUniqueSession(), shared ));
-    BOOST_CHECK_NO_THROW( zeq::Subscriber( zeq::URI( "localhost:1234" ),
-                                           shared ));
-    BOOST_CHECK_NO_THROW( zeq::Subscriber( zeq::URI( "localhost" ),
-                                           zeq::DEFAULT_SESSION, shared ));
-    BOOST_CHECK_NO_THROW( zeq::Subscriber( zeq::URI( "localhost:1234" ),
-                                           zeq::DEFAULT_SESSION, shared ));
+    zeroeq::Subscriber shared;
+    BOOST_CHECK_NO_THROW( zeroeq::Subscriber( (zeroeq::Receiver&)shared ));
+    BOOST_CHECK_NO_THROW( zeroeq::Subscriber( test::buildUniqueSession(),
+                                              shared ));
+    BOOST_CHECK_NO_THROW( zeroeq::Subscriber( zeroeq::URI( "localhost:1234" ),
+                                              shared ));
+    BOOST_CHECK_NO_THROW( zeroeq::Subscriber( zeroeq::URI( "localhost" ),
+                                              zeroeq::DEFAULT_SESSION,
+                                              shared ));
+    BOOST_CHECK_NO_THROW( zeroeq::Subscriber( zeroeq::URI( "localhost:1234" ),
+                                              zeroeq::DEFAULT_SESSION,
+                                              shared ));
 }
 
 BOOST_AUTO_TEST_CASE(invalid_construction)
 {
-    BOOST_CHECK_THROW( zeq::Subscriber subscriber( zeq::NULL_SESSION ),
+    BOOST_CHECK_THROW( zeroeq::Subscriber subscriber( zeroeq::NULL_SESSION ),
                        std::runtime_error );
-    BOOST_CHECK_THROW( zeq::Subscriber( "" ),
+    BOOST_CHECK_THROW( zeroeq::Subscriber( "" ),
                        std::runtime_error );
-    BOOST_CHECK_THROW( zeq::Subscriber( zeq::URI( "localhost" )),
+    BOOST_CHECK_THROW( zeroeq::Subscriber( zeroeq::URI( "localhost" )),
                        std::runtime_error );
-    BOOST_CHECK_THROW( zeq::Subscriber( zeq::URI( "localhost" ),
-                                      zeq::NULL_SESSION ), std::runtime_error );
-    BOOST_CHECK_THROW( zeq::Subscriber( zeq::URI( "localhost" ), "" ),
+    BOOST_CHECK_THROW( zeroeq::Subscriber( zeroeq::URI( "localhost" ),
+                                           zeroeq::NULL_SESSION ),
+                       std::runtime_error );
+    BOOST_CHECK_THROW( zeroeq::Subscriber( zeroeq::URI( "localhost" ), "" ),
                        std::runtime_error );
 
-    zeq::Subscriber shared;
-    BOOST_CHECK_THROW( zeq::Subscriber subscriber( zeq::NULL_SESSION, shared ),
+    zeroeq::Subscriber shared;
+    BOOST_CHECK_THROW( zeroeq::Subscriber subscriber( zeroeq::NULL_SESSION,
+                                                      shared ),
                        std::runtime_error );
-    BOOST_CHECK_THROW( zeq::Subscriber( "", shared ),
+    BOOST_CHECK_THROW( zeroeq::Subscriber( "", shared ),
                        std::runtime_error );
-    BOOST_CHECK_THROW( zeq::Subscriber( zeq::URI( "localhost" ), shared),
+    BOOST_CHECK_THROW( zeroeq::Subscriber( zeroeq::URI( "localhost" ), shared ),
                        std::runtime_error );
-    BOOST_CHECK_THROW( zeq::Subscriber( zeq::URI( "localhost" ),
-                                        zeq::NULL_SESSION, shared ),
+    BOOST_CHECK_THROW( zeroeq::Subscriber( zeroeq::URI( "localhost" ),
+                                           zeroeq::NULL_SESSION, shared ),
                        std::runtime_error );
-    BOOST_CHECK_THROW( zeq::Subscriber( zeq::URI( "localhost" ), "", shared ),
+    BOOST_CHECK_THROW( zeroeq::Subscriber( zeroeq::URI( "localhost" ), "",
+                                           shared ),
                        std::runtime_error );
 }
 
 BOOST_AUTO_TEST_CASE(registerhandler)
 {
-    zeq::Subscriber subscriber;
+    zeroeq::Subscriber subscriber;
     BOOST_CHECK( !subscriber.hasHandler( EVENT_ECHO ));
     BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
                        std::bind( &test::onEchoEvent, std::placeholders::_1 )));
@@ -71,7 +76,7 @@ BOOST_AUTO_TEST_CASE(registerhandler)
 
 BOOST_AUTO_TEST_CASE(deregisterhandler)
 {
-    zeq::Subscriber subscriber;
+    zeroeq::Subscriber subscriber;
     BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
                        std::bind( &test::onEchoEvent, std::placeholders::_1 )));
     BOOST_CHECK( subscriber.deregisterHandler( EVENT_ECHO ));
@@ -79,7 +84,7 @@ BOOST_AUTO_TEST_CASE(deregisterhandler)
 
 BOOST_AUTO_TEST_CASE(invalid_registerhandler)
 {
-    zeq::Subscriber subscriber;
+    zeroeq::Subscriber subscriber;
     BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
                        std::bind( &test::onEchoEvent, std::placeholders::_1 )));
     BOOST_CHECK( !subscriber.registerHandler( EVENT_ECHO,
@@ -88,16 +93,16 @@ BOOST_AUTO_TEST_CASE(invalid_registerhandler)
 
 BOOST_AUTO_TEST_CASE(test_invalid_deregisterhandler)
 {
-    zeq::Subscriber subscriber;
+    zeroeq::Subscriber subscriber;
     BOOST_CHECK( !subscriber.deregisterHandler( EVENT_ECHO ));
     BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
                        std::bind( &test::onEchoEvent, std::placeholders::_1 )));
-    BOOST_CHECK( !subscriber.deregisterHandler(zeq::vocabulary::EVENT_EXIT ));
+    BOOST_CHECK( !subscriber.deregisterHandler(zeroeq::vocabulary::EVENT_EXIT));
 }
 
 BOOST_AUTO_TEST_CASE(invalid_subscribe)
 {
-    zeq::Subscriber subscriber;
+    zeroeq::Subscriber subscriber;
     test::Echo echo;
     BOOST_CHECK( subscriber.subscribe( echo ));
     BOOST_CHECK( !subscriber.subscribe( echo ));
@@ -105,7 +110,7 @@ BOOST_AUTO_TEST_CASE(invalid_subscribe)
 
 BOOST_AUTO_TEST_CASE(test_invalid_unsubscribe)
 {
-    zeq::Subscriber subscriber;
+    zeroeq::Subscriber subscriber;
     test::Echo echo;
     BOOST_CHECK( !subscriber.unsubscribe( echo ));
     BOOST_CHECK( subscriber.subscribe( echo ));
@@ -118,6 +123,6 @@ BOOST_AUTO_TEST_CASE(not_implemented_servus )
     if( servus::Servus::isAvailable( ) )
         return;
 
-    const zeq::URI uri( test::buildUniqueSession( ));
-    BOOST_CHECK_THROW( zeq::Subscriber subscriber( uri ), std::runtime_error );
+    const zeroeq::URI uri( test::buildUniqueSession( ));
+    BOOST_CHECK_THROW( zeroeq::Subscriber( uri ), std::runtime_error );
 }

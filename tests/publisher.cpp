@@ -5,12 +5,12 @@
  *                          Juan Hernando <jhernando@fi.upm.es>
  */
 
-#define BOOST_TEST_MODULE zeq_publisher
+#define BOOST_TEST_MODULE zeroeq_publisher
 
 #include "broker.h"
-#include <zeq/detail/broker.h>
-#include <zeq/detail/constants.h>
-#include <zeq/detail/sender.h>
+#include <zeroeq/detail/broker.h>
+#include <zeroeq/detail/constants.h>
+#include <zeroeq/detail/sender.h>
 
 #include <servus/servus.h>
 
@@ -23,9 +23,9 @@
 
 BOOST_AUTO_TEST_CASE(create_uri_publisher)
 {
-    const zeq::Publisher publisher( zeq::URI( "" ));
+    const zeroeq::Publisher publisher( zeroeq::URI( "" ));
 
-    const zeq::URI& uri = publisher.getURI();
+    const zeroeq::URI& uri = publisher.getURI();
     const std::string expectedScheme( "tcp" );
     const std::string baseScheme = uri.getScheme().substr( 0,
                                                       expectedScheme.length( ));
@@ -38,33 +38,34 @@ BOOST_AUTO_TEST_CASE(create_invalid_uri_publisher)
 {
     // invalid URI, hostname only not allowed
     BOOST_CHECK_THROW(
-        zeq::Publisher publisher( zeq::URI( "localhost" )),
+        zeroeq::Publisher publisher( zeroeq::URI( "localhost" )),
         std::runtime_error );
 }
 
 BOOST_AUTO_TEST_CASE(publish)
 {
-    zeq::Publisher publisher( zeq::NULL_SESSION );
+    zeroeq::Publisher publisher( zeroeq::NULL_SESSION );
     BOOST_CHECK( publisher.publish( test::Echo( test::echoMessage )));
     BOOST_CHECK( publisher.publish(
-                     zeq::vocabulary::serializeEcho( test::echoMessage )));
+                     zeroeq::vocabulary::serializeEcho( test::echoMessage )));
 }
 
 BOOST_AUTO_TEST_CASE(publish_update_uri)
 {
-    zeq::Publisher publisher( zeq::NULL_SESSION );
-    const zeq::URI& uri = publisher.getURI();
+    zeroeq::Publisher publisher( zeroeq::NULL_SESSION );
+    const zeroeq::URI& uri = publisher.getURI();
     BOOST_CHECK_MESSAGE( uri.getPort() != 0, uri );
     BOOST_CHECK_MESSAGE( !uri.getHost().empty(), uri );
     BOOST_CHECK( publisher.publish( test::Echo( test::echoMessage )));
     BOOST_CHECK( publisher.publish(
-                     zeq::vocabulary::serializeEcho( test::echoMessage )));
+                     zeroeq::vocabulary::serializeEcho( test::echoMessage )));
 }
 
 BOOST_AUTO_TEST_CASE(publish_empty_event)
 {
-    zeq::Publisher publisher( zeq::NULL_SESSION );
-    BOOST_CHECK( publisher.publish( zeq::Event( zeq::vocabulary::EVENT_EXIT )));
+    zeroeq::Publisher publisher( zeroeq::NULL_SESSION );
+    BOOST_CHECK( publisher.publish(
+                     zeroeq::Event( zeroeq::vocabulary::EVENT_EXIT )));
 }
 
 BOOST_AUTO_TEST_CASE(multiple_publisher_on_same_host)
@@ -72,9 +73,9 @@ BOOST_AUTO_TEST_CASE(multiple_publisher_on_same_host)
     if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
         return;
 
-    const zeq::Publisher publisher1;
-    const zeq::Publisher publisher2;
-    const zeq::Publisher publisher3;
+    const zeroeq::Publisher publisher1;
+    const zeroeq::Publisher publisher2;
+    const zeroeq::Publisher publisher3;
 
     servus::Servus service( PUBLISHER_SERVICE );
     const servus::Strings& instances =
@@ -87,7 +88,7 @@ BOOST_AUTO_TEST_CASE(zeroconf_record)
     if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
         return;
 
-    const zeq::Publisher publisher;
+    const zeroeq::Publisher publisher;
 
     servus::Servus service( PUBLISHER_SERVICE );
     const servus::Strings& instances =
@@ -97,8 +98,9 @@ BOOST_AUTO_TEST_CASE(zeroconf_record)
     const std::string& instance = instances[0];
     BOOST_CHECK_EQUAL( instance, publisher.getAddress( ));
     BOOST_CHECK_EQUAL( service.get( instance, KEY_APPLICATION ), "publisher" );
-    BOOST_CHECK_EQUAL( zeq::uint128_t( service.get( instance, KEY_INSTANCE )),
-                       zeq::detail::Sender::getUUID( ));
+    BOOST_CHECK_EQUAL( zeroeq::uint128_t( service.get( instance,
+                                                       KEY_INSTANCE )),
+                       zeroeq::detail::Sender::getUUID( ));
     BOOST_CHECK_EQUAL( service.get( instance, KEY_SESSION ), getUserName( ));
     BOOST_CHECK_EQUAL( service.get( instance, KEY_USER ), getUserName( ));
 }
@@ -108,7 +110,7 @@ BOOST_AUTO_TEST_CASE(custom_session)
     if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
         return;
 
-    const zeq::Publisher publisher( test::buildUniqueSession( ));
+    const zeroeq::Publisher publisher( test::buildUniqueSession( ));
 
     servus::Servus service( PUBLISHER_SERVICE );
     const servus::Strings& instances =
@@ -126,7 +128,7 @@ BOOST_AUTO_TEST_CASE(different_session_at_runtime)
         return;
 
     setenv( "ZEROEQ_SESSION", "testsession", 1 );
-    const zeq::Publisher publisher;
+    const zeroeq::Publisher publisher;
 
     servus::Servus service( PUBLISHER_SERVICE );
     const servus::Strings& instances =
@@ -141,7 +143,7 @@ BOOST_AUTO_TEST_CASE(different_session_at_runtime)
 
 BOOST_AUTO_TEST_CASE(empty_session)
 {
-    BOOST_CHECK_THROW( const zeq::Publisher publisher( "" ),
+    BOOST_CHECK_THROW( const zeroeq::Publisher publisher( "" ),
                        std::runtime_error );
 }
 
@@ -149,7 +151,7 @@ BOOST_AUTO_TEST_CASE(empty_session_from_environment)
 {
     setenv( "ZEROEQ_SESSION", "", 1 );
 
-    const zeq::Publisher publisher;
+    const zeroeq::Publisher publisher;
     BOOST_CHECK_EQUAL( publisher.getSession(), getUserName( ));
 
     unsetenv( "ZEROEQ_SESSION" );
@@ -160,7 +162,7 @@ BOOST_AUTO_TEST_CASE(fixed_uri_and_session)
     if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
         return;
 
-    const zeq::Publisher publisher( zeq::URI( "127.0.0.1"),
+    const zeroeq::Publisher publisher( zeroeq::URI( "127.0.0.1" ),
                                     test::buildUniqueSession( ));
     servus::Servus service( PUBLISHER_SERVICE );
     const servus::Strings& instances =

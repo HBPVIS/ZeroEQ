@@ -1,35 +1,33 @@
 # Copyright (c) HBP 2014-2016 Daniel.Nachbaur@epfl.ch
 #                             Stefan.Eilemann@epfl.ch
 
-cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 
-project(zeq)
+project(ZeroEQ VERSION 0.6.0)
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
   ${CMAKE_SOURCE_DIR}/CMake/common)
 include(GitExternal)
 
-set(VERSION_MAJOR "0")
-set(VERSION_MINOR "6")
-set(VERSION_PATCH "0")
-set(VERSION_ABI 6)
+set(ZeroEQ_VERSION_ABI 6)
+set(ZEROEQ_DEB_DEPENDS libboost-test-dev libzmq3-dev)
 
 include(Common)
 
 set(COMMON_PROJECT_DOMAIN eu.humanbrainproject)
-set(ZEQ_DESCRIPTION "ZeroEQ - Zero Event Queue")
-set(ZEQ_MAINTAINER "Human Brain Project <HBPVis@googlegroups.com>")
-set(ZEQ_LICENSE LGPL)
-set(ZEQ_DEPENDENT_LIBRARIES Servus)
+set(ZEROEQ_DESCRIPTION "ZeroEQ - Zero Event Queue")
+set(ZEROEQ_MAINTAINER "Human Brain Project <HBPVis@googlegroups.com>")
+set(ZEROEQ_LICENSE LGPL)
+set(ZEROEQ_DEPENDENT_LIBRARIES Servus)
 
-common_package(Boost COMPONENTS unit_test_framework)
-common_package(FlatBuffers REQUIRED)
-common_package(httpxx)
-common_package(libzmq REQUIRED)
-common_package(Servus REQUIRED)
-common_package(Threads REQUIRED)
-common_package_post()
+common_find_package(Boost COMPONENTS unit_test_framework)
+common_find_package(FlatBuffers REQUIRED)
+common_find_package(httpxx)
+common_find_package(libzmq REQUIRED)
+common_find_package(Servus REQUIRED)
+common_find_package(Threads REQUIRED)
+common_find_package_post()
 
-add_subdirectory(zeq)
+add_subdirectory(zeroeq)
 add_subdirectory(tests)
 add_subdirectory(tools)
 

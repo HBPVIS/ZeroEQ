@@ -1,7 +1,0 @@
-namespace zeq.vocabulary;
-
-table Echo {
-  message: string;
-}
-
-root_type Echo;
