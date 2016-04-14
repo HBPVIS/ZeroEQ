@@ -96,7 +96,7 @@ public:
 
     bool publish( const zeroeq::Event& event )
     {
-#ifdef COMMON_LITTLEENDIAN
+#ifdef ZEROEQ_LITTLEENDIAN
         const uint128_t& type = event.getType();
 #else
         uint128_t type = event.getType();
@@ -134,7 +134,7 @@ public:
 
     bool publish( const servus::Serializable& serializable )
     {
-#ifdef COMMON_LITTLEENDIAN
+#ifdef ZEROEQ_LITTLEENDIAN
         const uint128_t& type = serializable.getTypeIdentifier();
 #else
         uint128_t type = serializable.getTypeIdentifier();
