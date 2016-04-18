@@ -213,7 +213,7 @@ public:
             else
             {
                 // Note eile: The topic filtering in the handler registration
-                // should ensure that we don't get messages we haven't
+                // should ensure that we don't get messages if we have no
                 // handlers. If this throws, something does not work.
                 ZEROEQTHROW( std::runtime_error( "Got unsubscribed event" ));
             }
