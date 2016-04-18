@@ -9,6 +9,8 @@
 #include <zeroeq/api.h>
 #include <zeroeq/types.h>
 
+#include <servus/serializable.h>
+
 namespace zeroeq
 {
 namespace detail { class Event; }
@@ -16,25 +18,28 @@ namespace detail { class Event; }
 /**
  * An event is emitted by a Publisher to notify Subscriber of a change.
  *
- * Events are published via zeroeq::Publisher and received via
- * zeroeq::Subscriber. The format of the serialized data is specific to the
- * serialization backend.
+ * Events are published via zeroeq::Publisher and received via zeroeq::Subscriber. The
+ * format of the serialized data is specific to the serialization backend.
  *
  * Example: @include tests/serialization.cpp
  */
-class Event
+class Event : public servus::Serializable
 {
 public:
     /**
      * Construct a new event of the given type
      *
      * @param type the desired event type
+     * @param func the desired event function
      * @sa vocabulary::registerEvent
      */
-    ZEROEQ_API explicit Event( const uint128_t& type );
+    ZEROEQ_API Event( const uint128_t& type, const EventFunc& func = EventFunc( ));
 
     /** Move ctor @internal */
     ZEROEQ_API Event( Event&& rhs );
+
+    /** @return the fully qualified, demangled class name. */
+    ZEROEQ_API std::string getTypeName() const final;
 
     ZEROEQ_API ~Event();
 
@@ -53,16 +58,14 @@ public:
     /** @internal @return serialization specific implementation */
     ZEROEQ_API flatbuffers::Parser& getParser();
 
-    /** @internal Set a raw buffer as event data. */
-    void setData( const ConstByteArray& data, const size_t size );
-
 private:
-    Event( const Event& ) = delete;
-    Event& operator=( const Event& ) = delete;
 
-    Event& operator=( Event&& rhs );
+    ZEROEQ_API bool _fromBinary( const void* data, const size_t size ) final;
+    ZEROEQ_API Data _toBinary() const final;
+    ZEROEQ_API bool _fromJSON( const std::string& json ) final;
+    ZEROEQ_API std::string _toJSON() const final;
 
-    detail::Event* _impl;
+    std::unique_ptr< detail::Event > _impl;
 };
 
 }

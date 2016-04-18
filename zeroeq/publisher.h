@@ -84,17 +84,6 @@ public:
     ZEROEQ_API ~Publisher();
 
     /**
-     * Publish the given event to any subscriber.
-     *
-     * If there is no subscriber for that event, no event will be send.
-     *
-     * @deprecated Use publish() with serializable.
-     * @param event the serialized event to publish
-     * @return true if publish was successful
-     */
-    ZEROEQ_API bool publish( const Event& event );
-
-    /**
      * Publish the given serializable object to any subscriber.
      *
      * If there is no subscriber for that serializable, no event will be sent.

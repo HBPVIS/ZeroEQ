@@ -44,8 +44,6 @@ class Subscriber;
 class URI;
 struct EventDescriptor;
 
-typedef std::shared_ptr< const uint8_t > ConstByteArray;
-
 typedef std::vector< EventDescriptor > EventDescriptors;
 typedef std::function< void( const Event& ) > EventFunc;
 

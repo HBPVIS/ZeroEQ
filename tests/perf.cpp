@@ -72,8 +72,7 @@ public:
 
 BOOST_AUTO_TEST_CASE(throughput)
 {
-    zeroeq::Publisher publisher( zeroeq::URI( "127.0.0.1" ),
-                                 zeroeq::NULL_SESSION );
+    zeroeq::Publisher publisher( zeroeq::URI( "127.0.0.1" ), zeroeq::NULL_SESSION );
     zeroeq::Subscriber subscriber( zeroeq::URI( publisher.getURI( )));
     {
         // establish subscription

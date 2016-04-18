@@ -9,19 +9,20 @@
 namespace zeroeq
 {
 
-Event::Event( const uint128_t& type )
-    : _impl( new detail::Event( type ))
-{}
-
-Event::Event( Event&& rhs )
-    : _impl( rhs._impl )
+Event::Event( const uint128_t& type, const EventFunc& func )
+    : _impl( new detail::Event( type, func ))
 {
-    rhs._impl = 0;
+    if( func)
+        setUpdatedFunction( [this](){ _impl->func( *this ); });
 }
 
 Event::~Event()
 {
-    delete _impl;
+}
+
+std::string Event::getTypeName() const
+{
+    return _impl->type.getString();
 }
 
 const uint128_t& Event::getType() const
@@ -49,9 +50,38 @@ flatbuffers::Parser& Event::getParser()
     return _impl->parser;
 }
 
-void Event::setData( const ConstByteArray& data, const size_t size )
+Event::Event( Event&& rhs )
+    : _impl( std::move( rhs._impl ))
 {
-    _impl->setData( data, size );
+}
+
+bool Event::_fromBinary( const void *data, const size_t size )
+{
+    _impl->setData(( const uint8_t*)data, size );
+    return true;
+}
+
+servus::Serializable::Data Event::_toBinary() const
+{
+    servus::Serializable::Data data;
+    data.ptr.reset( _impl->getData(), []( const void* ){});
+    data.size = _impl->getSize();
+    return data;
+}
+
+bool Event::_fromJSON( const std::string& json )
+{
+    return _impl->parser.Parse( json.c_str( ));
+}
+
+std::string Event::_toJSON() const
+{
+    std::string json;
+    flatbuffers::GeneratorOptions opts;
+    opts.base64_byte_array = true;
+    opts.strict_json = true;
+    GenerateText( _impl->parser, _impl->getData(), opts, &json );
+    return json;
 }
 
 }

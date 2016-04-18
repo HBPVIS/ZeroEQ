@@ -15,24 +15,22 @@ using namespace zeroeq::vocabulary;
 BOOST_AUTO_TEST_CASE(construction)
 {
     BOOST_CHECK_NO_THROW( zeroeq::Subscriber( ));
-    BOOST_CHECK_NO_THROW( zeroeq::Subscriber subscriber(
-                              test::buildUniqueSession( )));
+    BOOST_CHECK_NO_THROW(
+                zeroeq::Subscriber subscriber( test::buildUniqueSession( )));
     BOOST_CHECK_NO_THROW( zeroeq::Subscriber( zeroeq::URI( "localhost:1234" )));
     BOOST_CHECK_NO_THROW( zeroeq::Subscriber( zeroeq::URI( "localhost" ),
-                                              zeroeq::DEFAULT_SESSION ));
+                                           zeroeq::DEFAULT_SESSION ));
 
     zeroeq::Subscriber shared;
     BOOST_CHECK_NO_THROW( zeroeq::Subscriber( (zeroeq::Receiver&)shared ));
-    BOOST_CHECK_NO_THROW( zeroeq::Subscriber( test::buildUniqueSession(),
-                                              shared ));
+    BOOST_CHECK_NO_THROW(
+                zeroeq::Subscriber( test::buildUniqueSession(), shared ));
     BOOST_CHECK_NO_THROW( zeroeq::Subscriber( zeroeq::URI( "localhost:1234" ),
-                                              shared ));
+                                           shared ));
     BOOST_CHECK_NO_THROW( zeroeq::Subscriber( zeroeq::URI( "localhost" ),
-                                              zeroeq::DEFAULT_SESSION,
-                                              shared ));
+                                           zeroeq::DEFAULT_SESSION, shared ));
     BOOST_CHECK_NO_THROW( zeroeq::Subscriber( zeroeq::URI( "localhost:1234" ),
-                                              zeroeq::DEFAULT_SESSION,
-                                              shared ));
+                                           zeroeq::DEFAULT_SESSION, shared ));
 }
 
 BOOST_AUTO_TEST_CASE(invalid_construction)
@@ -44,60 +42,39 @@ BOOST_AUTO_TEST_CASE(invalid_construction)
     BOOST_CHECK_THROW( zeroeq::Subscriber( zeroeq::URI( "localhost" )),
                        std::runtime_error );
     BOOST_CHECK_THROW( zeroeq::Subscriber( zeroeq::URI( "localhost" ),
-                                           zeroeq::NULL_SESSION ),
-                       std::runtime_error );
+                                      zeroeq::NULL_SESSION ), std::runtime_error );
     BOOST_CHECK_THROW( zeroeq::Subscriber( zeroeq::URI( "localhost" ), "" ),
                        std::runtime_error );
 
     zeroeq::Subscriber shared;
-    BOOST_CHECK_THROW( zeroeq::Subscriber subscriber( zeroeq::NULL_SESSION,
-                                                      shared ),
+    BOOST_CHECK_THROW( zeroeq::Subscriber subscriber( zeroeq::NULL_SESSION, shared ),
                        std::runtime_error );
     BOOST_CHECK_THROW( zeroeq::Subscriber( "", shared ),
                        std::runtime_error );
-    BOOST_CHECK_THROW( zeroeq::Subscriber( zeroeq::URI( "localhost" ), shared ),
+    BOOST_CHECK_THROW( zeroeq::Subscriber( zeroeq::URI( "localhost" ), shared),
                        std::runtime_error );
     BOOST_CHECK_THROW( zeroeq::Subscriber( zeroeq::URI( "localhost" ),
-                                           zeroeq::NULL_SESSION, shared ),
+                                        zeroeq::NULL_SESSION, shared ),
                        std::runtime_error );
-    BOOST_CHECK_THROW( zeroeq::Subscriber( zeroeq::URI( "localhost" ), "",
-                                           shared ),
+    BOOST_CHECK_THROW( zeroeq::Subscriber( zeroeq::URI( "localhost" ), "", shared ),
                        std::runtime_error );
 }
 
-BOOST_AUTO_TEST_CASE(registerhandler)
+BOOST_AUTO_TEST_CASE(subscribe)
 {
     zeroeq::Subscriber subscriber;
-    BOOST_CHECK( !subscriber.hasHandler( EVENT_ECHO ));
-    BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
-                       std::bind( &test::onEchoEvent, std::placeholders::_1 )));
-    BOOST_CHECK( subscriber.hasHandler( EVENT_ECHO ));
+    zeroeq::Event echoEvent( ::zeroeq::vocabulary::EVENT_ECHO,
+                          std::bind( &test::onEchoEvent, std::placeholders::_1 ));
+    BOOST_CHECK( subscriber.subscribe( echoEvent ));
 }
 
-BOOST_AUTO_TEST_CASE(deregisterhandler)
+BOOST_AUTO_TEST_CASE(unsubscribe)
 {
     zeroeq::Subscriber subscriber;
-    BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
-                       std::bind( &test::onEchoEvent, std::placeholders::_1 )));
-    BOOST_CHECK( subscriber.deregisterHandler( EVENT_ECHO ));
-}
-
-BOOST_AUTO_TEST_CASE(invalid_registerhandler)
-{
-    zeroeq::Subscriber subscriber;
-    BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
-                       std::bind( &test::onEchoEvent, std::placeholders::_1 )));
-    BOOST_CHECK( !subscriber.registerHandler( EVENT_ECHO,
-                       std::bind( &test::onEchoEvent, std::placeholders::_1 )));
-}
-
-BOOST_AUTO_TEST_CASE(test_invalid_deregisterhandler)
-{
-    zeroeq::Subscriber subscriber;
-    BOOST_CHECK( !subscriber.deregisterHandler( EVENT_ECHO ));
-    BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
-                       std::bind( &test::onEchoEvent, std::placeholders::_1 )));
-    BOOST_CHECK( !subscriber.deregisterHandler(zeroeq::vocabulary::EVENT_EXIT));
+    zeroeq::Event echoEvent( ::zeroeq::vocabulary::EVENT_ECHO,
+                          std::bind( &test::onEchoEvent, std::placeholders::_1 ));
+    BOOST_CHECK( subscriber.subscribe( echoEvent ));
+    BOOST_CHECK( subscriber.unsubscribe( echoEvent ));
 }
 
 BOOST_AUTO_TEST_CASE(invalid_subscribe)
@@ -118,12 +95,23 @@ BOOST_AUTO_TEST_CASE(test_invalid_unsubscribe)
     BOOST_CHECK( !subscriber.unsubscribe( echo ));
 }
 
-BOOST_AUTO_TEST_CASE(not_implemented_servus )
+
+BOOST_AUTO_TEST_CASE(test_invalid_unsubscribe_different_event_objects)
+{
+    zeroeq::Subscriber subscriber;
+    zeroeq::Event echoEvent( ::zeroeq::vocabulary::EVENT_ECHO,
+                          std::bind( &test::onEchoEvent, std::placeholders::_1 ));
+
+    BOOST_CHECK( subscriber.subscribe( echoEvent ));
+    BOOST_CHECK( !subscriber.unsubscribe( zeroeq::Event( ::zeroeq::vocabulary::EVENT_EXIT )));
+}
+
+
+BOOST_AUTO_TEST_CASE(not_implemented_servus)
 {
     if( servus::Servus::isAvailable( ) )
         return;
 
     const zeroeq::URI uri( test::buildUniqueSession( ));
-    BOOST_CHECK_THROW( zeroeq::Subscriber subscriber( uri ),
-                       std::runtime_error );
+    BOOST_CHECK_THROW( zeroeq::Subscriber subscriber( uri ), std::runtime_error );
 }

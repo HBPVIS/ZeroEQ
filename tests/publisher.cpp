@@ -64,8 +64,7 @@ BOOST_AUTO_TEST_CASE(publish_update_uri)
 BOOST_AUTO_TEST_CASE(publish_empty_event)
 {
     zeroeq::Publisher publisher( zeroeq::NULL_SESSION );
-    BOOST_CHECK( publisher.publish(
-                     zeroeq::Event( zeroeq::vocabulary::EVENT_EXIT )));
+    BOOST_CHECK( publisher.publish( zeroeq::Event( zeroeq::vocabulary::EVENT_EXIT )));
 }
 
 BOOST_AUTO_TEST_CASE(multiple_publisher_on_same_host)
@@ -98,8 +97,7 @@ BOOST_AUTO_TEST_CASE(zeroconf_record)
     const std::string& instance = instances[0];
     BOOST_CHECK_EQUAL( instance, publisher.getAddress( ));
     BOOST_CHECK_EQUAL( service.get( instance, KEY_APPLICATION ), "publisher" );
-    BOOST_CHECK_EQUAL( zeroeq::uint128_t( service.get( instance,
-                                                       KEY_INSTANCE )),
+    BOOST_CHECK_EQUAL( zeroeq::uint128_t( service.get( instance, KEY_INSTANCE )),
                        zeroeq::detail::Sender::getUUID( ));
     BOOST_CHECK_EQUAL( service.get( instance, KEY_SESSION ), getUserName( ));
     BOOST_CHECK_EQUAL( service.get( instance, KEY_USER ), getUserName( ));
@@ -162,7 +160,7 @@ BOOST_AUTO_TEST_CASE(fixed_uri_and_session)
     if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
         return;
 
-    const zeroeq::Publisher publisher( zeroeq::URI( "127.0.0.1" ),
+    const zeroeq::Publisher publisher( zeroeq::URI( "127.0.0.1"),
                                     test::buildUniqueSession( ));
     servus::Servus service( PUBLISHER_SERVICE );
     const servus::Strings& instances =

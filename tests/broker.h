@@ -64,10 +64,7 @@ public:
     Echo( const std::string& message ) : _message( message ) {}
     const std::string& getMessage() const { return _message; }
 
-    bool operator == ( const Echo& rhs ) const
-    {
-        return _message == rhs._message;
-    }
+    bool operator == ( const Echo& rhs ) const { return _message == rhs._message; }
 
 private:
     bool _fromBinary( const void* data, const size_t ) final

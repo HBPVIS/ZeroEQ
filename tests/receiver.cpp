@@ -56,10 +56,13 @@ BOOST_AUTO_TEST_CASE(test_two_subscribers)
     zeroeq::Subscriber subscriber2( test::buildURI( "localhost", publisher ),
                                  subscriber1 );
 
-    BOOST_CHECK( subscriber1.registerHandler( zeroeq::vocabulary::EVENT_ECHO,
-                                std::bind( &onEvent1, std::placeholders::_1 )));
-    BOOST_CHECK( subscriber2.registerHandler( zeroeq::vocabulary::EVENT_ECHO,
-                                std::bind( &onEvent2, std::placeholders::_1 )));
+    zeroeq::Event echoEvent1( ::zeroeq::vocabulary::EVENT_ECHO,
+                          std::bind( &onEvent1, std::placeholders::_1 ));
+    BOOST_CHECK( subscriber1.subscribe( echoEvent1 ));
+
+    zeroeq::Event echoEvent2( ::zeroeq::vocabulary::EVENT_ECHO,
+                          std::bind( &onEvent2, std::placeholders::_1 ));
+    BOOST_CHECK( subscriber2.subscribe( echoEvent2 ));
 
     testReceive( publisher, subscriber1, gotOne, gotTwo, __LINE__ );
     testReceive( publisher, subscriber2, gotOne, gotTwo, __LINE__ );
@@ -74,10 +77,13 @@ BOOST_AUTO_TEST_CASE(test_publisher_routing)
     zeroeq::Subscriber subscriber2( test::buildURI( "localhost", publisher ),
                                  *subscriber1 );
 
-    BOOST_CHECK( subscriber1->registerHandler( zeroeq::vocabulary::EVENT_ECHO,
-                                std::bind( &onEvent1, std::placeholders::_1 )));
-    BOOST_CHECK( subscriber2.registerHandler( zeroeq::vocabulary::EVENT_ECHO,
-                                std::bind( &onEvent2, std::placeholders::_1 )));
+    zeroeq::Event echoEvent1( ::zeroeq::vocabulary::EVENT_ECHO,
+                          std::bind( &onEvent1, std::placeholders::_1 ));
+    BOOST_CHECK( subscriber1->subscribe( echoEvent1 ));
+
+    zeroeq::Event echoEvent2( ::zeroeq::vocabulary::EVENT_ECHO,
+                          std::bind( &onEvent2, std::placeholders::_1 ));
+    BOOST_CHECK( subscriber2.subscribe( echoEvent2 ));
 
     testReceive( publisher, *subscriber1, gotTwo, __LINE__ );
     BOOST_CHECK( !gotOne );

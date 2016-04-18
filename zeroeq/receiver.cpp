@@ -112,7 +112,7 @@ private:
         {
         case -1: // error
             ZEROEQTHROW( std::runtime_error( std::string( "Poll error: " ) +
-                                             zmq_strerror( zmq_errno( ))));
+                                          zmq_strerror( zmq_errno( ))));
         case 0: // timeout; no events signaled during poll
             return false;
 

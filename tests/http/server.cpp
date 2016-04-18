@@ -110,8 +110,8 @@ public:
         }
 
         BOOST_CHECK_MESSAGE( response == expected,
-                             "At l." + std::to_string( line ) + ": " +
-                             response + " != " + expected);
+                             "At l." + std::to_string( line ) + ": " + response +
+                             " != " + expected);
     }
 
 private:

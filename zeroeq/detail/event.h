@@ -18,17 +18,14 @@ namespace zeroeq
 namespace detail
 {
 
-namespace
-{
-static inline void dummy_deleter( const void* ) {}
-}
-
 class Event
 {
 public:
-    explicit Event( const uint128_t& type_ )
+    Event( const uint128_t& type_, const EventFunc& func_ )
         : type( type_ )
+        , data( 0 )
         , size( 0 )
+        , func( func_ )
     {}
 
     size_t getSize() const
@@ -41,11 +38,11 @@ public:
     const void* getData() const
     {
         if( data )
-            return data.get();
+            return data;
         return parser.builder_.GetBufferPointer();
     }
 
-    void setData( const ConstByteArray& data_, const size_t size_ )
+    void setData( const uint8_t* data_, const size_t size_ )
     {
         parser.builder_.Clear();
         data = data_;
@@ -58,8 +55,10 @@ public:
     flatbuffers::Parser parser;
 
     /** setData() uses this instead of fbb during deserialization */
-    ConstByteArray data;
+    const uint8_t* data;
+
     size_t size;
+    EventFunc func;
 
 private:
     Event( const Event& ) = delete;

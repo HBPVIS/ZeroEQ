@@ -72,15 +72,16 @@ BOOST_AUTO_TEST_CASE(new_event)
 {
     zeroeq::Publisher publisher( zeroeq::NULL_SESSION );
     zeroeq::Subscriber subscriber( zeroeq::URI( publisher.getURI( )));
-    BOOST_CHECK( subscriber.registerHandler( zeroeqtest::EVENT_NEWEVENT,
-                 std::bind( &zeroeqtest::onMessageEvent,
-                            std::placeholders::_1 )));
+
+    ::zeroeq::Event newEvent( ::zeroeqtest::EVENT_NEWEVENT, std::bind(
+                                                        &zeroeqtest::onMessageEvent,
+                                                        std::placeholders::_1 ));
+    BOOST_CHECK( subscriber.subscribe( newEvent ));
 
     bool received = false;
     for( size_t i = 0; i < 10; ++i )
     {
-        BOOST_CHECK( publisher.publish(
-                         zeroeqtest::serializeString( zeroeqtest::message )));
+        BOOST_CHECK( publisher.publish( zeroeqtest::serializeString( zeroeqtest::message )));
 
         if( subscriber.receive( 100 ))
         {

@@ -21,8 +21,9 @@ BOOST_AUTO_TEST_CASE(publish_receive)
 {
     zeroeq::Publisher publisher( zeroeq::NULL_SESSION );
     zeroeq::Subscriber subscriber( zeroeq::URI( publisher.getURI( )));
-    BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
-                       std::bind( &test::onEchoEvent, std::placeholders::_1 )));
+    zeroeq::Event echoEvent( ::zeroeq::vocabulary::EVENT_ECHO,
+                          std::bind( &test::onEchoEvent, std::placeholders::_1 ));
+    BOOST_CHECK( subscriber.subscribe( echoEvent ));
 
 
     bool received = false;
@@ -84,7 +85,7 @@ BOOST_AUTO_TEST_CASE(subscribe_to_different_session_zeroconf)
 
     zeroeq::Publisher publisher( test::buildUniqueSession( ));
     BOOST_CHECK_NO_THROW(
-               zeroeq::Subscriber subscriber( publisher.getSession() + "bar" ));
+                zeroeq::Subscriber subscriber( publisher.getSession() + "bar" ));
 }
 
 BOOST_AUTO_TEST_CASE(no_receive_zeroconf)
@@ -103,19 +104,19 @@ BOOST_AUTO_TEST_CASE(publish_receive_zeroconf)
 
     zeroeq::Publisher publisher( test::buildUniqueSession( ));
     zeroeq::Subscriber noSubscriber( publisher.getSession( ));
-    zeroeq::detail::Sender::getUUID() = servus::make_UUID(); //different machine
+    zeroeq::detail::Sender::getUUID() = servus::make_UUID(); // different machine
     zeroeq::Subscriber subscriber( publisher.getSession( ));
 
-    BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
-                       std::bind( &test::onEchoEvent, std::placeholders::_1 )));
-    BOOST_CHECK( noSubscriber.registerHandler( EVENT_ECHO,
-                       std::bind( &test::onEchoEvent, std::placeholders::_1 )));
+    zeroeq::Event echoEvent( ::zeroeq::vocabulary::EVENT_ECHO,
+                          std::bind( &test::onEchoEvent, std::placeholders::_1 ));
+    BOOST_CHECK( subscriber.subscribe( echoEvent ));
+    BOOST_CHECK( noSubscriber.subscribe( echoEvent ));
 
     bool received = false;
     for( size_t i = 0; i < 20; ++i )
     {
         BOOST_CHECK( publisher.publish(
-                       zeroeq::vocabulary::serializeEcho( test::echoMessage )));
+                         zeroeq::vocabulary::serializeEcho( test::echoMessage )));
 
         BOOST_CHECK( !noSubscriber.receive( 100 ));
         if( subscriber.receive( 0 ))
@@ -135,15 +136,15 @@ BOOST_AUTO_TEST_CASE(publish_receive_zeroconf_disabled)
     zeroeq::Publisher publisher( zeroeq::NULL_SESSION );
     zeroeq::Subscriber subscriber( test::buildUniqueSession( ));
 
-    BOOST_CHECK( subscriber.registerHandler(
-                     EVENT_ECHO, std::bind( &test::onEchoEvent,
-                                            std::placeholders::_1 )));
+    zeroeq::Event echoEvent( ::zeroeq::vocabulary::EVENT_ECHO,
+                          std::bind( &test::onEchoEvent, std::placeholders::_1 ));
+    BOOST_CHECK( subscriber.subscribe( echoEvent ));
 
     bool received = false;
     for( size_t i = 0; i < 20; ++i )
     {
         BOOST_CHECK( publisher.publish(
-                       zeroeq::vocabulary::serializeEcho( test::echoMessage )));
+                         zeroeq::vocabulary::serializeEcho( test::echoMessage )));
 
         if( subscriber.receive( 100 ))
         {
@@ -156,7 +157,7 @@ BOOST_AUTO_TEST_CASE(publish_receive_zeroconf_disabled)
 
 void onLargeEcho( const zeroeq::Event& event )
 {
-    BOOST_CHECK( event.getType() == zeroeq::vocabulary::EVENT_ECHO );
+    BOOST_CHECK( event.getType() == ::zeroeq::vocabulary::EVENT_ECHO );
 }
 
 BOOST_AUTO_TEST_CASE(publish_receive_filters)
@@ -164,22 +165,22 @@ BOOST_AUTO_TEST_CASE(publish_receive_filters)
     // The publisher needs to be destroyed before the subscriber otherwise
     // zmq_ctx_destroy() can hang forever. For more details see
     // zmq_ctx_destroy() documentation.
-    zeroeq::Publisher* publisher =
-            new zeroeq::Publisher( zeroeq::NULL_SESSION );
+    zeroeq::Publisher* publisher = new zeroeq::Publisher( zeroeq::NULL_SESSION );
     zeroeq::Subscriber subscriber( zeroeq::URI( publisher->getURI( )));
     const std::string message( 60000, 'a' );
 
     // Make sure we're connected
-    BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
-                       std::bind( &test::onEchoEvent, std::placeholders::_1 )));
+    zeroeq::Event echoEvent( ::zeroeq::vocabulary::EVENT_ECHO,
+                          std::bind( &test::onEchoEvent, std::placeholders::_1 ));
+    BOOST_CHECK( subscriber.subscribe( echoEvent ));
     for( size_t i = 0; i < 20; ++i )
     {
         BOOST_CHECK( publisher->publish(
-                       zeroeq::vocabulary::serializeEcho( test::echoMessage )));
+                         zeroeq::vocabulary::serializeEcho( test::echoMessage )));
         if( subscriber.receive( 100 ))
             break;
     }
-    BOOST_CHECK( subscriber.deregisterHandler( EVENT_ECHO ));
+    BOOST_CHECK( subscriber.unsubscribe( echoEvent ));
 
     // benchmark with no data to be transmitted
     const zeroeq::Event& event = serializeEcho( message );
@@ -193,8 +194,9 @@ BOOST_AUTO_TEST_CASE(publish_receive_filters)
                              startTime;
 
     // Benchmark with echo handler, now should send data
-    BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
-                       std::bind( &onLargeEcho, std::placeholders::_1 )));
+    zeroeq::Event largeEchoEvent( ::zeroeq::vocabulary::EVENT_ECHO,
+                          std::bind( &onLargeEcho, std::placeholders::_1 ));
+    BOOST_CHECK( subscriber.subscribe( largeEchoEvent ));
 
     startTime = std::chrono::high_resolution_clock::now();
     for( size_t i = 0; i < 20000; ++i )
@@ -218,11 +220,12 @@ BOOST_AUTO_TEST_CASE(publish_receive_late_zeroconf)
         return;
 
     zeroeq::Subscriber subscriber( test::buildUniqueSession( ));
-    zeroeq::detail::Sender::getUUID() = servus::make_UUID(); //different machine
+    zeroeq::detail::Sender::getUUID() = servus::make_UUID(); // different machine
     zeroeq::Publisher publisher( subscriber.getSession( ));
 
-    BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
-                       std::bind( &test::onEchoEvent, std::placeholders::_1 )));
+    zeroeq::Event echoEvent( ::zeroeq::vocabulary::EVENT_ECHO,
+                          std::bind( &test::onEchoEvent, std::placeholders::_1 ));
+    BOOST_CHECK( subscriber.subscribe( echoEvent ));
     bool received = false;
     for( size_t i = 0; i < 20; ++i )
     {
@@ -243,11 +246,13 @@ BOOST_AUTO_TEST_CASE(publish_receive_empty_event_zeroconf)
         return;
 
     zeroeq::Publisher publisher( test::buildUniqueSession( ));
-    zeroeq::detail::Sender::getUUID() = servus::make_UUID(); //different machine
+    zeroeq::detail::Sender::getUUID() = servus::make_UUID(); // different machine
     zeroeq::Subscriber subscriber( publisher.getSession( ));
 
-    BOOST_CHECK( subscriber.registerHandler( EVENT_EXIT,
-                       std::bind( &test::onExitEvent, std::placeholders::_1 )));
+    zeroeq::Event exitEvent( EVENT_EXIT,
+                          std::bind( &test::onExitEvent, std::placeholders::_1 ));
+    BOOST_CHECK( subscriber.subscribe( exitEvent ));
+
     bool received = false;
     const zeroeq::Event event( EVENT_EXIT );
     for( size_t i = 0; i < 20; ++i )
@@ -285,8 +290,7 @@ public:
             ++i;
 
             if( i > 200 )
-                ZEROEQTHROW( std::runtime_error(
-                                 "Publisher giving up after 20s" ));
+                ZEROEQTHROW( std::runtime_error( "Publisher giving up after 20s"));
         }
     }
 
@@ -301,10 +305,11 @@ BOOST_AUTO_TEST_CASE(publish_blocking_receive_zeroconf)
         return;
 
     zeroeq::Subscriber subscriber( test::buildUniqueSession( ));
-    zeroeq::detail::Sender::getUUID() = servus::make_UUID(); //different machine
+    zeroeq::detail::Sender::getUUID() = servus::make_UUID(); // different machine
 
-    BOOST_CHECK( subscriber.registerHandler( EVENT_ECHO,
-                       std::bind( &test::onEchoEvent, std::placeholders::_1 )));
+    zeroeq::Event echoEvent( ::zeroeq::vocabulary::EVENT_ECHO,
+                          std::bind( &test::onEchoEvent, std::placeholders::_1 ));
+    BOOST_CHECK( subscriber.subscribe( echoEvent ));
 
     Publisher publisher;
     std::thread thread( std::bind( &Publisher::run, &publisher,

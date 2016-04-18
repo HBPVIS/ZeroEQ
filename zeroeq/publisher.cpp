@@ -74,7 +74,7 @@ public:
     {
         if( session.empty( ))
             ZEROEQTHROW( std::runtime_error(
-                             "Empty session is not allowed for publisher" ));
+                          "Empty session is not allowed for publisher" ));
 
         const std::string& zmqURI = buildZmqURI( uri );
         if( zmq_bind( socket, zmqURI.c_str( )) == -1 )
@@ -82,8 +82,8 @@ public:
             zmq_close( socket );
             socket = 0;
             ZEROEQTHROW( std::runtime_error(
-                             std::string( "Cannot bind publisher socket '" ) +
-                             zmqURI + "': " + zmq_strerror( zmq_errno( ))));
+                          std::string( "Cannot bind publisher socket '" ) +
+                          zmqURI + "': " + zmq_strerror( zmq_errno( ))));
         }
 
         initURI();
@@ -93,44 +93,6 @@ public:
     }
 
     ~Impl() {}
-
-    bool publish( const zeroeq::Event& event )
-    {
-#ifdef ZEROEQ_LITTLEENDIAN
-        const uint128_t& type = event.getType();
-#else
-        uint128_t type = event.getType();
-        detail::byteswap( type ); // convert to little endian wire protocol
-#endif
-        zmq_msg_t msgHeader;
-        zmq_msg_init_size( &msgHeader, sizeof( type ));
-        memcpy( zmq_msg_data( &msgHeader ), &type, sizeof( type ));
-        int ret = zmq_msg_send( &msgHeader, socket,
-                                event.getSize() > 0 ? ZMQ_SNDMORE : 0 );
-        zmq_msg_close( &msgHeader );
-        if( ret == -1 )
-        {
-            ZEROEQWARN << "Cannot publish message header, got "
-                       << zmq_strerror( zmq_errno( )) << std::endl;
-            return false;
-        }
-
-        if( event.getSize() == 0 )
-            return true;
-
-        zmq_msg_t msg;
-        zmq_msg_init_size( &msg, event.getSize( ));
-        memcpy( zmq_msg_data(&msg), event.getData(), event.getSize( ));
-        ret = zmq_msg_send( &msg, socket, 0 );
-        zmq_msg_close( &msg );
-        if( ret  == -1 )
-        {
-            ZEROEQWARN << "Cannot publish message data, got "
-                       << zmq_strerror( zmq_errno( )) << std::endl;
-            return false;
-        }
-        return true;
-    }
 
     bool publish( const servus::Serializable& serializable )
     {
@@ -152,7 +114,7 @@ public:
         if( ret == -1 )
         {
             ZEROEQWARN << "Cannot publish message header, got "
-                       << zmq_strerror( zmq_errno( )) << std::endl;
+                   << zmq_strerror( zmq_errno( )) << std::endl;
             return false;
         }
 
@@ -167,7 +129,7 @@ public:
         if( ret  == -1 )
         {
             ZEROEQWARN << "Cannot publish message data, got "
-                       << zmq_strerror( zmq_errno( )) << std::endl;
+                    << zmq_strerror( zmq_errno( )) << std::endl;
             return false;
         }
         return true;
@@ -197,7 +159,7 @@ private:
         if( !result )
         {
             ZEROEQTHROW( std::runtime_error( "Zeroconf announce failed: " +
-                                             result.getString( )));
+                                          result.getString( )));
         }
     }
 
@@ -224,11 +186,6 @@ Publisher::Publisher( const URI& uri, const std::string& session )
 
 Publisher::~Publisher()
 {
-}
-
-bool Publisher::publish( const Event& event )
-{
-    return _impl->publish( event );
 }
 
 bool Publisher::publish( const servus::Serializable& serializable )

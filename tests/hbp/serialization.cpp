@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE( frameEvent )
     {
         const zeroeq::hbp::data::Frame frame( 1, 2, 3, 0 );
         const zeroeq::Event& event = zeroeq::hbp::serializeFrame( frame );
-        const auto& out = zeroeq::hbp::deserializeFrame( event );
+        const zeroeq::hbp::data::Frame& out = zeroeq::hbp::deserializeFrame( event );
 
         BOOST_CHECK_EQUAL( frame, out );
 
@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE( frameEvent )
     {
         const zeroeq::hbp::data::Frame frame( 3, 2, 1, -1 );
         const zeroeq::Event& event = zeroeq::hbp::serializeFrame( frame );
-        const auto& out = zeroeq::hbp::deserializeFrame( event );
+        const zeroeq::hbp::data::Frame& out = zeroeq::hbp::deserializeFrame( event );
         const zeroeq::hbp::data::Frame expected( 3, 3, 3, -1 );
 
         BOOST_CHECK_EQUAL( expected, out );
@@ -75,8 +75,7 @@ BOOST_AUTO_TEST_CASE( toggleRequestEvent )
 BOOST_AUTO_TEST_CASE( lookupTable1D )
 {
     const std::vector< uint8_t > lut( 1024 );
-    const zeroeq::Event& lookupTableEvent =
-            zeroeq::hbp::serializeLookupTable1D( lut );
+    const zeroeq::Event& lookupTableEvent = zeroeq::hbp::serializeLookupTable1D( lut );
     const std::vector< uint8_t >& deserializedLut =
             zeroeq::hbp::deserializeLookupTable1D( lookupTableEvent );
     BOOST_CHECK_EQUAL_COLLECTIONS(
