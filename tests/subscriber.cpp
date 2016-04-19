@@ -101,9 +101,11 @@ BOOST_AUTO_TEST_CASE(test_invalid_unsubscribe_different_event_objects)
     zeroeq::Subscriber subscriber;
     zeroeq::Event echoEvent( ::zeroeq::vocabulary::EVENT_ECHO,
                           std::bind( &test::onEchoEvent, std::placeholders::_1 ));
+    zeroeq::Event exitEvent( ::zeroeq::vocabulary::EVENT_EXIT,
+                          std::bind( &test::onEchoEvent, std::placeholders::_1 ));
 
     BOOST_CHECK( subscriber.subscribe( echoEvent ));
-    BOOST_CHECK( !subscriber.unsubscribe( zeroeq::Event( ::zeroeq::vocabulary::EVENT_EXIT )));
+    BOOST_CHECK( !subscriber.unsubscribe( exitEvent ));
 }
 
 

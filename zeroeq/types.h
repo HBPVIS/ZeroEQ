@@ -42,9 +42,7 @@ class Event;
 class Publisher;
 class Subscriber;
 class URI;
-struct EventDescriptor;
 
-typedef std::vector< EventDescriptor > EventDescriptors;
 typedef std::function< void( const Event& ) > EventFunc;
 
 #ifdef WIN32

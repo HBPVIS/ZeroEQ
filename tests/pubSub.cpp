@@ -254,7 +254,7 @@ BOOST_AUTO_TEST_CASE(publish_receive_empty_event_zeroconf)
     BOOST_CHECK( subscriber.subscribe( exitEvent ));
 
     bool received = false;
-    const zeroeq::Event event( EVENT_EXIT );
+    const zeroeq::Event event( EVENT_EXIT, ::zeroeq::EventFunc( ));
     for( size_t i = 0; i < 20; ++i )
     {
         BOOST_CHECK( publisher.publish( event ));

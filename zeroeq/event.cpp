@@ -12,8 +12,7 @@ namespace zeroeq
 Event::Event( const uint128_t& type, const EventFunc& func )
     : _impl( new detail::Event( type, func ))
 {
-    if( func)
-        setUpdatedFunction( [this](){ _impl->func( *this ); });
+    setUpdatedFunction( [this](){ _impl->func( *this ); });
 }
 
 Event::~Event()
@@ -69,19 +68,16 @@ servus::Serializable::Data Event::_toBinary() const
     return data;
 }
 
-bool Event::_fromJSON( const std::string& json )
+bool Event::_fromJSON( const std::string& )
 {
-    return _impl->parser.Parse( json.c_str( ));
+    ZEROEQTHROW( std::runtime_error(
+                     "Flatbuffers objects cannot be converted from JSON" ));
 }
 
 std::string Event::_toJSON() const
 {
-    std::string json;
-    flatbuffers::GeneratorOptions opts;
-    opts.base64_byte_array = true;
-    opts.strict_json = true;
-    GenerateText( _impl->parser, _impl->getData(), opts, &json );
-    return json;
+    ZEROEQTHROW( std::runtime_error(
+                     "Flatbuffers objects cannot be converted to JSON" ));
 }
 
 }

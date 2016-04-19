@@ -33,7 +33,7 @@ public:
      * @param func the desired event function
      * @sa vocabulary::registerEvent
      */
-    ZEROEQ_API Event( const uint128_t& type, const EventFunc& func = EventFunc( ));
+    ZEROEQ_API Event( const uint128_t& type, const EventFunc& func );
 
     /** Move ctor @internal */
     ZEROEQ_API Event( Event&& rhs );

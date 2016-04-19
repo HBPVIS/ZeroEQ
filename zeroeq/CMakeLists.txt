@@ -2,10 +2,7 @@
 
 flatbuffers_generate_c_headers(ZEROEQ_FBS
   detail/echo.fbs
-  detail/exit.fbs
-  detail/heartbeat.fbs
-  detail/request.fbs
-  detail/vocabulary.fbs)
+  detail/exit.fbs)
 
 list(APPEND CPPCHECK_EXTRA_ARGS
   --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/*_generated.h)
@@ -15,7 +12,6 @@ set(ZEROEQ_PUBLIC_HEADERS
   connection/broker.h
   connection/service.h
   event.h
-  eventDescriptor.h
   log.h
   publisher.h
   receiver.h
@@ -28,7 +24,6 @@ set(ZEROEQ_HEADERS
   detail/broker.h
   detail/constants.h
   detail/event.h
-  detail/eventDescriptor.h
   detail/port.h
   detail/sender.h
   detail/socket.h
@@ -41,7 +36,6 @@ set(ZEROEQ_SOURCES
   detail/sender.cpp
   detail/vocabulary.cpp
   event.cpp
-  eventDescriptor.cpp
   publisher.cpp
   receiver.cpp
   subscriber.cpp

@@ -64,7 +64,9 @@ BOOST_AUTO_TEST_CASE(publish_update_uri)
 BOOST_AUTO_TEST_CASE(publish_empty_event)
 {
     zeroeq::Publisher publisher( zeroeq::NULL_SESSION );
-    BOOST_CHECK( publisher.publish( zeroeq::Event( zeroeq::vocabulary::EVENT_EXIT )));
+    BOOST_CHECK( publisher.publish(
+                     zeroeq::Event( ::zeroeq::vocabulary::EVENT_EXIT,
+                                    ::zeroeq::EventFunc( ))));
 }
 
 BOOST_AUTO_TEST_CASE(multiple_publisher_on_same_host)

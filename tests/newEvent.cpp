@@ -43,7 +43,7 @@ static const std::string message( "So long, and thanks for all the fish" );
 
 zeroeq::Event serializeString( const std::string& string )
 {
-    ::zeroeq::Event event( EVENT_NEWEVENT );
+    ::zeroeq::Event event( EVENT_NEWEVENT, ::zeroeq::EventFunc( ));
 
     flatbuffers::FlatBufferBuilder& fbb = event.getFBB();
     auto data = fbb.CreateString( string );
@@ -74,14 +74,15 @@ BOOST_AUTO_TEST_CASE(new_event)
     zeroeq::Subscriber subscriber( zeroeq::URI( publisher.getURI( )));
 
     ::zeroeq::Event newEvent( ::zeroeqtest::EVENT_NEWEVENT, std::bind(
-                                                        &zeroeqtest::onMessageEvent,
-                                                        std::placeholders::_1 ));
+                                                    &zeroeqtest::onMessageEvent,
+                                                    std::placeholders::_1 ));
     BOOST_CHECK( subscriber.subscribe( newEvent ));
 
     bool received = false;
     for( size_t i = 0; i < 10; ++i )
     {
-        BOOST_CHECK( publisher.publish( zeroeqtest::serializeString( zeroeqtest::message )));
+        BOOST_CHECK( publisher.publish(
+                         zeroeqtest::serializeString( zeroeqtest::message )));
 
         if( subscriber.receive( 100 ))
         {
