@@ -15,8 +15,8 @@ namespace vocabulary
 namespace detail
 {
 
-zeroeq::Event serializeEcho( const std::string& msg );
-std::string deserializeEcho( const zeroeq::Event& event );
+zeroeq::FBEvent serializeEcho( const std::string& msg );
+std::string deserializeEcho( const zeroeq::FBEvent& event );
 
 }
 }

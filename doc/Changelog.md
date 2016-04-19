@@ -3,9 +3,9 @@
 # git master
 
 * [145](https://github.com/HBPVIS/ZeroEQ/pull/145):
-  * The zeroeq::Event class is renamed to xxxx
-  * xxxx is now is derived from the servus::Serializable
-  * Removed deprecated zeroeq::Event functions from pub/sub
+  * The zeroeq::Event class is renamed to zeroeq::FBEvent
+  * zeroeq::FBEvent is derived from the servus::Serializable
+  * Removed deprecated zeroeq::FBEvent functions from pub/sub
 * [143](https://github.com/HBPVIS/ZeroEQ/pull/143):
   Rename zeq to ZeroEQ in the whole project
 * [141](https://github.com/HBPVIS/ZeroEQ/pull/141):

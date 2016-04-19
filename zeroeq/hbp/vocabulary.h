@@ -63,7 +63,7 @@ public:
  * @return the serialized event.
  */
 ZEROEQ_API
-Event serializeSelectedIDs( const uint32_ts& ids );
+FBEvent serializeSelectedIDs( const uint32_ts& ids );
 
 /**
  * Deserialize the given neuron selection event into the vector of neuron GIDs.
@@ -71,7 +71,7 @@ Event serializeSelectedIDs( const uint32_ts& ids );
  * @return the vector of neuron GIDs (uint).
  */
 ZEROEQ_API
-std::vector< unsigned int > deserializeSelectedIDs( const Event& event );
+std::vector< unsigned int > deserializeSelectedIDs( const FBEvent& event );
 
 /**
  * Serialize the given selection into an Event of type EVENT_TOGGLE_ID_REQUEST.
@@ -79,7 +79,7 @@ std::vector< unsigned int > deserializeSelectedIDs( const Event& event );
  * @return the serialized event.
  */
 ZEROEQ_API
-Event serializeToggleIDRequest( const uint32_ts& ids );
+FBEvent serializeToggleIDRequest( const uint32_ts& ids );
 
 /**
  * Deserialize an toggle selection request event into the vector of neuron GIDs.
@@ -87,7 +87,7 @@ Event serializeToggleIDRequest( const uint32_ts& ids );
  * @return the vector of neuron GIDs (uint).
  */
 ZEROEQ_API
-std::vector< unsigned int > deserializeToggleIDRequest( const Event& event );
+std::vector< unsigned int > deserializeToggleIDRequest( const FBEvent& event );
 
 /**
  * Serialize the given CellSetBinaryOp into an Event of type
@@ -96,13 +96,13 @@ std::vector< unsigned int > deserializeToggleIDRequest( const Event& event );
  * @return the serialized event.
  */
 ZEROEQ_API
-Event serializeCellSetBinaryOp( const data::CellSetBinaryOp& cellSetBinaryOp );
+FBEvent serializeCellSetBinaryOp( const data::CellSetBinaryOp& cellSetBinaryOp );
 
 /**
  * Convenience overload of the function above
  */
 ZEROEQ_API
-Event serializeCellSetBinaryOp( const uint32_ts& first, const uint32_ts& second,
+FBEvent serializeCellSetBinaryOp( const uint32_ts& first, const uint32_ts& second,
                                 CellSetBinaryOpType type );
 
 /**
@@ -112,7 +112,7 @@ Event serializeCellSetBinaryOp( const uint32_ts& first, const uint32_ts& second,
  * @return the deserialized CellSetBinaryOp.
  */
 ZEROEQ_API
-data::CellSetBinaryOp deserializeCellSetBinaryOp( const Event& event );
+data::CellSetBinaryOp deserializeCellSetBinaryOp( const FBEvent& event );
 
 }
 }

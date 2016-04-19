@@ -3,64 +3,64 @@
  *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  */
 
-#include "event.h"
-#include "detail/event.h"
+#include "fbevent.h"
+#include "detail/fbevent.h"
 
 namespace zeroeq
 {
 
-Event::Event( const uint128_t& type, const EventFunc& func )
-    : _impl( new detail::Event( type, func ))
+FBEvent::FBEvent( const uint128_t& type, const EventFunc& func )
+    : _impl( new detail::FBEvent( type, func ))
 {
     setUpdatedFunction( [this](){ _impl->func( *this ); });
 }
 
-Event::~Event()
+FBEvent::~FBEvent()
 {
 }
 
-std::string Event::getTypeName() const
+std::string FBEvent::getTypeName() const
 {
     return _impl->type.getString();
 }
 
-const uint128_t& Event::getType() const
+const uint128_t& FBEvent::getType() const
 {
     return _impl->type;
 }
 
-size_t Event::getSize() const
+size_t FBEvent::getSize() const
 {
     return _impl->getSize();
 }
 
-const void* Event::getData() const
+const void* FBEvent::getData() const
 {
     return _impl->getData();
 }
 
-flatbuffers::FlatBufferBuilder& Event::getFBB()
+flatbuffers::FlatBufferBuilder& FBEvent::getFBB()
 {
     return _impl->parser.builder_;
 }
 
-flatbuffers::Parser& Event::getParser()
+flatbuffers::Parser& FBEvent::getParser()
 {
     return _impl->parser;
 }
 
-Event::Event( Event&& rhs )
+FBEvent::FBEvent( FBEvent&& rhs )
     : _impl( std::move( rhs._impl ))
 {
 }
 
-bool Event::_fromBinary( const void *data, const size_t size )
+bool FBEvent::_fromBinary( const void *data, const size_t size )
 {
     _impl->setData(( const uint8_t*)data, size );
     return true;
 }
 
-servus::Serializable::Data Event::_toBinary() const
+servus::Serializable::Data FBEvent::_toBinary() const
 {
     servus::Serializable::Data data;
     data.ptr.reset( _impl->getData(), []( const void* ){});
@@ -68,13 +68,13 @@ servus::Serializable::Data Event::_toBinary() const
     return data;
 }
 
-bool Event::_fromJSON( const std::string& )
+bool FBEvent::_fromJSON( const std::string& )
 {
     ZEROEQTHROW( std::runtime_error(
                      "Flatbuffers objects cannot be converted from JSON" ));
 }
 
-std::string Event::_toJSON() const
+std::string FBEvent::_toJSON() const
 {
     ZEROEQTHROW( std::runtime_error(
                      "Flatbuffers objects cannot be converted to JSON" ));

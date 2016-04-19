@@ -18,7 +18,7 @@ BOOST_AUTO_TEST_CASE( selectionsEvent )
     unsigned int ids[] = {16,2,77,29};
     const std::vector< unsigned int > selection(
         ids, ids + sizeof(ids) / sizeof(unsigned int) );
-    const zeroeq::Event& selectionEvent =
+    const zeroeq::FBEvent& selectionEvent =
         zeroeq::hbp::serializeSelectedIDs( selection );
     const std::vector< unsigned int >& deserializedSelection =
             zeroeq::hbp::deserializeSelectedIDs( selectionEvent );
@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE( toggleRequestEvent )
     unsigned int ids[] = {16,2,77,29};
     const std::vector< unsigned int > selection(
         ids, ids + sizeof(ids) / sizeof(unsigned int) );
-    const zeroeq::Event& toggleRequest_event =
+    const zeroeq::FBEvent& toggleRequest_event =
         zeroeq::hbp::serializeToggleIDRequest( selection );
     const std::vector< unsigned int >& deserialized_toggleRequest =
             zeroeq::hbp::deserializeToggleIDRequest( toggleRequest_event );
@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE( cellSetBinaryOp )
       { 0, 2, 4, 6 }, { 1, 3, 5, 7 },
       zeroeq::hbp::CELLSETOP_SYNAPTIC_PROJECTIONS );
 
-  const zeroeq::Event& cellSetBinaryOpEvent =
+  const zeroeq::FBEvent& cellSetBinaryOpEvent =
       zeroeq::hbp::serializeCellSetBinaryOp( cellSet.first, cellSet.second,
                                           cellSet.operation );
 

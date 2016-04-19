@@ -12,8 +12,8 @@
 bool gotOne = false;
 bool gotTwo = false;
 
-void onEvent1( const zeroeq::Event& ) { gotOne = true; }
-void onEvent2( const zeroeq::Event& ) { gotTwo = true; }
+void onEvent1( const zeroeq::FBEvent& ) { gotOne = true; }
+void onEvent2( const zeroeq::FBEvent& ) { gotTwo = true; }
 
 void testReceive( zeroeq::Publisher& publisher, zeroeq::Receiver& receiver,
                   bool& var1, bool& var2, const int line )
@@ -56,11 +56,11 @@ BOOST_AUTO_TEST_CASE(test_two_subscribers)
     zeroeq::Subscriber subscriber2( test::buildURI( "localhost", publisher ),
                                  subscriber1 );
 
-    zeroeq::Event echoEvent1( ::zeroeq::vocabulary::EVENT_ECHO,
+    zeroeq::FBEvent echoEvent1( ::zeroeq::vocabulary::EVENT_ECHO,
                           std::bind( &onEvent1, std::placeholders::_1 ));
     BOOST_CHECK( subscriber1.subscribe( echoEvent1 ));
 
-    zeroeq::Event echoEvent2( ::zeroeq::vocabulary::EVENT_ECHO,
+    zeroeq::FBEvent echoEvent2( ::zeroeq::vocabulary::EVENT_ECHO,
                           std::bind( &onEvent2, std::placeholders::_1 ));
     BOOST_CHECK( subscriber2.subscribe( echoEvent2 ));
 
@@ -77,11 +77,11 @@ BOOST_AUTO_TEST_CASE(test_publisher_routing)
     zeroeq::Subscriber subscriber2( test::buildURI( "localhost", publisher ),
                                  *subscriber1 );
 
-    zeroeq::Event echoEvent1( ::zeroeq::vocabulary::EVENT_ECHO,
+    zeroeq::FBEvent echoEvent1( ::zeroeq::vocabulary::EVENT_ECHO,
                           std::bind( &onEvent1, std::placeholders::_1 ));
     BOOST_CHECK( subscriber1->subscribe( echoEvent1 ));
 
-    zeroeq::Event echoEvent2( ::zeroeq::vocabulary::EVENT_ECHO,
+    zeroeq::FBEvent echoEvent2( ::zeroeq::vocabulary::EVENT_ECHO,
                           std::bind( &onEvent2, std::placeholders::_1 ));
     BOOST_CHECK( subscriber2.subscribe( echoEvent2 ));
 

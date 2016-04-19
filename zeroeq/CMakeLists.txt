@@ -11,7 +11,7 @@ set(ZEROEQ_PUBLIC_HEADERS
   ${ZEROEQ_FBS_ZEROEQ_OUTPUTS}
   connection/broker.h
   connection/service.h
-  event.h
+  fbevent.h
   log.h
   publisher.h
   receiver.h
@@ -23,7 +23,7 @@ set(ZEROEQ_PUBLIC_HEADERS
 set(ZEROEQ_HEADERS
   detail/broker.h
   detail/constants.h
-  detail/event.h
+  detail/fbevent.h
   detail/port.h
   detail/sender.h
   detail/socket.h
@@ -35,7 +35,7 @@ set(ZEROEQ_SOURCES
   detail/port.cpp
   detail/sender.cpp
   detail/vocabulary.cpp
-  event.cpp
+  fbevent.cpp
   publisher.cpp
   receiver.cpp
   subscriber.cpp

@@ -42,14 +42,14 @@ zeroeq::URI buildURI( const std::string& hostname, const zeroeq::Publisher& to )
 
 const std::string echoMessage( "So long, and thanks for all the fish!" );
 
-void onEchoEvent( const zeroeq::Event& event )
+void onEchoEvent( const zeroeq::FBEvent& event )
 {
     BOOST_CHECK( event.getType() == zeroeq::vocabulary::EVENT_ECHO );
     const std::string message = zeroeq::vocabulary::deserializeEcho( event );
     BOOST_CHECK_EQUAL( echoMessage, message );
 }
 
-void onExitEvent( const zeroeq::Event& event )
+void onExitEvent( const zeroeq::FBEvent& event )
 {
     BOOST_CHECK_EQUAL( event.getType(), zeroeq::vocabulary::EVENT_EXIT );
     BOOST_CHECK_EQUAL( event.getSize(), 0 );

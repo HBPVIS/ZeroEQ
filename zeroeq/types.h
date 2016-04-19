@@ -38,12 +38,12 @@ namespace zeroeq
 {
 
 using servus::uint128_t;
-class Event;
+class FBEvent;
 class Publisher;
 class Subscriber;
 class URI;
 
-typedef std::function< void( const Event& ) > EventFunc;
+typedef std::function< void( const FBEvent& ) > EventFunc;
 
 #ifdef WIN32
 typedef SOCKET SocketDescriptor;

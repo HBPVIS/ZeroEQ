@@ -15,7 +15,7 @@
 
 const char* scriptFile = 0;
 
-typedef std::pair< float, zeroeq::Event > PauseEventPair;
+typedef std::pair< float, zeroeq::FBEvent > PauseEventPair;
 typedef std::vector< PauseEventPair > Events;
 typedef std::vector< uint32_t > uint32_ts;
 
@@ -40,7 +40,7 @@ int main( int argc, char** argv )
         }
 
         std::cout << "Sending event ";
-        const zeroeq::Event& event = i->second;
+        const zeroeq::FBEvent& event = i->second;
         if( event.getType() == zeroeq::hbp::EVENT_TOGGLEIDREQUEST )
             std::cout << zeroeq::hbp::TOGGLEIDREQUEST << std::endl;
         else if( event.getType() == zeroeq::hbp::EVENT_CELLSETBINARYOP )
@@ -85,7 +85,7 @@ std::string trim( const std::string& trim )
     return back <= front ? std::string() : std::string( front, back );
 }
 
-zeroeq::Event parseCellSetBinaryOp( std::istream& input )
+zeroeq::FBEvent parseCellSetBinaryOp( std::istream& input )
 {
     uint32_ts first;
     uint32_ts second;
@@ -123,7 +123,7 @@ zeroeq::Event parseCellSetBinaryOp( std::istream& input )
     return zeroeq::hbp::serializeCellSetBinaryOp( first, second, operation );
 }
 
-zeroeq::Event parseToggleIDRequest( std::istream& input )
+zeroeq::FBEvent parseToggleIDRequest( std::istream& input )
 {
     uint32_ts ids;
 

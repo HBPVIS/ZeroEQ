@@ -12,7 +12,7 @@
 #include <zeroeq/hbp/imageJPEG_generated.h>
 #include <zeroeq/hbp/selections_generated.h>
 #include <zeroeq/hbp/lookupTable1D_generated.h>
-#include <zeroeq/event.h>
+#include <zeroeq/fbevent.h>
 #include <zeroeq/vocabulary.h>
 
 #include <cassert>
@@ -26,7 +26,7 @@ typedef std::vector< unsigned int > uints;
 
 template< typename T, typename Builder >
 void buildVectorOnlyBuffer(
-    zeroeq::Event& event,
+    zeroeq::FBEvent& event,
     void (Builder::*adder)( flatbuffers::Offset< flatbuffers::Vector< T >>),
     const std::vector< T >& vector)
 {
@@ -47,7 +47,7 @@ std::vector< T > deserializeVector( const flatbuffers::Vector< T >* in )
 
 template< typename T, typename U >
 std::vector< T > deserializeVector(
-    const zeroeq::Event& event,
+    const zeroeq::FBEvent& event,
     const flatbuffers::Vector< T >* (U::*getter)( ) const )
 {
     auto data = flatbuffers::GetRoot< U >( event.getData( ));
@@ -57,33 +57,34 @@ std::vector< T > deserializeVector(
 #define BUILD_VECTOR_ONLY_BUFFER( event, type, vector ) \
   buildVectorOnlyBuffer( event, &type##Builder::add_##vector, vector);
 
-Event serializeSelectedIDs( const uint32_ts& ids )
+FBEvent serializeSelectedIDs( const uint32_ts& ids )
 {
-    zeroeq::Event event( EVENT_SELECTEDIDS, zeroeq::EventFunc( ));
+    FBEvent event( EVENT_SELECTEDIDS, zeroeq::EventFunc( ));
     BUILD_VECTOR_ONLY_BUFFER( event, SelectedIDs, ids );
     return event;
 }
 
-uints deserializeSelectedIDs( const Event& event )
+uints deserializeSelectedIDs( const FBEvent& event )
 {
     return deserializeVector( event, &SelectedIDs::ids );
 }
 
-zeroeq::Event serializeToggleIDRequest( const uint32_ts& ids )
+FBEvent serializeToggleIDRequest( const uint32_ts& ids )
 {
-    zeroeq::Event event( EVENT_TOGGLEIDREQUEST, zeroeq::EventFunc( ));
+    FBEvent event( EVENT_TOGGLEIDREQUEST, zeroeq::EventFunc( ));
     BUILD_VECTOR_ONLY_BUFFER( event, ToggleIDRequest, ids );
     return event;
 }
 
-uints deserializeToggleIDRequest( const zeroeq::Event& event )
+uints deserializeToggleIDRequest( const zeroeq::FBEvent& event )
 {
     return deserializeVector( event, &ToggleIDRequest::ids );
 }
 
-Event serializeCellSetBinaryOp( const data::CellSetBinaryOp& cellSetBinaryOp )
+FBEvent serializeCellSetBinaryOp(
+        const data::CellSetBinaryOp& cellSetBinaryOp )
 {
-  zeroeq::Event event( EVENT_CELLSETBINARYOP, zeroeq::EventFunc( ));
+  FBEvent event( EVENT_CELLSETBINARYOP, zeroeq::EventFunc( ));
 
   flatbuffers::FlatBufferBuilder& fbb = event.getFBB( );
 
@@ -100,15 +101,16 @@ Event serializeCellSetBinaryOp( const data::CellSetBinaryOp& cellSetBinaryOp )
   return event;
 }
 
-Event serializeCellSetBinaryOp( const uint32_ts& first, const uint32_ts& second,
-                                CellSetBinaryOpType type )
+FBEvent serializeCellSetBinaryOp( const uint32_ts& first,
+                                          const uint32_ts& second,
+                                          CellSetBinaryOpType type )
 {
-    return serializeCellSetBinaryOp(
-        data::CellSetBinaryOp( first, second, type ));
+    return serializeCellSetBinaryOp( data::CellSetBinaryOp( first,
+                                                            second,
+                                                            type ));
 }
 
-data::CellSetBinaryOp
-deserializeCellSetBinaryOp( const Event& event )
+data::CellSetBinaryOp deserializeCellSetBinaryOp( const FBEvent& event )
 {
   data::CellSetBinaryOp result;
 

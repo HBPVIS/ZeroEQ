@@ -41,9 +41,9 @@ namespace zeroeqtest
 {
 static const std::string message( "So long, and thanks for all the fish" );
 
-zeroeq::Event serializeString( const std::string& string )
+zeroeq::FBEvent serializeString( const std::string& string )
 {
-    ::zeroeq::Event event( EVENT_NEWEVENT, ::zeroeq::EventFunc( ));
+    ::zeroeq::FBEvent event( EVENT_NEWEVENT, ::zeroeq::EventFunc( ));
 
     flatbuffers::FlatBufferBuilder& fbb = event.getFBB();
     auto data = fbb.CreateString( string );
@@ -54,7 +54,7 @@ zeroeq::Event serializeString( const std::string& string )
     return event;
 }
 
-std::string deserializeString( const ::zeroeq::Event& event )
+std::string deserializeString( const ::zeroeq::FBEvent& event )
 {
     BOOST_CHECK_EQUAL( event.getType(), EVENT_NEWEVENT );
 
@@ -62,7 +62,7 @@ std::string deserializeString( const ::zeroeq::Event& event )
     return std::string( data->message()->c_str( ));
 }
 
-void onMessageEvent( const zeroeq::Event& event )
+void onMessageEvent( const zeroeq::FBEvent& event )
 {
     BOOST_CHECK_EQUAL( deserializeString( event ), message );
 }
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(new_event)
     zeroeq::Publisher publisher( zeroeq::NULL_SESSION );
     zeroeq::Subscriber subscriber( zeroeq::URI( publisher.getURI( )));
 
-    ::zeroeq::Event newEvent( ::zeroeqtest::EVENT_NEWEVENT, std::bind(
+    ::zeroeq::FBEvent newEvent( ::zeroeqtest::EVENT_NEWEVENT, std::bind(
                                                     &zeroeqtest::onMessageEvent,
                                                     std::placeholders::_1 ));
     BOOST_CHECK( subscriber.subscribe( newEvent ));

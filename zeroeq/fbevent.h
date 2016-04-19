@@ -3,8 +3,8 @@
  *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  */
 
-#ifndef ZEROEQ_EVENT_H
-#define ZEROEQ_EVENT_H
+#ifndef ZEROEQ_FBEVENT_H
+#define ZEROEQ_FBEVENT_H
 
 #include <zeroeq/api.h>
 #include <zeroeq/types.h>
@@ -13,7 +13,7 @@
 
 namespace zeroeq
 {
-namespace detail { class Event; }
+namespace detail { class FBEvent; }
 
 /**
  * An event is emitted by a Publisher to notify Subscriber of a change.
@@ -23,7 +23,7 @@ namespace detail { class Event; }
  *
  * Example: @include tests/serialization.cpp
  */
-class Event : public servus::Serializable
+class FBEvent : public servus::Serializable
 {
 public:
     /**
@@ -33,15 +33,15 @@ public:
      * @param func the desired event function
      * @sa vocabulary::registerEvent
      */
-    ZEROEQ_API Event( const uint128_t& type, const EventFunc& func );
+    ZEROEQ_API FBEvent( const uint128_t& type, const EventFunc& func );
 
     /** Move ctor @internal */
-    ZEROEQ_API Event( Event&& rhs );
+    ZEROEQ_API FBEvent( FBEvent&& rhs );
 
     /** @return the fully qualified, demangled class name. */
     ZEROEQ_API std::string getTypeName() const final;
 
-    ZEROEQ_API ~Event();
+    ZEROEQ_API ~FBEvent();
 
     /** @return the type of this event */
     ZEROEQ_API const uint128_t& getType() const;
@@ -65,7 +65,7 @@ private:
     ZEROEQ_API bool _fromJSON( const std::string& json ) final;
     ZEROEQ_API std::string _toJSON() const final;
 
-    std::unique_ptr< detail::Event > _impl;
+    std::unique_ptr< detail::FBEvent > _impl;
 };
 
 }

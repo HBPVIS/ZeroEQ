@@ -27,8 +27,8 @@ namespace vocabulary
 
 /** @name Builtin Events */
 //@{
-ZEROEQ_API Event serializeEcho( const std::string& message );
-ZEROEQ_API std::string deserializeEcho( const Event& event );
+ZEROEQ_API FBEvent serializeEcho( const std::string& message );
+ZEROEQ_API std::string deserializeEcho( const FBEvent& event );
 //@}
 }
 }

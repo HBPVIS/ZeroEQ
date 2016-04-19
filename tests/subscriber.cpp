@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(invalid_construction)
 BOOST_AUTO_TEST_CASE(subscribe)
 {
     zeroeq::Subscriber subscriber;
-    zeroeq::Event echoEvent( ::zeroeq::vocabulary::EVENT_ECHO,
+    zeroeq::FBEvent echoEvent( ::zeroeq::vocabulary::EVENT_ECHO,
                           std::bind( &test::onEchoEvent, std::placeholders::_1 ));
     BOOST_CHECK( subscriber.subscribe( echoEvent ));
 }
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(subscribe)
 BOOST_AUTO_TEST_CASE(unsubscribe)
 {
     zeroeq::Subscriber subscriber;
-    zeroeq::Event echoEvent( ::zeroeq::vocabulary::EVENT_ECHO,
+    zeroeq::FBEvent echoEvent( ::zeroeq::vocabulary::EVENT_ECHO,
                           std::bind( &test::onEchoEvent, std::placeholders::_1 ));
     BOOST_CHECK( subscriber.subscribe( echoEvent ));
     BOOST_CHECK( subscriber.unsubscribe( echoEvent ));
@@ -99,9 +99,9 @@ BOOST_AUTO_TEST_CASE(test_invalid_unsubscribe)
 BOOST_AUTO_TEST_CASE(test_invalid_unsubscribe_different_event_objects)
 {
     zeroeq::Subscriber subscriber;
-    zeroeq::Event echoEvent( ::zeroeq::vocabulary::EVENT_ECHO,
+    zeroeq::FBEvent echoEvent( ::zeroeq::vocabulary::EVENT_ECHO,
                           std::bind( &test::onEchoEvent, std::placeholders::_1 ));
-    zeroeq::Event exitEvent( ::zeroeq::vocabulary::EVENT_EXIT,
+    zeroeq::FBEvent exitEvent( ::zeroeq::vocabulary::EVENT_EXIT,
                           std::bind( &test::onEchoEvent, std::placeholders::_1 ));
 
     BOOST_CHECK( subscriber.subscribe( echoEvent ));

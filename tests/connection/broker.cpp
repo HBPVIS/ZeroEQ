@@ -33,8 +33,8 @@ public:
     void run()
     {
         zeroeq::Subscriber subscriber( test::buildURI( "127.0.0.1", *_publisher ));
-        zeroeq::Event echoEvent( ::zeroeq::vocabulary::EVENT_ECHO,
-                              [this]( const zeroeq::Event& event )
+        zeroeq::FBEvent echoEvent( ::zeroeq::vocabulary::EVENT_ECHO,
+                              [this]( const zeroeq::FBEvent& event )
                               { test::onEchoEvent( event );
                                 received = true; });
         BOOST_CHECK( subscriber.subscribe( echoEvent ));

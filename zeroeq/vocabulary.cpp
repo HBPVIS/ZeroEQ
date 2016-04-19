@@ -7,19 +7,19 @@
 #include "vocabulary.h"
 
 #include "detail/vocabulary.h"
-#include "event.h"
+#include "fbevent.h"
 
 namespace zeroeq
 {
 namespace vocabulary
 {
 
-Event serializeEcho( const std::string& message )
+FBEvent serializeEcho( const std::string& message )
 {
     return detail::serializeEcho( message );
 }
 
-std::string deserializeEcho( const Event& event )
+std::string deserializeEcho( const FBEvent& event )
 {
     return detail::deserializeEcho( event );
 }

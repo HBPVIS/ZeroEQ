@@ -3,7 +3,7 @@
  *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  */
 
-#include "event.h"
+#include "fbevent.h"
 
 #include "../vocabulary.h"
 
@@ -22,9 +22,9 @@ namespace vocabulary
 namespace detail
 {
 
-zeroeq::Event serializeEcho( const std::string& msg )
+zeroeq::FBEvent serializeEcho( const std::string& msg )
 {
-    zeroeq::Event event( ::zeroeq::vocabulary::EVENT_ECHO, ::zeroeq::EventFunc( ));
+    zeroeq::FBEvent event( ::zeroeq::vocabulary::EVENT_ECHO, ::zeroeq::EventFunc( ));
 
     flatbuffers::FlatBufferBuilder& fbb = event.getFBB();
     EchoBuilder builder( fbb );
@@ -33,7 +33,7 @@ zeroeq::Event serializeEcho( const std::string& msg )
     return event;
 }
 
-std::string deserializeEcho( const zeroeq::Event& event )
+std::string deserializeEcho( const zeroeq::FBEvent& event )
 {
     const auto& data = GetEcho( event.getData( ));
     return data->message()->c_str();

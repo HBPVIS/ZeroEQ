@@ -7,7 +7,7 @@
 #define ZEROEQ_DETAIL_EVENT_H
 
 #include <zeroeq/types.h>
-#include <zeroeq/event.h>
+#include <zeroeq/fbevent.h>
 #include <zeroeq/log.h>
 
 #include <flatbuffers/flatbuffers.h>
@@ -18,10 +18,10 @@ namespace zeroeq
 namespace detail
 {
 
-class Event
+class FBEvent
 {
 public:
-    Event( const uint128_t& type_, const EventFunc& func_ )
+    FBEvent( const uint128_t& type_, const EventFunc& func_ )
         : type( type_ )
         , data( 0 )
         , size( 0 )
@@ -61,8 +61,8 @@ public:
     EventFunc func;
 
 private:
-    Event( const Event& ) = delete;
-    Event& operator=( const Event& ) = delete;
+    FBEvent( const FBEvent& ) = delete;
+    FBEvent& operator=( const FBEvent& ) = delete;
 };
 
 }
