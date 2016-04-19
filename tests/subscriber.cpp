@@ -124,5 +124,6 @@ BOOST_AUTO_TEST_CASE(not_implemented_servus )
         return;
 
     const zeroeq::URI uri( test::buildUniqueSession( ));
-    BOOST_CHECK_THROW( zeroeq::Subscriber( uri ), std::runtime_error );
+    BOOST_CHECK_THROW( zeroeq::Subscriber subscriber( uri ),
+                       std::runtime_error );
 }
