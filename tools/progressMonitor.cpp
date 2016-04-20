@@ -22,7 +22,7 @@ public:
         : _progress( 0 )
         , _startTime( high_resolution_clock::now( ))
     {
-        _progress.setUpdatedFunction(
+        _progress.registerDeserializedCallback(
             [&] {
                 const uint64_t now = duration_cast< seconds >(
                     high_resolution_clock::now() - _startTime ).count();

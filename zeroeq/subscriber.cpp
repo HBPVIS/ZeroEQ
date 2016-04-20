@@ -230,7 +230,6 @@ public:
                                           zmq_msg_size( &msg ));
                 zmq_msg_close( &msg );
             }
-            serializable->notifyUpdated();
         }
     }
 
