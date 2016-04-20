@@ -105,7 +105,7 @@ public:
 
             char msg[256];
             const int read = ::zmq_recv( _socket, msg, sizeof( msg ), 0 );
-            BOOST_REQUIRE( read > 0 );
+            BOOST_REQUIRE_GE( read, 0 );
             response.append( msg, read );
         }
 
