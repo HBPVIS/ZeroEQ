@@ -10,6 +10,9 @@
 
 #include <servus/servus.h>
 
+#include <tests/newEvent_generated.h>
+#include <tests/newEvent_zeroeq_generated.h>
+
 using namespace zeroeq::vocabulary;
 
 BOOST_AUTO_TEST_CASE(construction)
@@ -100,12 +103,12 @@ BOOST_AUTO_TEST_CASE(test_invalid_unsubscribe_different_event_objects)
 {
     zeroeq::Subscriber subscriber;
     zeroeq::FBEvent echoEvent( ::zeroeq::vocabulary::EVENT_ECHO,
-                          std::bind( &test::onEchoEvent, std::placeholders::_1 ));
-    zeroeq::FBEvent exitEvent( ::zeroeq::vocabulary::EVENT_EXIT,
-                          std::bind( &test::onEchoEvent, std::placeholders::_1 ));
+                                ::zeroeq::EventFunc( ));
+    zeroeq::FBEvent newEvent( ::zeroeqtest::EVENT_NEWEVENT,
+                              ::zeroeq::EventFunc( ));
 
     BOOST_CHECK( subscriber.subscribe( echoEvent ));
-    BOOST_CHECK( !subscriber.unsubscribe( exitEvent ));
+    BOOST_CHECK( !subscriber.unsubscribe( newEvent ));
 }
 
 

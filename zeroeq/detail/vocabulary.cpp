@@ -8,8 +8,6 @@
 #include "../vocabulary.h"
 
 #include <zeroeq/echo_generated.h>
-#include <zeroeq/request_generated.h>
-#include <zeroeq/vocabulary_generated.h>
 
 #include <flatbuffers/idl.h>
 #include <unordered_map>

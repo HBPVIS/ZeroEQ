@@ -249,15 +249,14 @@ BOOST_AUTO_TEST_CASE(publish_receive_empty_event_zeroconf)
     zeroeq::detail::Sender::getUUID() = servus::make_UUID(); // different machine
     zeroeq::Subscriber subscriber( publisher.getSession( ));
 
-    zeroeq::FBEvent exitEvent( EVENT_EXIT,
+    zeroeq::FBEvent echoEvent( EVENT_ECHO,
                           std::bind( &test::onExitEvent, std::placeholders::_1 ));
-    BOOST_CHECK( subscriber.subscribe( exitEvent ));
+    BOOST_CHECK( subscriber.subscribe( echoEvent ));
 
     bool received = false;
-    const zeroeq::FBEvent event( EVENT_EXIT, ::zeroeq::EventFunc( ));
     for( size_t i = 0; i < 20; ++i )
     {
-        BOOST_CHECK( publisher.publish( event ));
+        BOOST_CHECK( publisher.publish( echoEvent ));
 
         if( subscriber.receive( 100 ))
         {

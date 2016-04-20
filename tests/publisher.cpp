@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(publish_empty_event)
 {
     zeroeq::Publisher publisher( zeroeq::NULL_SESSION );
     BOOST_CHECK( publisher.publish(
-                     zeroeq::FBEvent( ::zeroeq::vocabulary::EVENT_EXIT,
+                     zeroeq::FBEvent( ::zeroeq::vocabulary::EVENT_ECHO,
                                     ::zeroeq::EventFunc( ))));
 }
 

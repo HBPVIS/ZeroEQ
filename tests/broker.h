@@ -51,7 +51,7 @@ void onEchoEvent( const zeroeq::FBEvent& event )
 
 void onExitEvent( const zeroeq::FBEvent& event )
 {
-    BOOST_CHECK_EQUAL( event.getType(), zeroeq::vocabulary::EVENT_EXIT );
+    BOOST_CHECK_EQUAL( event.getType(), zeroeq::vocabulary::EVENT_ECHO );
     BOOST_CHECK_EQUAL( event.getSize(), 0 );
 }
 
@@ -64,7 +64,8 @@ public:
     Echo( const std::string& message ) : _message( message ) {}
     const std::string& getMessage() const { return _message; }
 
-    bool operator == ( const Echo& rhs ) const { return _message == rhs._message; }
+    bool operator == ( const Echo& rhs ) const
+    { return _message == rhs._message; }
 
 private:
     bool _fromBinary( const void* data, const size_t ) final

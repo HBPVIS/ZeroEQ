@@ -35,5 +35,4 @@ ZEROEQ_API std::string deserializeEcho( const FBEvent& event );
 
 // must be after the declaration of registerEvent()
 #include <zeroeq/echo_zeroeq_generated.h>
-#include <zeroeq/exit_zeroeq_generated.h>
 #endif

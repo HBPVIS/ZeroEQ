@@ -1,8 +1,7 @@
 # Copyright (c) HBP 2014-2015 Daniel.Nachbaur@epfl.ch
 
 flatbuffers_generate_c_headers(ZEROEQ_FBS
-  detail/echo.fbs
-  detail/exit.fbs)
+  detail/echo.fbs)
 
 list(APPEND CPPCHECK_EXTRA_ARGS
   --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/*_generated.h)
