@@ -30,6 +30,26 @@ namespace vocabulary
 ZEROEQ_API FBEvent serializeEcho( const std::string& message );
 ZEROEQ_API std::string deserializeEcho( const FBEvent& event );
 //@}
+
+/**
+ * Serialize a json to an event
+ * @param json to serialize
+ * @param type of the event
+ * @param schema schema for the event
+ * @return the event
+ */
+FBEvent serializeJSON( const std::string& json,
+                       const uint128_t& type,
+                       const std::string& schema );
+
+/**
+ * Deserialize a SCHEMA to a json
+ * @param event is the event to be deserialized
+ * @param schema is the schema for json
+ * @return json
+ */
+std::string deserializeJSON( const FBEvent& event,
+                             const std::string& schema );
 }
 }
 
