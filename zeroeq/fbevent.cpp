@@ -12,7 +12,8 @@ namespace zeroeq
 FBEvent::FBEvent( const uint128_t& type, const EventFunc& func )
     : _impl( new detail::FBEvent( type, func ))
 {
-    setUpdatedFunction( [this](){ _impl->func( *this ); });
+    if( func )
+        setUpdatedFunction( [this](){ _impl->func( *this ); });
 }
 
 FBEvent::~FBEvent()

@@ -38,14 +38,18 @@ public:
     const void* getData() const
     {
         if( data )
-            return data;
+            return data.get();
         return parser.builder_.GetBufferPointer();
     }
 
     void setData( const uint8_t* data_, const size_t size_ )
     {
         parser.builder_.Clear();
-        data = data_;
+        // Since we are working on the same copy with new servus::Serializable
+        // based Flat Buffer events ( not memory per event ),
+        // we are copying the memory
+        data.reset( new uint8_t[ size_ ] );
+        memcpy( data.get(), data_, size_ );
         size = size_;
     }
 
@@ -55,7 +59,7 @@ public:
     flatbuffers::Parser parser;
 
     /** setData() uses this instead of fbb during deserialization */
-    const uint8_t* data;
+    std::shared_ptr< uint8_t > data;
 
     size_t size;
     EventFunc func;
