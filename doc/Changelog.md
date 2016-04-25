@@ -6,6 +6,9 @@
   * The zeroeq::Event class is renamed to zeroeq::FBEvent
   * zeroeq::FBEvent is derived from the servus::Serializable
   * Removed deprecated zeroeq::FBEvent functions from pub/sub
+  * Removed EVENT_EXIT
+  * Removed RESTBridge related code
+  * FlatBuffers is an optional dependency
 * [143](https://github.com/HBPVIS/ZeroEQ/pull/143):
   Rename zeq to ZeroEQ in the whole project
 * [141](https://github.com/HBPVIS/ZeroEQ/pull/141):
