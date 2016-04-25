@@ -13,6 +13,9 @@
 #include <boost/test/unit_test.hpp>
 #include <string>
 
+#include <tests/emptyEvent_generated.h>
+#include <tests/emptyEvent_zeroeq_generated.h>
+
 #ifdef _WIN32
 #  include <process.h>
 #  define getpid _getpid
@@ -49,9 +52,9 @@ void onEchoEvent( const zeroeq::FBEvent& event )
     BOOST_CHECK_EQUAL( echoMessage, message );
 }
 
-void onExitEvent( const zeroeq::FBEvent& event )
+void onEmptyEvent( const zeroeq::FBEvent& event )
 {
-    BOOST_CHECK_EQUAL( event.getType(), zeroeq::vocabulary::EVENT_ECHO );
+    BOOST_CHECK_EQUAL( event.getType(), ::zeroeqtest::EVENT_EMPTYEVENT );
     BOOST_CHECK_EQUAL( event.getSize(), 0 );
 }
 
