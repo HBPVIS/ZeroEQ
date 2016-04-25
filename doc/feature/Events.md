@@ -45,6 +45,7 @@ example to notify of an action to be taken.
     }
 
 ## Examples
+
     int onOpen( const void* data, const size_t size )
     {
         zerobuf::data::ConstOpenEventPtr open =

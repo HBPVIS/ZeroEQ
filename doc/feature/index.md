@@ -1,4 +1,4 @@
-Landing page for http::Server
+Landing page for http::Server {#landingpage}
 ============
 
 This specification outlines the API to add a custom landing page to the

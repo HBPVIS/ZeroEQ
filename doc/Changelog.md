@@ -2,10 +2,13 @@
 
 # git master
 
-# Release 0.6 (30-06-2016)
-
+* [181](https://github.com/HBPVIS/ZeroEQ/pull/181):
+  Specification for registry and schema API using REST
 * [179](https://github.com/HBPVIS/ZeroEQ/pull/179):
   Fix http server blocking issues with libzmq 4.1.4
+
+# Release 0.6 (30-06-2016)
+
 * [170](https://github.com/HBPVIS/ZeroEQ/pull/170):
   Remove FlatBuffers dependency and support
 * [169](https://github.com/HBPVIS/ZeroEQ/pull/169):
