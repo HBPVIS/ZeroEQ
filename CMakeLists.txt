@@ -2,13 +2,13 @@
 #                             Stefan.Eilemann@epfl.ch
 
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
-
 project(ZeroEQ VERSION 0.6.0)
+set(ZeroEQ_VERSION_ABI 6)
+
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
-  ${CMAKE_SOURCE_DIR}/CMake/common)
+                              ${CMAKE_SOURCE_DIR}/CMake/common)
 include(GitExternal)
 
-set(ZeroEQ_VERSION_ABI 6)
 set(ZEROEQ_DEB_DEPENDS libboost-test-dev libzmq3-dev)
 
 include(Common)
