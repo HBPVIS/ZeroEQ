@@ -229,10 +229,10 @@ BOOST_AUTO_TEST_CASE(get)
     zeroeq::http::Server server;
     Foo foo;
 
-    foo.setRequestedFunction( [&]{ foo.setNotified(); });
+    foo.registerSerializeCallback( [&]{ foo.setNotified(); });
     server.register_( foo );
 
-    std::thread thread( [ & ]() { while( running ) server.receive( 100 ); });
+    std::thread thread( [&]() { while( running ) server.receive( 100 ); });
 
     Client client( server.getURI( ));
 
@@ -258,7 +258,7 @@ BOOST_AUTO_TEST_CASE(shared)
     Foo foo;
     server2.register_( foo );
 
-    std::thread thread( [ & ]() { while( running ) subscriber.receive( 100 );});
+    std::thread thread( [&]() { while( running ) subscriber.receive( 100 );});
 
     Client client1( server1.getURI( ));
     Client client2( server2.getURI( ));
@@ -278,10 +278,10 @@ BOOST_AUTO_TEST_CASE(put)
     zeroeq::http::Server server;
     Foo foo;
 
-    foo.setUpdatedFunction( [&]{ foo.setNotified(); });
+    foo.registerDeserializedCallback( [&]{ foo.setNotified(); });
     server.subscribe( foo );
 
-    std::thread thread( [ & ]() { while( running ) server.receive( 100 ); });
+    std::thread thread( [&]() { while( running ) server.receive( 100 ); });
 
     Client client( server.getURI( ));
     client.test( std::string( "PUT /test/Foo HTTP/1.0\r\n\r\n" ) + jsonPut,
@@ -318,7 +318,7 @@ BOOST_AUTO_TEST_CASE(post)
     Foo foo;
     server.register_( foo );
 
-    std::thread thread( [ & ]() { while( running ) server.receive( 100 ); });
+    std::thread thread( [&]() { while( running ) server.receive( 100 ); });
 
     Client client( server.getURI( ));
     client.test( std::string( "POST /test/Foo HTTP/1.0\r\n" +
@@ -338,7 +338,7 @@ BOOST_AUTO_TEST_CASE(largeGet)
     Foo foo;
     server.register_( foo );
 
-    std::thread thread( [ & ]() { while( running ) server.receive( 100 ); });
+    std::thread thread( [&]() { while( running ) server.receive( 100 ); });
 
     Client client( server.getURI( ));
     client.test( "GET" + std::string( 4096, ' ' ) +
@@ -356,7 +356,7 @@ BOOST_AUTO_TEST_CASE(garbage)
 {
     bool running = true;
     zeroeq::http::Server server;
-    std::thread thread( [ & ]() { while( running ) server.receive( 100 ); });
+    std::thread thread( [&]() { while( running ) server.receive( 100 ); });
 
     Client client( server.getURI( ));
     client.test( "ramble mumble foo bar", "", __LINE__ );
@@ -372,7 +372,7 @@ BOOST_AUTO_TEST_CASE(urlcasesensitivity)
     Foo foo;
     server.register_( foo );
 
-    std::thread thread( [ & ]() { while( running ) server.receive( 100 ); });
+    std::thread thread( [&]() { while( running ) server.receive( 100 ); });
 
     Client client( server.getURI( ));
     client.test( "GET" + std::string( 4096, ' ' ) +

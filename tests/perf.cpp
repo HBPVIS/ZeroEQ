@@ -96,10 +96,12 @@ BOOST_AUTO_TEST_CASE(throughput)
         Message message( i );
         size_t received = 0;
         auto endTime = high_resolution_clock::now();
-        message.setUpdatedFunction( [&] {
-                                        ++received;
-                                        endTime = high_resolution_clock::now();
-                                    });
+
+        message.registerDeserializedCallback(
+            [&] {
+                ++received;
+                endTime = high_resolution_clock::now();
+            });
         subscriber.subscribe( message );
 
         const auto startTime = high_resolution_clock::now();

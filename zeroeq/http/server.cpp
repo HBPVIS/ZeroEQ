@@ -246,7 +246,6 @@ protected:
         }
 
         response.set_status( 200 );
-        i->second->notifyRequested();
         return i->second->toJSON();
     }
 
@@ -261,10 +260,7 @@ protected:
         else
         {
             if( i->second->fromJSON( request.body( )))
-            {
-                i->second->notifyUpdated();
                 response.set_status( 200 );
-            }
             else
                 response.set_status( 400 );
         }
