@@ -33,11 +33,12 @@ public:
     void run()
     {
         zeroeq::Subscriber subscriber( test::buildURI( "127.0.0.1", *_publisher ));
-        zeroeq::FBEvent echoEvent( ::zeroeq::vocabulary::EVENT_ECHO,
-                              [this]( const zeroeq::FBEvent& event )
-                              { test::onEchoEvent( event );
-                                received = true; });
-        BOOST_CHECK( subscriber.subscribe( echoEvent ));
+        ::test::SerializablePtr echoEvent = ::test::getFBEchoInEvent(
+                    [this]( const zeroeq::FBEvent& event )
+                    { test::onEchoEvent( event );
+                      received = true; });
+
+        BOOST_CHECK( subscriber.subscribe( *echoEvent ));
 
         // Using the connection broker in place of zeroconf
         BrokerPtr broker = createBroker( subscriber );
@@ -111,12 +112,14 @@ BOOST_AUTO_TEST_CASE( broker )
     for( size_t i = 0; i < 100 && !subscriber.received; ++i )
     {
         BOOST_CHECK( publisher.publish(
-                         zeroeq::vocabulary::serializeEcho( test::echoMessage )));
+                         *::test::getFBEchoOutEvent( ::test::echoMessage )));
         std::this_thread::sleep_for( std::chrono::milliseconds( 100 ));
     }
 
     thread.join();
+#ifdef ZEROEQ_USE_FLATBUFFERS
     BOOST_CHECK( subscriber.received );
+#endif
     _publisher = 0;
 }
 
@@ -172,13 +175,15 @@ BOOST_AUTO_TEST_CASE( named_broker )
     for( size_t i = 0; i < 100 && !subscriber1.received; ++i )
     {
         BOOST_CHECK( publisher.publish(
-                         zeroeq::vocabulary::serializeEcho( test::echoMessage )));
+                         *::test::getFBEchoOutEvent( ::test::echoMessage )));
         std::this_thread::sleep_for( std::chrono::milliseconds( 100 ));
     }
 
     thread2.join();
     thread1.join();
+#ifdef ZEROEQ_USE_FLATBUFFERS
     BOOST_CHECK( subscriber1.received );
+#endif
     _publisher = 0;
 }
 
@@ -188,8 +193,8 @@ class FailingNamedSubscriber : public Subscriber
     {
         BOOST_CHECK_THROW(
             new zeroeq::connection::Broker( "zeroeq::connection::test_named_broker",
-                                         subscriber,
-                                         zeroeq::connection::Broker::PORT_FIXED ),
+                                             subscriber,
+                                             zeroeq::connection::Broker::PORT_FIXED ),
             std::runtime_error );
 
         return BrokerPtr(
@@ -228,6 +233,6 @@ BOOST_AUTO_TEST_CASE( invalid_broker )
 {
     zeroeq::Subscriber subscriber( zeroeq::URI( "127.0.0.1:1234" ));
     BOOST_CHECK_THROW( zeroeq::connection::Broker( std::string( "invalidIP" ),
-                                                subscriber ),
+                                                   subscriber ),
                        std::runtime_error );
 }

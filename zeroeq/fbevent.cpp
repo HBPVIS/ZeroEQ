@@ -13,7 +13,7 @@ FBEvent::FBEvent( const uint128_t& type, const EventFunc& func )
     : _impl( new detail::FBEvent( type, func ))
 {
     if( func )
-        setUpdatedFunction( [this](){ _impl->func( *this ); });
+        registerDeserializedCallback( [this](){ _impl->func( *this ); } );
 }
 
 FBEvent::~FBEvent()
@@ -22,10 +22,11 @@ FBEvent::~FBEvent()
 
 std::string FBEvent::getTypeName() const
 {
-    return _impl->type.getString();
+    ZEROEQTHROW( std::runtime_error(
+                     "Flatbuffers objects do not have a type name" ));
 }
 
-const uint128_t& FBEvent::getType() const
+uint128_t FBEvent::getTypeIdentifier() const
 {
     return _impl->type;
 }

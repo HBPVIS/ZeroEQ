@@ -34,9 +34,6 @@
 
 #include "broker.h"
 
-#include <tests/newEvent_generated.h>
-#include <tests/newEvent_zeroeq_generated.h>
-
 namespace zeroeqtest
 {
 static const std::string message( "So long, and thanks for all the fish" );
@@ -56,7 +53,7 @@ zeroeq::FBEvent serializeString( const std::string& string )
 
 std::string deserializeString( const ::zeroeq::FBEvent& event )
 {
-    BOOST_CHECK_EQUAL( event.getType(), EVENT_NEWEVENT );
+    BOOST_CHECK_EQUAL( event.getTypeIdentifier(), EVENT_NEWEVENT );
 
     auto data = GetNewEvent( event.getData( ));
     return std::string( data->message()->c_str( ));

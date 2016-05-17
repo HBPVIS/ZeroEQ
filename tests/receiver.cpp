@@ -18,14 +18,14 @@ void onEvent2( const zeroeq::FBEvent& ) { gotTwo = true; }
 void testReceive( zeroeq::Publisher& publisher, zeroeq::Receiver& receiver,
                   bool& var1, bool& var2, const int line )
 {
-    using zeroeq::vocabulary::serializeEcho;
     gotOne = false;
     gotTwo = false;
 
     const auto startTime = std::chrono::high_resolution_clock::now();
     for( ;; )
     {
-        BOOST_CHECK( publisher.publish( serializeEcho( test::echoMessage )));
+        BOOST_CHECK( publisher.publish(
+                         *::test::getFBEchoOutEvent( ::test::echoMessage )));
         while( receiver.receive( 100 )) {}
 
         if( var1 && var2 )
@@ -56,16 +56,21 @@ BOOST_AUTO_TEST_CASE(test_two_subscribers)
     zeroeq::Subscriber subscriber2( test::buildURI( "localhost", publisher ),
                                  subscriber1 );
 
-    zeroeq::FBEvent echoEvent1( ::zeroeq::vocabulary::EVENT_ECHO,
-                          std::bind( &onEvent1, std::placeholders::_1 ));
-    BOOST_CHECK( subscriber1.subscribe( echoEvent1 ));
+    ::test::SerializablePtr echoEvent1 = ::test::getFBEchoInEvent(
+                    std::bind( &onEvent1, std::placeholders::_1 ));
 
-    zeroeq::FBEvent echoEvent2( ::zeroeq::vocabulary::EVENT_ECHO,
-                          std::bind( &onEvent2, std::placeholders::_1 ));
-    BOOST_CHECK( subscriber2.subscribe( echoEvent2 ));
+    BOOST_CHECK( subscriber1.subscribe( *echoEvent1 ));
 
+    ::test::SerializablePtr echoEvent2 = ::test::getFBEchoInEvent(
+                    std::bind( &onEvent2, std::placeholders::_1 ));
+
+    BOOST_CHECK( subscriber2.subscribe( *echoEvent2 ));
+
+#ifdef ZEROEQ_USE_FLATBUFFERS
     testReceive( publisher, subscriber1, gotOne, gotTwo, __LINE__ );
     testReceive( publisher, subscriber2, gotOne, gotTwo, __LINE__ );
+#endif
+
 }
 
 BOOST_AUTO_TEST_CASE(test_publisher_routing)
@@ -77,21 +82,28 @@ BOOST_AUTO_TEST_CASE(test_publisher_routing)
     zeroeq::Subscriber subscriber2( test::buildURI( "localhost", publisher ),
                                  *subscriber1 );
 
-    zeroeq::FBEvent echoEvent1( ::zeroeq::vocabulary::EVENT_ECHO,
-                          std::bind( &onEvent1, std::placeholders::_1 ));
-    BOOST_CHECK( subscriber1->subscribe( echoEvent1 ));
+    ::test::SerializablePtr echoEvent1 = ::test::getFBEchoInEvent(
+                    std::bind( &onEvent1, std::placeholders::_1 ));
 
-    zeroeq::FBEvent echoEvent2( ::zeroeq::vocabulary::EVENT_ECHO,
-                          std::bind( &onEvent2, std::placeholders::_1 ));
-    BOOST_CHECK( subscriber2.subscribe( echoEvent2 ));
+    BOOST_CHECK( subscriber1->subscribe( *echoEvent1 ));
 
+    ::test::SerializablePtr echoEvent2 = ::test::getFBEchoInEvent(
+                    std::bind( &onEvent2, std::placeholders::_1 ));
+
+    BOOST_CHECK( subscriber2.subscribe( *echoEvent2 ));
+
+#ifdef ZEROEQ_USE_FLATBUFFERS
     testReceive( publisher, *subscriber1, gotTwo, __LINE__ );
     BOOST_CHECK( !gotOne );
 
     testReceive( publisher, subscriber2, gotTwo, __LINE__ );
     BOOST_CHECK( !gotOne );
+#endif
 
     delete subscriber1;
+
+#ifdef ZEROEQ_USE_FLATBUFFERS
     testReceive( publisher, subscriber2, gotTwo, __LINE__ );
     BOOST_CHECK( !gotOne );
+#endif
 }

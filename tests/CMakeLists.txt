@@ -28,14 +28,8 @@ if(NOT HTTPXX_FOUND)
 endif()
 
 if(NOT FLATBUFFERS_FOUND)
-  list(APPEND EXCLUDE_FROM_TESTS connection/broker.cpp
-                                 hbp/serialization.cpp
-                                 newEvent.cpp
-                                 perf.cpp
-                                 publisher.cpp
-                                 pubSub.cpp
-                                 receiver.cpp
-                                 subscriber.cpp)
+  list(APPEND EXCLUDE_FROM_TESTS hbp/serialization.cpp
+                                 newEvent.cpp)
 endif()
 
 include(CommonCTest)

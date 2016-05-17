@@ -38,13 +38,10 @@ public:
     /** Move ctor @internal */
     ZEROEQ_API FBEvent( FBEvent&& rhs );
 
-    /** @return the fully qualified, demangled class name. */
-    ZEROEQ_API std::string getTypeName() const final;
+    /** @return the universally unique identifier of this serializable. */
+    ZEROEQ_API virtual uint128_t getTypeIdentifier() const;
 
     ZEROEQ_API ~FBEvent();
-
-    /** @return the type of this event */
-    ZEROEQ_API const uint128_t& getType() const;
 
     /** @internal @return the size in bytes of the serialized data */
     ZEROEQ_API size_t getSize() const;
@@ -59,6 +56,12 @@ public:
     ZEROEQ_API flatbuffers::Parser& getParser();
 
 private:
+
+    /**
+     * @throw std::runtime_error because it is used by the REST
+     * interface for http_server and this is not supported by FBEvent
+     */
+    ZEROEQ_API std::string getTypeName() const final;
 
     ZEROEQ_API bool _fromBinary( const void* data, const size_t size ) final;
     ZEROEQ_API Data _toBinary() const final;

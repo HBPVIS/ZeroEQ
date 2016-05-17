@@ -9,7 +9,6 @@
 
 #include <zeroeq/echo_generated.h>
 
-#include <flatbuffers/idl.h>
 #include <unordered_map>
 #include <stdexcept>
 
@@ -22,7 +21,8 @@ namespace detail
 
 zeroeq::FBEvent serializeEcho( const std::string& msg )
 {
-    zeroeq::FBEvent event( ::zeroeq::vocabulary::EVENT_ECHO, ::zeroeq::EventFunc( ));
+    zeroeq::FBEvent event( ::zeroeq::vocabulary::EVENT_ECHO,
+                           ::zeroeq::EventFunc( ));
 
     flatbuffers::FlatBufferBuilder& fbb = event.getFBB();
     EchoBuilder builder( fbb );

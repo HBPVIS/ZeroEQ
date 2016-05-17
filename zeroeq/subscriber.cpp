@@ -6,7 +6,6 @@
 
 #include "subscriber.h"
 
-#include "fbevent.h"
 #include "log.h"
 #include "detail/broker.h"
 #include "detail/constants.h"
@@ -24,6 +23,7 @@
 
 namespace zeroeq
 {
+
 class Subscriber::Impl
 {
 public:
@@ -56,8 +56,8 @@ public:
         if( !addConnection( context, zmqURI, uint128_t( )))
         {
             ZEROEQTHROW( std::runtime_error(
-                          "Cannot connect subscriber to " + zmqURI + ": " +
-                           zmq_strerror( zmq_errno( ))));
+                             "Cannot connect subscriber to " + zmqURI + ": " +
+                             zmq_strerror( zmq_errno( ))));
         }
     }
 
@@ -68,13 +68,13 @@ public:
     {
         if( _session == zeroeq::NULL_SESSION || session.empty( ))
             ZEROEQTHROW( std::runtime_error( std::string(
-                    "Invalid session name for subscriber" )));
+                         "Invalid session name for subscriber" )));
 
         if( uri.getHost().empty() || uri.getPort() == 0 )
         {
             if( !servus::Servus::isAvailable( ))
                 ZEROEQTHROW( std::runtime_error(
-                              std::string( "Empty servus implementation" )));
+                                 std::string( "Empty servus implementation" )));
 
             _browser.beginBrowsing( servus::Servus::IF_ALL );
             update( context );
@@ -136,15 +136,15 @@ public:
 
         uint128_t type;
         memcpy( &type, zmq_msg_data( &msg ), sizeof(type) );
-#ifndef ZEROEQ_LITTLEENDIAN
+    #ifndef ZEROEQ_LITTLEENDIAN
         detail::byteswap( type ); // convert from little endian wire
-#endif
+    #endif
         const bool payload = zmq_msg_more( &msg );
         zmq_msg_close( &msg );
 
         SerializableMap::const_iterator i = _serializables.find( type );
         if( i == _serializables.cend( ))
-            ZEROEQTHROW( std::runtime_error( "Cannot process type " + type.getString( )));
+            ZEROEQTHROW( std::runtime_error( "Got unsubscribed event " + type.getString( )));
 
         servus::Serializable* serializable = i->second;
         if( payload )
@@ -155,8 +155,6 @@ public:
                                       zmq_msg_size( &msg ));
             zmq_msg_close( &msg );
         }
-        serializable->notifyUpdated();
-
     }
 
     void update( void* context )
@@ -183,8 +181,9 @@ public:
                                                           KEY_INSTANCE ));
                 if( !addConnection( context, zmqURI, identifier ))
                 {
-                    ZEROEQINFO << "Cannot connect subscriber to " << zmqURI << ": "
-                            << zmq_strerror( zmq_errno( )) << std::endl;
+                    ZEROEQINFO << "Cannot connect subscriber to " << zmqURI
+                               << ": " << zmq_strerror( zmq_errno( ))
+                               << std::endl;
                 }
             }
         }
@@ -234,7 +233,6 @@ public:
     const std::string& getSession() const { return _session; }
 
 private:
-
     typedef std::map< std::string, void* > SocketMap;
     SocketMap _subscribers;
 
@@ -321,7 +319,7 @@ Subscriber::Subscriber( const std::string& session, Receiver& shared )
 {
 }
 
-Subscriber::Subscriber( const URI& uri, Receiver& shared )
+Subscriber::Subscriber( const URI& uri, Receiver& shared  )
     : Receiver( shared )
     , _impl( new Impl( uri, getZMQContext( )))
 {

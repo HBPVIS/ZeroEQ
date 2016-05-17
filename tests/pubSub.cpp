@@ -15,21 +15,23 @@
 #include <thread>
 #include <chrono>
 
+#ifdef ZEROEQ_USE_FLATBUFFERS
 using namespace zeroeq::vocabulary;
+#endif
 
 BOOST_AUTO_TEST_CASE(publish_receive)
 {
     zeroeq::Publisher publisher( zeroeq::NULL_SESSION );
     zeroeq::Subscriber subscriber( zeroeq::URI( publisher.getURI( )));
-    zeroeq::FBEvent echoEvent( ::zeroeq::vocabulary::EVENT_ECHO,
-                          std::bind( &test::onEchoEvent, std::placeholders::_1 ));
-    BOOST_CHECK( subscriber.subscribe( echoEvent ));
-
+    ::test::SerializablePtr echoEvent = ::test::getFBEchoInEvent(
+                    std::bind( &test::onEchoEvent, std::placeholders::_1 ));
+    BOOST_CHECK( subscriber.subscribe( *echoEvent ));
 
     bool received = false;
     for( size_t i = 0; i < 10; ++i )
     {
-        BOOST_CHECK( publisher.publish( serializeEcho( test::echoMessage )));
+        BOOST_CHECK( publisher.publish(
+                         *::test::getFBEchoOutEvent( test::echoMessage )));
 
         if( subscriber.receive( 100 ))
         {
@@ -85,7 +87,7 @@ BOOST_AUTO_TEST_CASE(subscribe_to_different_session_zeroconf)
 
     zeroeq::Publisher publisher( test::buildUniqueSession( ));
     BOOST_CHECK_NO_THROW(
-                zeroeq::Subscriber subscriber( publisher.getSession() + "bar" ));
+               zeroeq::Subscriber subscriber( publisher.getSession() + "bar" ));
 }
 
 BOOST_AUTO_TEST_CASE(no_receive_zeroconf)
@@ -107,16 +109,17 @@ BOOST_AUTO_TEST_CASE(publish_receive_zeroconf)
     zeroeq::detail::Sender::getUUID() = servus::make_UUID(); // different machine
     zeroeq::Subscriber subscriber( publisher.getSession( ));
 
-    zeroeq::FBEvent echoEvent( ::zeroeq::vocabulary::EVENT_ECHO,
-                          std::bind( &test::onEchoEvent, std::placeholders::_1 ));
-    BOOST_CHECK( subscriber.subscribe( echoEvent ));
-    BOOST_CHECK( noSubscriber.subscribe( echoEvent ));
+    ::test::SerializablePtr echoEvent = ::test::getFBEchoInEvent(
+                    std::bind( &test::onEchoEvent, std::placeholders::_1 ));
+
+    BOOST_CHECK( subscriber.subscribe( *echoEvent ));
+    BOOST_CHECK( noSubscriber.subscribe( *echoEvent ));
 
     bool received = false;
     for( size_t i = 0; i < 20; ++i )
     {
         BOOST_CHECK( publisher.publish(
-                         zeroeq::vocabulary::serializeEcho( test::echoMessage )));
+                         *::test::getFBEchoOutEvent( ::test::echoMessage )));
 
         BOOST_CHECK( !noSubscriber.receive( 100 ));
         if( subscriber.receive( 0 ))
@@ -136,15 +139,16 @@ BOOST_AUTO_TEST_CASE(publish_receive_zeroconf_disabled)
     zeroeq::Publisher publisher( zeroeq::NULL_SESSION );
     zeroeq::Subscriber subscriber( test::buildUniqueSession( ));
 
-    zeroeq::FBEvent echoEvent( ::zeroeq::vocabulary::EVENT_ECHO,
-                          std::bind( &test::onEchoEvent, std::placeholders::_1 ));
-    BOOST_CHECK( subscriber.subscribe( echoEvent ));
+    ::test::SerializablePtr echoEvent = ::test::getFBEchoInEvent(
+                    std::bind( &test::onEchoEvent, std::placeholders::_1 ));
+
+    BOOST_CHECK( subscriber.subscribe( *echoEvent ));
 
     bool received = false;
     for( size_t i = 0; i < 20; ++i )
     {
         BOOST_CHECK( publisher.publish(
-                         zeroeq::vocabulary::serializeEcho( test::echoMessage )));
+                         *::test::getFBEchoOutEvent( ::test::echoMessage )));
 
         if( subscriber.receive( 100 ))
         {
@@ -157,7 +161,11 @@ BOOST_AUTO_TEST_CASE(publish_receive_zeroconf_disabled)
 
 void onLargeEcho( const zeroeq::FBEvent& event )
 {
-    BOOST_CHECK( event.getType() == ::zeroeq::vocabulary::EVENT_ECHO );
+#ifdef ZEROEQ_USE_FLATBUFFERS
+    BOOST_CHECK( event.getTypeIdentifier() == ::zeroeq::vocabulary::EVENT_ECHO );
+#else
+    (void)event;
+#endif
 }
 
 BOOST_AUTO_TEST_CASE(publish_receive_filters)
@@ -170,38 +178,39 @@ BOOST_AUTO_TEST_CASE(publish_receive_filters)
     const std::string message( 60000, 'a' );
 
     // Make sure we're connected
-    zeroeq::FBEvent echoEvent( ::zeroeq::vocabulary::EVENT_ECHO,
-                          std::bind( &test::onEchoEvent, std::placeholders::_1 ));
-    BOOST_CHECK( subscriber.subscribe( echoEvent ));
+    ::test::SerializablePtr echoEvent = ::test::getFBEchoInEvent(
+                    std::bind( &test::onEchoEvent, std::placeholders::_1 ));
+
+    BOOST_CHECK( subscriber.subscribe( *echoEvent ));
     for( size_t i = 0; i < 20; ++i )
     {
         BOOST_CHECK( publisher->publish(
-                         zeroeq::vocabulary::serializeEcho( test::echoMessage )));
+                         *::test::getFBEchoOutEvent( ::test::echoMessage )));
         if( subscriber.receive( 100 ))
             break;
     }
-    BOOST_CHECK( subscriber.unsubscribe( echoEvent ));
+    BOOST_CHECK( subscriber.unsubscribe( *echoEvent ));
 
     // benchmark with no data to be transmitted
-    const zeroeq::FBEvent& event = serializeEcho( message );
+    ::test::SerializablePtr event = ::test::getFBEchoOutEvent( "" );
     auto startTime = std::chrono::high_resolution_clock::now();
     for( size_t i = 0; i < 20000; ++i )
     {
-        BOOST_CHECK( publisher->publish( event ));
+        BOOST_CHECK( publisher->publish( *event ));
         while( subscriber.receive( 0 )) /* NOP to drain */;
     }
     const auto& noEchoTime = std::chrono::high_resolution_clock::now() -
                              startTime;
 
     // Benchmark with echo handler, now should send data
-    zeroeq::FBEvent largeEchoEvent( ::zeroeq::vocabulary::EVENT_ECHO,
-                          std::bind( &onLargeEcho, std::placeholders::_1 ));
-    BOOST_CHECK( subscriber.subscribe( largeEchoEvent ));
+    ::test::SerializablePtr largeEchoEvent = ::test::getFBEchoInEvent(
+                    std::bind( &onLargeEcho, std::placeholders::_1 ));
+    BOOST_CHECK( subscriber.subscribe( *largeEchoEvent ));
 
     startTime = std::chrono::high_resolution_clock::now();
     for( size_t i = 0; i < 20000; ++i )
     {
-        BOOST_CHECK( publisher->publish( event ));
+        BOOST_CHECK( publisher->publish( *largeEchoEvent ));
         while( subscriber.receive( 0 )) /* NOP to drain */;
     }
 
@@ -223,13 +232,15 @@ BOOST_AUTO_TEST_CASE(publish_receive_late_zeroconf)
     zeroeq::detail::Sender::getUUID() = servus::make_UUID(); // different machine
     zeroeq::Publisher publisher( subscriber.getSession( ));
 
-    zeroeq::FBEvent echoEvent( ::zeroeq::vocabulary::EVENT_ECHO,
-                          std::bind( &test::onEchoEvent, std::placeholders::_1 ));
-    BOOST_CHECK( subscriber.subscribe( echoEvent ));
+    ::test::SerializablePtr echoEvent = ::test::getFBEchoInEvent(
+                    std::bind( &test::onEchoEvent, std::placeholders::_1 ));
+
+    BOOST_CHECK( subscriber.subscribe( *echoEvent ));
     bool received = false;
     for( size_t i = 0; i < 20; ++i )
     {
-        BOOST_CHECK( publisher.publish( serializeEcho( test::echoMessage )));
+        BOOST_CHECK( publisher.publish(
+                         *::test::getFBEchoOutEvent( test::echoMessage )));
 
         if( subscriber.receive( 100 ))
         {
@@ -249,14 +260,15 @@ BOOST_AUTO_TEST_CASE(publish_receive_empty_event_zeroconf)
     zeroeq::detail::Sender::getUUID() = servus::make_UUID(); // different machine
     zeroeq::Subscriber subscriber( publisher.getSession( ));
 
-    zeroeq::FBEvent echoEvent( ::zeroeqtest::EVENT_EMPTYEVENT,
-                          std::bind( &test::onEmptyEvent, std::placeholders::_1 ));
-    BOOST_CHECK( subscriber.subscribe( echoEvent ));
+    ::test::SerializablePtr emptyEvent = ::test::getFBEmptyInEvent(
+                    std::bind( &test::onEmptyEvent, std::placeholders::_1 ));
+
+    BOOST_CHECK( subscriber.subscribe( *emptyEvent ));
 
     bool received = false;
     for( size_t i = 0; i < 20; ++i )
     {
-        BOOST_CHECK( publisher.publish( echoEvent ));
+        BOOST_CHECK( publisher.publish( *::test::getFBEmptyOutEvent( )));
 
         if( subscriber.receive( 100 ))
         {
@@ -284,7 +296,8 @@ public:
         while( running )
         {
             BOOST_CHECK(
-                publisher.publish( serializeEcho( test::echoMessage )));
+                publisher.publish(
+                            *::test::getFBEchoOutEvent( test::echoMessage )));
             std::this_thread::sleep_for( std::chrono::milliseconds( 100 ));
             ++i;
 
@@ -297,7 +310,6 @@ public:
 };
 }
 
-
 BOOST_AUTO_TEST_CASE(publish_blocking_receive_zeroconf)
 {
     if( !servus::Servus::isAvailable() || getenv("TRAVIS"))
@@ -306,9 +318,10 @@ BOOST_AUTO_TEST_CASE(publish_blocking_receive_zeroconf)
     zeroeq::Subscriber subscriber( test::buildUniqueSession( ));
     zeroeq::detail::Sender::getUUID() = servus::make_UUID(); // different machine
 
-    zeroeq::FBEvent echoEvent( ::zeroeq::vocabulary::EVENT_ECHO,
-                          std::bind( &test::onEchoEvent, std::placeholders::_1 ));
-    BOOST_CHECK( subscriber.subscribe( echoEvent ));
+    ::test::SerializablePtr echoEvent = ::test::getFBEchoInEvent(
+                    std::bind( &test::onEchoEvent, std::placeholders::_1 ));
+
+    BOOST_CHECK( subscriber.subscribe( *echoEvent ));
 
     Publisher publisher;
     std::thread thread( std::bind( &Publisher::run, &publisher,

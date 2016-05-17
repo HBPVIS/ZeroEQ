@@ -4,7 +4,7 @@
 
 * [145](https://github.com/HBPVIS/ZeroEQ/pull/145):
   * The zeroeq::Event class is renamed to zeroeq::FBEvent
-  * zeroeq::FBEvent is derived from the servus::Serializable
+  * zeroeq::FBEvent is derived from servus::Serializable
   * Removed deprecated zeroeq::FBEvent functions from pub/sub
   * Removed EVENT_EXIT
   * Removed RESTBridge related code

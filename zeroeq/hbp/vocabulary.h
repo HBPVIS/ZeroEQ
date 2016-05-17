@@ -103,7 +103,7 @@ FBEvent serializeCellSetBinaryOp( const data::CellSetBinaryOp& cellSetBinaryOp )
  */
 ZEROEQ_API
 FBEvent serializeCellSetBinaryOp( const uint32_ts& first, const uint32_ts& second,
-                                CellSetBinaryOpType type );
+                                  CellSetBinaryOpType type );
 
 /**
  * Deserialize the given EVENT_CELLSETBINARYOP event into a CellSetBinaryOp

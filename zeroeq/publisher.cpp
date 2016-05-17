@@ -74,7 +74,7 @@ public:
     {
         if( session.empty( ))
             ZEROEQTHROW( std::runtime_error(
-                          "Empty session is not allowed for publisher" ));
+                         "Empty session is not allowed for publisher" ));
 
         const std::string& zmqURI = buildZmqURI( uri );
         if( zmq_bind( socket, zmqURI.c_str( )) == -1 )
@@ -82,8 +82,8 @@ public:
             zmq_close( socket );
             socket = 0;
             ZEROEQTHROW( std::runtime_error(
-                          std::string( "Cannot bind publisher socket '" ) +
-                          zmqURI + "': " + zmq_strerror( zmq_errno( ))));
+                         std::string( "Cannot bind publisher socket '" ) +
+                         zmqURI + "': " + zmq_strerror( zmq_errno( ))));
         }
 
         initURI();
@@ -114,7 +114,7 @@ public:
         if( ret == -1 )
         {
             ZEROEQWARN << "Cannot publish message header, got "
-                   << zmq_strerror( zmq_errno( )) << std::endl;
+                       << zmq_strerror( zmq_errno( )) << std::endl;
             return false;
         }
 
@@ -129,7 +129,7 @@ public:
         if( ret  == -1 )
         {
             ZEROEQWARN << "Cannot publish message data, got "
-                    << zmq_strerror( zmq_errno( )) << std::endl;
+                       << zmq_strerror( zmq_errno( )) << std::endl;
             return false;
         }
         return true;
@@ -159,7 +159,7 @@ private:
         if( !result )
         {
             ZEROEQTHROW( std::runtime_error( "Zeroconf announce failed: " +
-                                          result.getString( )));
+                                             result.getString( )));
         }
     }
 

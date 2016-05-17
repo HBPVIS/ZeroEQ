@@ -41,9 +41,9 @@ int main( int argc, char** argv )
 
         std::cout << "Sending event ";
         const zeroeq::FBEvent& event = i->second;
-        if( event.getType() == zeroeq::hbp::EVENT_TOGGLEIDREQUEST )
+        if( event.getTypeIdentifier() == zeroeq::hbp::EVENT_TOGGLEIDREQUEST )
             std::cout << zeroeq::hbp::TOGGLEIDREQUEST << std::endl;
-        else if( event.getType() == zeroeq::hbp::EVENT_CELLSETBINARYOP )
+        else if( event.getTypeIdentifier() == zeroeq::hbp::EVENT_CELLSETBINARYOP )
             std::cout << zeroeq::hbp::CELLSETBINARYOP << std::endl;
         else
             std::cout << " unknown type" << std::endl;

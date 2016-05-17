@@ -101,13 +101,11 @@ FBEvent serializeCellSetBinaryOp(
   return event;
 }
 
-FBEvent serializeCellSetBinaryOp( const uint32_ts& first,
-                                          const uint32_ts& second,
-                                          CellSetBinaryOpType type )
+FBEvent serializeCellSetBinaryOp( const uint32_ts& first, const uint32_ts& second,
+                                  CellSetBinaryOpType type )
 {
-    return serializeCellSetBinaryOp( data::CellSetBinaryOp( first,
-                                                            second,
-                                                            type ));
+    return serializeCellSetBinaryOp(
+        data::CellSetBinaryOp( first, second, type ));
 }
 
 data::CellSetBinaryOp deserializeCellSetBinaryOp( const FBEvent& event )
