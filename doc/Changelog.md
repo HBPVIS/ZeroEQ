@@ -2,6 +2,8 @@
 
 # git master
 
+* [161](https://github.com/HBPVIS/ZeroEQ/pull/161):
+  Move progressMonitor tool to Lexis
 * [145](https://github.com/HBPVIS/ZeroEQ/pull/145):
   * The zeroeq::Event class is renamed to zeroeq::FBEvent
   * zeroeq::FBEvent is derived from servus::Serializable
