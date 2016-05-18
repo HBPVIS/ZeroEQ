@@ -134,31 +134,6 @@ public:
     ZEROEQ_API ~Subscriber();
 
     /**
-     * Register a new callback for an event.
-     *
-     * Only one callback per event is possible in the current implementation.
-     *
-     * @deprecated Use subscribe()
-     * @param event the event type of interest
-     * @param func the callback function on receive of event
-     * @return true if callback could be registered
-     */
-    ZEROEQ_API bool registerHandler( const uint128_t& event,
-                                  const EventFunc& func );
-
-    /**
-     * Deregister a callback for an event.
-     *
-     * @deprecated Use unsubscribe()
-     * @param event the event type of interest
-     * @return true if callback could be deregistered
-     */
-    ZEROEQ_API bool deregisterHandler( const uint128_t& event );
-
-    /** @deprecated */
-    ZEROEQ_API bool hasHandler( const uint128_t& event ) const;
-
-    /**
      * Subscribe a serializable object to receive updates from any connected
      * publisher.
      *

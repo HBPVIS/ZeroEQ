@@ -6,7 +6,6 @@
 
 #include "subscriber.h"
 
-#include "event.h"
 #include "log.h"
 #include "detail/broker.h"
 #include "detail/constants.h"
@@ -103,53 +102,6 @@ public:
             _browser.endBrowsing();
     }
 
-    bool registerHandler( const uint128_t& event, const EventFunc& func )
-    {
-        if( _eventFuncs.count( event ) != 0 )
-            return false;
-
-        // Add subscription to existing sockets
-        for( const auto& socket : _subscribers )
-        {
-            if( socket.second &&
-                zmq_setsockopt( socket.second, ZMQ_SUBSCRIBE,
-                                &event, sizeof( event )) == -1 )
-            {
-                ZEROEQTHROW( std::runtime_error(
-                    std::string( "Cannot update topic filter: " ) +
-                    zmq_strerror( zmq_errno( ))));
-            }
-        }
-
-        _eventFuncs[event] = func;
-        return true;
-    }
-
-    bool deregisterHandler( const uint128_t& event )
-    {
-        if( _eventFuncs.erase( event ) == 0 )
-            return false;
-
-        for( const auto& socket : _subscribers )
-        {
-            if( socket.second &&
-                zmq_setsockopt( socket.second, ZMQ_UNSUBSCRIBE,
-                                &event, sizeof( event )) == -1 )
-            {
-                ZEROEQTHROW( std::runtime_error(
-                    std::string( "Cannot update topic filter: " ) +
-                    zmq_strerror( zmq_errno( ))));
-            }
-        }
-
-        return true;
-    }
-
-    bool hasHandler( const uint128_t& event ) const
-    {
-        return _eventFuncs.count( event ) > 0;
-    }
-
     bool subscribe( servus::Serializable& serializable )
     {
         const uint128_t& type = serializable.getTypeIdentifier();
@@ -184,52 +136,24 @@ public:
 
         uint128_t type;
         memcpy( &type, zmq_msg_data( &msg ), sizeof(type) );
-#ifndef ZEROEQ_LITTLEENDIAN
+    #ifndef ZEROEQ_LITTLEENDIAN
         detail::byteswap( type ); // convert from little endian wire
-#endif
+    #endif
         const bool payload = zmq_msg_more( &msg );
         zmq_msg_close( &msg );
 
         SerializableMap::const_iterator i = _serializables.find( type );
-        if( i == _serializables.end( )) // FlatBuffer
-        {
-            zeroeq::Event event( type );
-            if( payload )
-            {
-                zmq_msg_init( &msg );
-                zmq_msg_recv( &msg, socket.socket, 0 );
-                const size_t size = zmq_msg_size( &msg );
-                ConstByteArray data( new uint8_t[size],
-                                     std::default_delete< uint8_t[] >( ));
-                memcpy( (void*)data.get(), zmq_msg_data( &msg ), size );
-                event.setData( data, size );
-                assert( event.getSize() == size );
-                zmq_msg_close( &msg );
-            }
+        if( i == _serializables.cend( ))
+            ZEROEQTHROW( std::runtime_error( "Got unsubscribed event " + type.getString( )));
 
-            if( _eventFuncs.count( type ) != 0 )
-                _eventFuncs[type]( event );
-#ifndef NDEBUG
-            else
-            {
-                // Note eile: The topic filtering in the handler registration
-                // should ensure that we don't get messages if we have no
-                // handlers. If this throws, something does not work.
-                ZEROEQTHROW( std::runtime_error( "Got unsubscribed event" ));
-            }
-#endif
-        }
-        else // serializable
+        servus::Serializable* serializable = i->second;
+        if( payload )
         {
-            servus::Serializable* serializable = i->second;
-            if( payload )
-            {
-                zmq_msg_init( &msg );
-                zmq_msg_recv( &msg, socket.socket, 0 );
-                serializable->fromBinary( zmq_msg_data( &msg ),
-                                          zmq_msg_size( &msg ));
-                zmq_msg_close( &msg );
-            }
+            zmq_msg_init( &msg );
+            zmq_msg_recv( &msg, socket.socket, 0 );
+            serializable->fromBinary( zmq_msg_data( &msg ),
+                                      zmq_msg_size( &msg ));
+            zmq_msg_close( &msg );
         }
     }
 
@@ -283,16 +207,6 @@ public:
         }
 
         // Add existing subscriptions to socket
-        for( const auto& i : _eventFuncs )
-        {
-            if( zmq_setsockopt( _subscribers[zmqURI], ZMQ_SUBSCRIBE,
-                                &i.first, sizeof( uint128_t )) == -1 )
-            {
-                ZEROEQTHROW( std::runtime_error(
-                    std::string( "Cannot update topic filter: " ) +
-                    zmq_strerror( zmq_errno( ))));
-            }
-        }
         for( const auto& i : _serializables )
         {
             if( zmq_setsockopt( _subscribers[zmqURI], ZMQ_SUBSCRIBE,
@@ -319,11 +233,8 @@ public:
     const std::string& getSession() const { return _session; }
 
 private:
-    typedef std::map< uint128_t, EventFunc > EventFuncs;
     typedef std::map< std::string, void* > SocketMap;
-
     SocketMap _subscribers;
-    EventFuncs _eventFuncs;
 
     typedef std::map< uint128_t, servus::Serializable* > SerializableMap;
     SerializableMap _serializables;
@@ -423,21 +334,6 @@ Subscriber::Subscriber( const URI& uri, const std::string& session,
 
 Subscriber::~Subscriber()
 {
-}
-
-bool Subscriber::registerHandler( const uint128_t& event, const EventFunc& func)
-{
-    return _impl->registerHandler( event, func );
-}
-
-bool Subscriber::deregisterHandler( const uint128_t& event )
-{
-    return _impl->deregisterHandler( event );
-}
-
-bool Subscriber::hasHandler( const uint128_t& event ) const
-{
-    return _impl->hasHandler( event );
 }
 
 bool Subscriber::subscribe( servus::Serializable& serializable )

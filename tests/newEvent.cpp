@@ -34,16 +34,13 @@
 
 #include "broker.h"
 
-#include <tests/newEvent_generated.h>
-#include <tests/newEvent_zeroeq_generated.h>
-
 namespace zeroeqtest
 {
 static const std::string message( "So long, and thanks for all the fish" );
 
-zeroeq::Event serializeString( const std::string& string )
+zeroeq::FBEvent serializeString( const std::string& string )
 {
-    ::zeroeq::Event event( EVENT_NEWEVENT );
+    ::zeroeq::FBEvent event( EVENT_NEWEVENT, ::zeroeq::EventFunc( ));
 
     flatbuffers::FlatBufferBuilder& fbb = event.getFBB();
     auto data = fbb.CreateString( string );
@@ -54,15 +51,15 @@ zeroeq::Event serializeString( const std::string& string )
     return event;
 }
 
-std::string deserializeString( const ::zeroeq::Event& event )
+std::string deserializeString( const ::zeroeq::FBEvent& event )
 {
-    BOOST_CHECK_EQUAL( event.getType(), EVENT_NEWEVENT );
+    BOOST_CHECK_EQUAL( event.getTypeIdentifier(), EVENT_NEWEVENT );
 
     auto data = GetNewEvent( event.getData( ));
     return std::string( data->message()->c_str( ));
 }
 
-void onMessageEvent( const zeroeq::Event& event )
+void onMessageEvent( const zeroeq::FBEvent& event )
 {
     BOOST_CHECK_EQUAL( deserializeString( event ), message );
 }
@@ -72,9 +69,11 @@ BOOST_AUTO_TEST_CASE(new_event)
 {
     zeroeq::Publisher publisher( zeroeq::NULL_SESSION );
     zeroeq::Subscriber subscriber( zeroeq::URI( publisher.getURI( )));
-    BOOST_CHECK( subscriber.registerHandler( zeroeqtest::EVENT_NEWEVENT,
-                 std::bind( &zeroeqtest::onMessageEvent,
-                            std::placeholders::_1 )));
+
+    ::zeroeq::FBEvent newEvent( ::zeroeqtest::EVENT_NEWEVENT, std::bind(
+                                                    &zeroeqtest::onMessageEvent,
+                                                    std::placeholders::_1 ));
+    BOOST_CHECK( subscriber.subscribe( newEvent ));
 
     bool received = false;
     for( size_t i = 0; i < 10; ++i )
