@@ -163,7 +163,7 @@ void onLargeEcho( const zeroeq::FBEvent& event )
 {
 #ifdef ZEROEQ_USE_FLATBUFFERS
     BOOST_CHECK( event.getTypeIdentifier() == ::zeroeq::vocabulary::EVENT_ECHO );
-#else
+#elif !defined(_MSC_VER)
     (void)event;
 #endif
 }

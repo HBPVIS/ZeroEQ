@@ -56,7 +56,7 @@ void onEchoEvent( const zeroeq::FBEvent& event )
     BOOST_CHECK( event.getTypeIdentifier() == zeroeq::vocabulary::EVENT_ECHO );
     const std::string message = zeroeq::vocabulary::deserializeEcho( event );
     BOOST_CHECK_EQUAL( echoMessage, message );
-#else
+#elif !defined(_MSC_VER)
     (void)event;
 #endif
 }
@@ -66,7 +66,7 @@ void onEmptyEvent( const zeroeq::FBEvent& event )
 #ifdef ZEROEQ_USE_FLATBUFFERS
     BOOST_CHECK_EQUAL( event.getTypeIdentifier(), ::zeroeqtest::EVENT_EMPTYEVENT );
     BOOST_CHECK_EQUAL( event.getSize(), 0 );
-#else
+#elif !defined(_MSC_VER)
     (void)event;
 #endif
 }
