@@ -21,7 +21,7 @@ namespace detail
 class FBEvent
 {
 public:
-    FBEvent( const uint128_t& type_, const EventFunc& func_ )
+    FBEvent( const uint128_t& type_, const FBEventFunc& func_ )
         : type( type_ )
         , data( 0 )
         , size( 0 )
@@ -57,7 +57,7 @@ public:
     /** setData() uses this instead of fbb during deserialization */
     const uint8_t* data;
     size_t size;
-    EventFunc func;
+    FBEventFunc func;
 
 private:
     FBEvent( const FBEvent& ) = delete;

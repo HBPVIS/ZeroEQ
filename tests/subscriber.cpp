@@ -65,9 +65,19 @@ BOOST_AUTO_TEST_CASE(invalid_construction)
 BOOST_AUTO_TEST_CASE(subscribe)
 {
     zeroeq::Subscriber subscriber;
+#ifdef ZEROEQ_USE_FLATBUFFERS
     ::test::SerializablePtr echoEvent = ::test::getFBEchoInEvent(
                     std::bind( &test::onEchoEvent, std::placeholders::_1 ));
     BOOST_CHECK( subscriber.subscribe( *echoEvent ));
+#endif
+
+    test::Echo echo;
+    BOOST_CHECK( subscriber.subscribe( echo ));
+
+    BOOST_CHECK( subscriber.subscribe( zeroeq::make_uint128( "Empty" ),
+                                       [](){}));
+    BOOST_CHECK( subscriber.subscribe( zeroeq::make_uint128( "Echo" ),
+                                       []( const void*, size_t ){} ));
 }
 
 BOOST_AUTO_TEST_CASE(unsubscribe)
@@ -77,15 +87,39 @@ BOOST_AUTO_TEST_CASE(unsubscribe)
                     std::bind( &test::onEchoEvent, std::placeholders::_1 ));
     BOOST_CHECK( subscriber.subscribe( *echoEvent ));
     BOOST_CHECK( subscriber.unsubscribe( *echoEvent ));
+
+    test::Echo echo;
+    BOOST_CHECK( subscriber.subscribe( echo ));
+    BOOST_CHECK( subscriber.unsubscribe( echo ));
+
+    BOOST_CHECK( subscriber.subscribe( zeroeq::make_uint128( "Empty" ),
+                                       [](){} ));
+    BOOST_CHECK( subscriber.unsubscribe( zeroeq::make_uint128( "Empty" ) ));
+
+    BOOST_CHECK( subscriber.subscribe( zeroeq::make_uint128( "Echo" ),
+                                       []( const void*, size_t ){} ));
+    BOOST_CHECK( subscriber.unsubscribe( zeroeq::make_uint128( "Echo" ) ));
 }
 
 BOOST_AUTO_TEST_CASE(invalid_subscribe)
 {
     zeroeq::Subscriber subscriber;
-    ::test::SerializablePtr echo =
-            ::test::getFBEchoInEvent( ::zeroeq::EventFunc( ));
-    BOOST_CHECK( subscriber.subscribe( *echo ));
-    BOOST_CHECK( !subscriber.subscribe( *echo ));
+
+#ifdef ZEROEQ_USE_FLATBUFFERS
+    ::test::SerializablePtr echoEvent =
+            ::test::getFBEchoInEvent( ::zeroeq::FBEventFunc( ));
+    BOOST_CHECK( subscriber.subscribe( *echoEvent ));
+    BOOST_CHECK( !subscriber.subscribe( *echoEvent ));
+#endif
+
+    test::Echo echo;
+    BOOST_CHECK( subscriber.subscribe( echo ));
+    BOOST_CHECK( !subscriber.subscribe( echo ));
+
+    BOOST_CHECK( subscriber.subscribe( zeroeq::make_uint128( "Echo" ),
+                                       []( const void*, size_t ){} ));
+    BOOST_CHECK( !subscriber.subscribe( zeroeq::make_uint128( "Echo" ),
+                                       []( const void*, size_t ){} ));
 }
 
 BOOST_AUTO_TEST_CASE(test_invalid_unsubscribe)
@@ -103,10 +137,10 @@ BOOST_AUTO_TEST_CASE(test_invalid_unsubscribe_different_event_objects)
 {
     zeroeq::Subscriber subscriber;
     ::test::SerializablePtr echoEvent =
-            ::test::getFBEchoInEvent( ::zeroeq::EventFunc( ));
+            ::test::getFBEchoInEvent( ::zeroeq::FBEventFunc( ));
 
     ::test::SerializablePtr emptyEvent =
-            ::test::getFBEmptyInEvent( ::zeroeq::EventFunc( ));
+            ::test::getFBEmptyInEvent( ::zeroeq::FBEventFunc( ));
 
     BOOST_CHECK( subscriber.subscribe( *echoEvent ));
     BOOST_CHECK( !subscriber.unsubscribe( *emptyEvent ));

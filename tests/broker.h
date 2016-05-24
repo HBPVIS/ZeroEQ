@@ -132,7 +132,7 @@ SerializablePtr getFBEchoOutEvent( const std::string& message )
 #endif
 }
 
-SerializablePtr getFBEchoInEvent( const ::zeroeq::EventFunc& eventFunc )
+SerializablePtr getFBEchoInEvent( const ::zeroeq::FBEventFunc& eventFunc )
 {
 #ifdef ZEROEQ_USE_FLATBUFFERS
     return SerializablePtr( new ::zeroeq::FBEvent( ::zeroeq::vocabulary::EVENT_ECHO,
@@ -148,13 +148,13 @@ SerializablePtr getFBEmptyOutEvent()
 #ifdef ZEROEQ_USE_FLATBUFFERS
     return SerializablePtr(
                 new ::zeroeq::FBEvent( ::zeroeqtest::EVENT_EMPTYEVENT,
-                                       ::zeroeq::EventFunc( )));
+                                       ::zeroeq::FBEventFunc( )));
 #else
     return SerializablePtr( new ::test::Empty );
 #endif
 }
 
-SerializablePtr getFBEmptyInEvent( const ::zeroeq::EventFunc& eventFunc )
+SerializablePtr getFBEmptyInEvent( const ::zeroeq::FBEventFunc& eventFunc )
 {
 #ifdef ZEROEQ_USE_FLATBUFFERS
     return SerializablePtr( new ::zeroeq::FBEvent( ::zeroeqtest::EVENT_EMPTYEVENT,

@@ -104,22 +104,32 @@ public:
 
     bool subscribe( servus::Serializable& serializable )
     {
-        const uint128_t& type = serializable.getTypeIdentifier();
-        if( _serializables.count( type ) != 0 )
+        const auto func = [&serializable]( const void* data, const size_t size )
+            { serializable.fromBinary( data, size ); };
+        return subscribe( serializable.getTypeIdentifier(), func );
+    }
+
+    bool subscribe( const uint128_t& event, const EventPayloadFunc& func )
+    {
+        if( _eventFuncs.count( event ) != 0 )
             return false;
 
-        _subscribe( type );
-        _serializables[ type ] = &serializable;
+        _subscribe( event );
+        _eventFuncs[ event ] = func;
         return true;
     }
 
     bool unsubscribe( const servus::Serializable& serializable )
     {
-        const uint128_t& type = serializable.getTypeIdentifier();
-        if( _serializables.erase( type ) == 0 )
+        return unsubscribe( serializable.getTypeIdentifier( ));
+    }
+
+    bool unsubscribe( const uint128_t& event )
+    {
+        if( _eventFuncs.erase( event ) == 0 )
             return false;
 
-        _unsubscribe( type );
+        _unsubscribe( event );
         return true;
     }
 
@@ -142,19 +152,19 @@ public:
         const bool payload = zmq_msg_more( &msg );
         zmq_msg_close( &msg );
 
-        SerializableMap::const_iterator i = _serializables.find( type );
-        if( i == _serializables.cend( ))
+        EventFuncMap::const_iterator i = _eventFuncs.find( type );
+        if( i == _eventFuncs.cend( ))
             ZEROEQTHROW( std::runtime_error( "Got unsubscribed event " + type.getString( )));
 
-        servus::Serializable* serializable = i->second;
         if( payload )
         {
             zmq_msg_init( &msg );
             zmq_msg_recv( &msg, socket.socket, 0 );
-            serializable->fromBinary( zmq_msg_data( &msg ),
-                                      zmq_msg_size( &msg ));
+            i->second( zmq_msg_data( &msg ), zmq_msg_size( &msg ));
             zmq_msg_close( &msg );
         }
+        else
+            i->second( nullptr, 0 );
     }
 
     void update( void* context )
@@ -207,7 +217,7 @@ public:
         }
 
         // Add existing subscriptions to socket
-        for( const auto& i : _serializables )
+        for( const auto& i : _eventFuncs )
         {
             if( zmq_setsockopt( _subscribers[zmqURI], ZMQ_SUBSCRIBE,
                                 &i.first, sizeof( uint128_t )) == -1 )
@@ -236,8 +246,8 @@ private:
     typedef std::map< std::string, void* > SocketMap;
     SocketMap _subscribers;
 
-    typedef std::map< uint128_t, servus::Serializable* > SerializableMap;
-    SerializableMap _serializables;
+    typedef std::map< uint128_t, EventPayloadFunc > EventFuncMap;
+    EventFuncMap _eventFuncs;
 
     servus::Servus _browser;
     std::vector< detail::Socket > _entries;
@@ -341,9 +351,24 @@ bool Subscriber::subscribe( servus::Serializable& serializable )
     return _impl->subscribe( serializable );
 }
 
+bool Subscriber::subscribe( const uint128_t& event, const EventFunc& func )
+{
+    return _impl->subscribe( event, [func]( const void*, size_t ){ func();} );
+}
+
+bool Subscriber::subscribe( const uint128_t& event, const EventPayloadFunc& func )
+{
+    return _impl->subscribe( event, func );
+}
+
 bool Subscriber::unsubscribe( const servus::Serializable& serializable )
 {
     return _impl->unsubscribe( serializable );
+}
+
+bool Subscriber::unsubscribe( const uint128_t& event )
+{
+    return _impl->unsubscribe( event );
 }
 
 const std::string& Subscriber::getSession() const

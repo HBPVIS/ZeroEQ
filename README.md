@@ -23,6 +23,7 @@ ZeroEQ provides the following major features:
 
 ## List of RFCs
 
+* [Event-based communication](@ref eventbased)
 * [HTTP GET and PUT server](@ref httpserver)
 * [Session filtering and management port](@ref Sessions)
 

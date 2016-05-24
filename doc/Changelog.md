@@ -2,6 +2,9 @@
 
 # git master
 
+* [166](https://github.com/HBPVIS/ZeroEQ/pull/166):
+  Implement event-based communication as per
+  [152](https://github.com/HBPVIS/ZeroEQ/pull/152)  
 * [161](https://github.com/HBPVIS/ZeroEQ/pull/161):
   Move progressMonitor tool to Lexis
 * [145](https://github.com/HBPVIS/ZeroEQ/pull/145):

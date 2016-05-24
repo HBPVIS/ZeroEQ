@@ -56,7 +56,7 @@ std::vector< T > deserializeVector(
 
 FBEvent serializeSelectedIDs( const uint32_ts& ids )
 {
-    FBEvent event( EVENT_SELECTEDIDS, zeroeq::EventFunc( ));
+    FBEvent event( EVENT_SELECTEDIDS, zeroeq::FBEventFunc( ));
     BUILD_VECTOR_ONLY_BUFFER( event, SelectedIDs, ids );
     return event;
 }
@@ -68,7 +68,7 @@ uints deserializeSelectedIDs( const FBEvent& event )
 
 FBEvent serializeToggleIDRequest( const uint32_ts& ids )
 {
-    FBEvent event( EVENT_TOGGLEIDREQUEST, zeroeq::EventFunc( ));
+    FBEvent event( EVENT_TOGGLEIDREQUEST, zeroeq::FBEventFunc( ));
     BUILD_VECTOR_ONLY_BUFFER( event, ToggleIDRequest, ids );
     return event;
 }
@@ -81,7 +81,7 @@ uints deserializeToggleIDRequest( const zeroeq::FBEvent& event )
 FBEvent serializeCellSetBinaryOp(
         const data::CellSetBinaryOp& cellSetBinaryOp )
 {
-  FBEvent event( EVENT_CELLSETBINARYOP, zeroeq::EventFunc( ));
+  FBEvent event( EVENT_CELLSETBINARYOP, zeroeq::FBEventFunc( ));
 
   flatbuffers::FlatBufferBuilder& fbb = event.getFBB( );
 

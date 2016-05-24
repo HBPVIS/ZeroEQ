@@ -40,7 +40,7 @@ static const std::string message( "So long, and thanks for all the fish" );
 
 zeroeq::FBEvent serializeString( const std::string& string )
 {
-    ::zeroeq::FBEvent event( EVENT_NEWEVENT, ::zeroeq::EventFunc( ));
+    ::zeroeq::FBEvent event( EVENT_NEWEVENT, ::zeroeq::FBEventFunc( ));
 
     flatbuffers::FlatBufferBuilder& fbb = event.getFBB();
     auto data = fbb.CreateString( string );

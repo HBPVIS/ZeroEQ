@@ -70,34 +70,56 @@ public:
 
     bool subscribe( servus::Serializable& serializable )
     {
-        const std::string& name = _toLower( serializable.getTypeName( ));
-        if( _subscriptions.count( name ) != 0 )
+        const auto func = [&serializable]( const std::string& json )
+            { return serializable.fromJSON( json ); };
+        return subscribe( serializable.getTypeName(), func );
+    }
+
+    bool subscribe( std::string event, const PUTPayloadFunc& func )
+    {
+        event = _toLower( event );
+        if( _subscriptions.count( event ) != 0 )
             return false;
 
-        _subscriptions[ name ] = &serializable;
+        _subscriptions[ event ] = func;
         return true;
     }
 
     bool unsubscribe( const servus::Serializable& serializable )
     {
+        return unsubscribe( serializable.getTypeName( ));
+    }
+
+    bool unsubscribe( const std::string& event )
+    {
         return _subscriptions.erase(
-            _toLower( serializable.getTypeName( ))) != 0;
+            _toLower( event )) != 0;
     }
 
     bool register_( servus::Serializable& serializable )
     {
-        const std::string& name = _toLower( serializable.getTypeName( ));
-        if( _registrations.count( name ) != 0 )
+        const auto func = [&serializable]() { return serializable.toJSON(); };
+        return register_( serializable.getTypeName(), func );
+    }
+
+    bool register_( std::string event, const GETFunc& func )
+    {
+        event = _toLower( event );
+        if( _registrations.count( event ) != 0 )
             return false;
 
-        _registrations[ name ] = &serializable;
+        _registrations[ event ] = func;
         return true;
     }
 
     bool unregister( const servus::Serializable& serializable )
     {
-        return _registrations.erase(
-            _toLower( serializable.getTypeName( ))) != 0;
+        return unregister( serializable.getTypeName( ));
+    }
+
+    bool unregister( const std::string& event )
+    {
+        return _registrations.erase( _toLower( event )) != 0;
     }
 
     void addSockets( std::vector< detail::Socket >& entries )
@@ -182,8 +204,8 @@ public:
         // response header
         if( response.status() >= 400 && response.status() < 500 )
             body = response.to_string();
-        response.headers()[ "Content-Length" ] = 
-			std::to_string( body.length( ));
+        response.headers()[ "Content-Length" ] =
+            std::to_string( body.length( ));
         response.headers()[ "Access-Control-Allow-Origin" ] =
             access_control_allow_origins;
         response.headers()[ "Access-Control-Allow-Headers" ] =
@@ -213,9 +235,10 @@ public:
     }
 
 protected:
-    typedef std::map< std::string, servus::Serializable* > SerializableMap;
-    SerializableMap _subscriptions;
-    SerializableMap _registrations;
+    typedef std::map< std::string, PUTPayloadFunc > PUTFuncMap;
+    typedef std::map< std::string, GETFunc > GETFuncMap;
+    PUTFuncMap _subscriptions;
+    GETFuncMap _registrations;
 
     std::string _getTypeName( const std::string& url )
     {
@@ -246,7 +269,7 @@ protected:
         }
 
         response.set_status( 200 );
-        return i->second->toJSON();
+        return i->second();
     }
 
     void _processPut( const httpxx::BufferedRequest& request,
@@ -259,7 +282,7 @@ protected:
             response.set_status( 404 );
         else
         {
-            if( i->second->fromJSON( request.body( )))
+            if( i->second( request.body( )))
                 response.set_status( 200 );
             else
                 response.set_status( 400 );
@@ -350,9 +373,25 @@ bool Server::subscribe( servus::Serializable& object )
     return _impl->subscribe( object );
 }
 
+bool Server::subscribe( const std::string& event, const PUTFunc& func )
+{
+    return _impl->subscribe( event,
+                             [func]( const std::string& ) { return func(); } );
+}
+
+bool Server::subscribe( const std::string& event, const PUTPayloadFunc& func )
+{
+    return _impl->subscribe( event, func );
+}
+
 bool Server::unsubscribe( const servus::Serializable& object )
 {
     return _impl->unsubscribe( object );
+}
+
+bool Server::unsubscribe( const std::string& event )
+{
+    return _impl->unsubscribe( event );
 }
 
 bool Server::register_( servus::Serializable& object )
@@ -360,9 +399,19 @@ bool Server::register_( servus::Serializable& object )
     return _impl->register_( object );
 }
 
+bool Server::register_( const std::string& event, const GETFunc& func )
+{
+    return _impl->register_( event, func );
+}
+
 bool Server::unregister( const servus::Serializable& object )
 {
     return _impl->unregister( object );
+}
+
+bool Server::unregister( const std::string& event )
+{
+    return _impl->unregister( event );
 }
 
 void Server::addSockets( std::vector< detail::Socket >& entries )

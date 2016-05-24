@@ -45,7 +45,11 @@ BOOST_AUTO_TEST_CASE(create_invalid_uri_publisher)
 BOOST_AUTO_TEST_CASE(publish)
 {
     zeroeq::Publisher publisher( zeroeq::NULL_SESSION );
-    BOOST_CHECK( publisher.publish( test::Echo( test::echoMessage )));
+    test::Echo echo( test::echoMessage );
+    BOOST_CHECK( publisher.publish( echo ));
+    BOOST_CHECK( publisher.publish( echo.getTypeIdentifier(),
+                                    echo.toBinary().ptr.get(),
+                                    echo.toBinary().size ));
     BOOST_CHECK( publisher.publish(
                      *::test::getFBEchoOutEvent( ::test::echoMessage )));
 }
@@ -64,8 +68,10 @@ BOOST_AUTO_TEST_CASE(publish_update_uri)
 BOOST_AUTO_TEST_CASE(publish_empty_event)
 {
     zeroeq::Publisher publisher( zeroeq::NULL_SESSION );
+    BOOST_CHECK( publisher.publish( test::Empty( )));
+    BOOST_CHECK( publisher.publish( zeroeq::make_uint128( "Empty" )));
     BOOST_CHECK( publisher.publish(
-                      *::test::getFBEchoInEvent( ::zeroeq::EventFunc( ))));
+                      *::test::getFBEchoInEvent( ::zeroeq::FBEventFunc( ))));
 }
 
 BOOST_AUTO_TEST_CASE(multiple_publisher_on_same_host)

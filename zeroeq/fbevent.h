@@ -35,7 +35,7 @@ public:
      * @param func the desired event function
      * @sa vocabulary::registerEvent
      */
-    ZEROEQ_API FBEvent( const uint128_t& type, const EventFunc& func );
+    ZEROEQ_API FBEvent( const uint128_t& type, const FBEventFunc& func );
 
     /** Move ctor @internal */
     ZEROEQ_API FBEvent( FBEvent&& rhs );
