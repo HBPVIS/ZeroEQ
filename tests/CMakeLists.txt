@@ -18,6 +18,10 @@ if(FLATBUFFERS_FOUND)
     pubSub.cpp PROPERTIES OBJECT_DEPENDS ${FBS_EMPTY_EVENT_OUTPUTS})
   set_source_files_properties(
     perf.cpp PROPERTIES OBJECT_DEPENDS ${FBS_EMPTY_EVENT_OUTPUTS})
+  set_source_files_properties(
+    connection/broker.cpp PROPERTIES OBJECT_DEPENDS ${FBS_EMPTY_EVENT_OUTPUTS})
+  set_source_files_properties(
+    connection/broker.cpp PROPERTIES OBJECT_DEPENDS ${FBS_NEW_EVENT_OUTPUTS})
   flatbuffers_generate_c_headers(FBS_BINARY_EVENT binary.fbs)
   list(APPEND TEST_LIBRARIES ZeroEQHBP)
 endif()

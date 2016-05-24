@@ -8,10 +8,7 @@
 
 #include <zeroeq/hbp/camera_generated.h>
 #include <zeroeq/hbp/cellSetBinaryOp_generated.h>
-#include <zeroeq/hbp/frame_generated.h>
-#include <zeroeq/hbp/imageJPEG_generated.h>
 #include <zeroeq/hbp/selections_generated.h>
-#include <zeroeq/hbp/lookupTable1D_generated.h>
 #include <zeroeq/fbevent.h>
 #include <zeroeq/vocabulary.h>
 
