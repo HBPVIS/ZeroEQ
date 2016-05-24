@@ -11,6 +11,8 @@
 
 #include <servus/serializable.h>
 
+namespace flatbuffers { class FlatBufferBuilder; class Parser; }
+
 namespace zeroeq
 {
 namespace detail { class FBEvent; }
@@ -21,7 +23,7 @@ namespace detail { class FBEvent; }
  * Events are published via zeroeq::Publisher and received via zeroeq::Subscriber. The
  * format of the serialized data is specific to the serialization backend.
  *
- * Example: @include tests/serialization.cpp
+ * Example: @include tests/hbp/serialization.cpp
  */
 class FBEvent : public servus::Serializable
 {

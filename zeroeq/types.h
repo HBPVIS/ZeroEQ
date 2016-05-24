@@ -73,8 +73,4 @@ enum AnnounceMode //!< Network presence announcements
 
 }
 
-// internal
-
-namespace flatbuffers { class FlatBufferBuilder; class Parser; }
-
 #endif

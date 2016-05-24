@@ -125,9 +125,8 @@ typedef std::shared_ptr< servus::Serializable > SerializablePtr;
 SerializablePtr getFBEchoOutEvent( const std::string& message )
 {
 #ifdef ZEROEQ_USE_FLATBUFFERS
-    ::zeroeq::FBEvent event = ::zeroeq::vocabulary::serializeEcho( message );
-    SerializablePtr serializable( new ::zeroeq::FBEvent( std::move( event )));
-    return serializable;
+    return SerializablePtr( new ::zeroeq::FBEvent(
+                               ::zeroeq::vocabulary::serializeEcho( message )));
 #else
     return SerializablePtr( new ::test::Echo( message ));
 #endif
@@ -147,10 +146,9 @@ SerializablePtr getFBEchoInEvent( const ::zeroeq::EventFunc& eventFunc )
 SerializablePtr getFBEmptyOutEvent()
 {
 #ifdef ZEROEQ_USE_FLATBUFFERS
-    SerializablePtr serializable(
+    return SerializablePtr(
                 new ::zeroeq::FBEvent( ::zeroeqtest::EVENT_EMPTYEVENT,
                                        ::zeroeq::EventFunc( )));
-    return serializable;
 #else
     return SerializablePtr( new ::test::Empty );
 #endif
@@ -159,7 +157,7 @@ SerializablePtr getFBEmptyOutEvent()
 SerializablePtr getFBEmptyInEvent( const ::zeroeq::EventFunc& eventFunc )
 {
 #ifdef ZEROEQ_USE_FLATBUFFERS
-    return SerializablePtr( new ::zeroeq::FBEvent( ::zeroeq::vocabulary::EVENT_ECHO,
+    return SerializablePtr( new ::zeroeq::FBEvent( ::zeroeqtest::EVENT_EMPTYEVENT,
                                                    eventFunc ));
 #else
     (void)eventFunc;

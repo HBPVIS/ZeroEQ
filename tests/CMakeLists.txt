@@ -11,22 +11,12 @@ set(TEST_LIBRARIES ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ZeroEQ
 
 if(FLATBUFFERS_FOUND)
   flatbuffers_generate_c_headers(FBS_NEW_EVENT newEvent.fbs)
+  set_source_files_properties(newEvent.cpp
+      PROPERTIES OBJECT_DEPENDS ${FBS_NEW_EVENT_OUTPUTS})
+
   flatbuffers_generate_c_headers(FBS_EMPTY_EVENT emptyEvent.fbs)
-  flatbuffers_generate_c_headers(FBS_BINARY_EVENT binary.fbs)
-  # Order of compilations differs between platforms
-  set(EVENT_OUTPUTS ${FBS_NEW_EVENT_OUTPUTS} ${FBS_EMPTY_EVENT_OUTPUTS})
-  set(TEST_FILES newEvent.cpp
-                 perf.cpp
-                 publisher.cpp
-                 pubSub.cpp
-                 receiver.cpp
-                 connection/broker.cpp)
-  foreach(EVENT_OUTPUT EVENT_OUTPUTS)
-     foreach(TEST_FILE TEST_FILES)
-       set_source_files_properties(${TEST_FILE} PROPERTIES OBJECT_DEPENDS
-                                   ${EVENT_OUTPUT})
-     endforeach(TEST_FILE)
-  endforeach(EVENT_OUTPUT)
+  set_source_files_properties(pubSub.cpp subscriber.cpp
+      PROPERTIES OBJECT_DEPENDS ${FBS_EMPTY_EVENT_OUTPUTS})
   list(APPEND TEST_LIBRARIES ZeroEQHBP)
 endif()
 
