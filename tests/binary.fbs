@@ -1,7 +1,0 @@
-namespace zeroeqtest;
-
-table Binary {
-  data: [ubyte];
-}
-
-root_type Binary;
