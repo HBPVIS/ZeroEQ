@@ -13,11 +13,7 @@
 
 #include <zeroeq/hbp/enums.h>
 
-#include <zeroeq/hbp/camera_zeroeq_generated.h>
 #include <zeroeq/hbp/cellSetBinaryOp_zeroeq_generated.h>
-#include <zeroeq/hbp/frame_zeroeq_generated.h>
-#include <zeroeq/hbp/imageJPEG_zeroeq_generated.h>
-#include <zeroeq/hbp/lookupTable1D_zeroeq_generated.h>
 #include <zeroeq/hbp/selections_zeroeq_generated.h>
 
 namespace zeroeq
