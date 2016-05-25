@@ -10,13 +10,9 @@ set(TEST_LIBRARIES ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ZeroEQ
   ${CMAKE_THREAD_LIBS_INIT} ${LIBZMQ_LIBRARIES})
 
 if(FLATBUFFERS_FOUND)
-  flatbuffers_generate_c_headers(FBS_NEW_EVENT newEvent.fbs)
-  set_source_files_properties(newEvent.cpp
-      PROPERTIES OBJECT_DEPENDS ${FBS_NEW_EVENT_OUTPUTS})
-
-  flatbuffers_generate_c_headers(FBS_EMPTY_EVENT emptyEvent.fbs)
-  set_source_files_properties(pubSub.cpp subscriber.cpp
-      PROPERTIES OBJECT_DEPENDS ${FBS_EMPTY_EVENT_OUTPUTS})
+  flatbuffers_generate_c_headers(FBS_EVENTS emptyEvent.fbs newEvent.fbs)
+  set_property(SOURCE newEvent.cpp pubSub.cpp subscriber.cpp
+      APPEND PROPERTY OBJECT_DEPENDS ${FBS_EVENTS_OUTPUTS})
   list(APPEND TEST_LIBRARIES ZeroEQHBP)
 endif()
 
