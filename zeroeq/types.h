@@ -43,7 +43,22 @@ class Publisher;
 class Subscriber;
 class URI;
 
-typedef std::function< void( const FBEvent& ) > EventFunc;
+typedef std::function< void( const FBEvent& ) > FBEventFunc;
+
+/** Callback for receival of subscribed event w/o payload. */
+typedef std::function< void() > EventFunc;
+
+/** Callback for receival of subscribed event w/ payload. */
+typedef std::function< void( const void*, size_t ) > EventPayloadFunc;
+
+/** HTTP PUT callback w/o payload, return reply success. */
+typedef std::function< bool() > PUTFunc;
+
+/** HTTP PUT callback w/ JSON payload, return reply success. */
+typedef std::function< bool( const std::string& ) > PUTPayloadFunc;
+
+/** HTTP GET callback to return JSON reply. */
+typedef std::function< std::string() > GETFunc;
 
 #ifdef WIN32
 typedef SOCKET SocketDescriptor;

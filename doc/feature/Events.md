@@ -1,4 +1,4 @@
-Event Communication
+Event Communication {#eventbased}
 ============
 
 With the introduction of servus::Serializable the default communication

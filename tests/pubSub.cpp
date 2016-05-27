@@ -19,7 +19,7 @@
 using namespace zeroeq::vocabulary;
 #endif
 
-BOOST_AUTO_TEST_CASE(publish_receive)
+BOOST_AUTO_TEST_CASE(publish_receive_FB)
 {
     zeroeq::Publisher publisher( zeroeq::NULL_SESSION );
     zeroeq::Subscriber subscriber( zeroeq::URI( publisher.getURI( )));
@@ -58,6 +58,57 @@ BOOST_AUTO_TEST_CASE(publish_receive_serializable)
         if( subscriber.receive( 100 ))
         {
             BOOST_CHECK_EQUAL( echoIn.getMessage(), echoOut.getMessage( ));
+            return;
+        }
+    }
+    BOOST_CHECK( !"reachable" );
+}
+
+BOOST_AUTO_TEST_CASE(publish_receive_event)
+{
+    const std::string echoString( "The quick brown fox" );
+    zeroeq::Publisher publisher( zeroeq::NULL_SESSION );
+    zeroeq::Subscriber subscriber( zeroeq::URI( publisher.getURI( )));
+    bool received = false;
+    BOOST_CHECK( subscriber.subscribe( zeroeq::make_uint128( "Echo" ),
+        [&]( const void* data , const size_t size )
+        {
+            BOOST_CHECK_EQUAL( reinterpret_cast< const char* >( data ),
+                               echoString );
+            BOOST_CHECK_EQUAL( size, echoString.length( ));
+            received = true;
+        }));
+
+    for( size_t i = 0; i < 10; ++i )
+    {
+        BOOST_CHECK( publisher.publish( zeroeq::make_uint128( "Echo" ),
+                                        echoString.c_str(),
+                                        echoString.length( )));
+
+        if( subscriber.receive( 100 ))
+        {
+            BOOST_CHECK( received );
+            return;
+        }
+    }
+    BOOST_CHECK( !"reachable" );
+}
+
+BOOST_AUTO_TEST_CASE(publish_receive_empty_event)
+{
+    zeroeq::Publisher publisher( zeroeq::NULL_SESSION );
+    zeroeq::Subscriber subscriber( zeroeq::URI( publisher.getURI( )));
+    bool received = false;
+    BOOST_CHECK( subscriber.subscribe( zeroeq::make_uint128( "Empty" ),
+        [&]() { received = true; }));
+
+    for( size_t i = 0; i < 10; ++i )
+    {
+        BOOST_CHECK( publisher.publish( zeroeq::make_uint128( "Empty" )));
+
+        if( subscriber.receive( 100 ))
+        {
+            BOOST_CHECK( received );
             return;
         }
     }
@@ -203,6 +254,7 @@ BOOST_AUTO_TEST_CASE(publish_receive_filters)
                              startTime;
 
     // Benchmark with echo handler, now should send data
+    event = ::test::getFBEchoOutEvent( message );
     ::test::SerializablePtr largeEchoEvent = ::test::getFBEchoInEvent(
                     std::bind( &onLargeEcho, std::placeholders::_1 ));
     BOOST_CHECK( subscriber.subscribe( *largeEchoEvent ));
@@ -210,7 +262,7 @@ BOOST_AUTO_TEST_CASE(publish_receive_filters)
     startTime = std::chrono::high_resolution_clock::now();
     for( size_t i = 0; i < 20000; ++i )
     {
-        BOOST_CHECK( publisher->publish( *largeEchoEvent ));
+        BOOST_CHECK( publisher->publish( *event ));
         while( subscriber.receive( 0 )) /* NOP to drain */;
     }
 

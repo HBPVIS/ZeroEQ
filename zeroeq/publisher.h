@@ -86,12 +86,35 @@ public:
     /**
      * Publish the given serializable object to any subscriber.
      *
-     * If there is no subscriber for that serializable, no event will be sent.
+     * If there is no subscriber for that serializable, no message will be sent.
      *
      * @param serializable the object to publish
      * @return true if publish was successful
      */
     ZEROEQ_API bool publish( const servus::Serializable& serializable );
+
+    /**
+     * Publish the given event to any subscriber.
+     *
+     * If there is no subscriber for that event, no message will be sent.
+     *
+     * @param event the event identifier to publish
+     * @return true if publish was successful
+     */
+    ZEROEQ_API bool publish( const uint128_t& event );
+
+    /**
+     * Publish the given event with payload to any subscriber.
+     *
+     * If there is no subscriber for that event, no message will be sent.
+     *
+     * @param event the event identifier to publish
+     * @param data the payload data of the event
+     * @param size the size of the payload data
+     * @return true if publish was successful
+     */
+    ZEROEQ_API bool publish( const uint128_t& event, const void* data,
+                             size_t size );
 
     /**
      * Get the publisher URI.

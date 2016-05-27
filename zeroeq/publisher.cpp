@@ -96,18 +96,21 @@ public:
 
     bool publish( const servus::Serializable& serializable )
     {
-#ifdef ZEROEQ_LITTLEENDIAN
-        const uint128_t& type = serializable.getTypeIdentifier();
-#else
-        uint128_t type = serializable.getTypeIdentifier();
-        detail::byteswap( type ); // convert to little endian wire protocol
-#endif
         const servus::Serializable::Data& data = serializable.toBinary();
-        const bool hasPayload = data.ptr && data.size > 0;
+        return publish( serializable.getTypeIdentifier(), data.ptr.get(),
+                        data.size );
+    }
+
+    bool publish( uint128_t event, const void* data, const size_t size )
+    {
+#ifdef ZEROEQ_BIGENDIAN
+        detail::byteswap( event ); // convert to little endian wire protocol
+#endif
+        const bool hasPayload = data && size > 0;
 
         zmq_msg_t msgHeader;
-        zmq_msg_init_size( &msgHeader, sizeof( type ));
-        memcpy( zmq_msg_data( &msgHeader ), &type, sizeof( type ));
+        zmq_msg_init_size( &msgHeader, sizeof( event ));
+        memcpy( zmq_msg_data( &msgHeader ), &event, sizeof( event ));
         int ret = zmq_msg_send( &msgHeader, socket,
                                 hasPayload ? ZMQ_SNDMORE : 0 );
         zmq_msg_close( &msgHeader );
@@ -122,8 +125,8 @@ public:
             return true;
 
         zmq_msg_t msg;
-        zmq_msg_init_size( &msg, data.size );
-        ::memcpy( zmq_msg_data(&msg), data.ptr.get(), data.size );
+        zmq_msg_init_size( &msg, size );
+        ::memcpy( zmq_msg_data(&msg), data, size );
         ret = zmq_msg_send( &msg, socket, 0 );
         zmq_msg_close( &msg );
         if( ret  == -1 )
@@ -191,6 +194,17 @@ Publisher::~Publisher()
 bool Publisher::publish( const servus::Serializable& serializable )
 {
     return _impl->publish( serializable );
+}
+
+bool Publisher::publish( const uint128_t& event )
+{
+    return _impl->publish( event, nullptr, 0 );
+}
+
+bool Publisher::publish( const uint128_t& event, const void* data,
+                         const size_t size )
+{
+    return _impl->publish( event, data, size );
 }
 
 std::string Publisher::getAddress() const

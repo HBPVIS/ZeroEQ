@@ -212,10 +212,22 @@ BOOST_AUTO_TEST_CASE(registration)
     BOOST_CHECK( server.unregister( foo ));
     BOOST_CHECK( !server.unregister( foo ));
 
+    BOOST_CHECK( server.register_( "foo", [](){ return "bla"; } ));
+    BOOST_CHECK( !server.register_( "foo", [](){ return "bla"; } ));
+    BOOST_CHECK( server.unregister( "foo" ));
+    BOOST_CHECK( !server.unregister( "foo" ));
+
     BOOST_CHECK( server.subscribe( foo ));
     BOOST_CHECK( !server.subscribe( foo ));
     BOOST_CHECK( server.unsubscribe( foo ));
     BOOST_CHECK( !server.unsubscribe( foo ));
+
+    BOOST_CHECK( server.subscribe( "foo",
+                                   []( const std::string& ) { return true; }));
+    BOOST_CHECK( !server.subscribe( "foo",
+                                    []( const std::string& ) { return true; }));
+    BOOST_CHECK( server.unsubscribe( "foo" ));
+    BOOST_CHECK( !server.unsubscribe( "foo" ));
 
     BOOST_CHECK( server.add( foo ));
     BOOST_CHECK( !server.add( foo ));
@@ -223,7 +235,7 @@ BOOST_AUTO_TEST_CASE(registration)
     BOOST_CHECK( !server.remove( foo ));
 }
 
-BOOST_AUTO_TEST_CASE(get)
+BOOST_AUTO_TEST_CASE(get_serializable)
 {
     bool running = true;
     zeroeq::http::Server server;
@@ -244,6 +256,31 @@ BOOST_AUTO_TEST_CASE(get)
                  "Content-Length: 48\r\n\r\n" )+
                  jsonGet, __LINE__ );
     BOOST_CHECK( foo.getNotified( ));
+
+    running = false;
+    thread.join();
+}
+
+BOOST_AUTO_TEST_CASE(get_event)
+{
+    bool running = true;
+    zeroeq::http::Server server;
+
+    bool requested = false;
+    server.register_( "test::Foo", [&](){ requested = true; return jsonGet; } );
+
+    std::thread thread( [&]() { while( running ) server.receive( 100 ); });
+
+    Client client( server.getURI( ));
+
+    client.test( "GET /unknown HTTP/1.0\r\n\r\n", error404, __LINE__ );
+    BOOST_CHECK( !requested );
+
+    client.test( "GET /test/Foo HTTP/1.0\r\n\r\n",
+                 std::string( "HTTP/1.0 200 OK\r\n" + cors_headers +
+                 "Content-Length: 48\r\n\r\n" )+
+                 jsonGet, __LINE__ );
+    BOOST_CHECK( requested );
 
     running = false;
     thread.join();
@@ -272,7 +309,7 @@ BOOST_AUTO_TEST_CASE(shared)
     thread.join();
 }
 
-BOOST_AUTO_TEST_CASE(put)
+BOOST_AUTO_TEST_CASE(put_serializable)
 {
     bool running = true;
     zeroeq::http::Server server;
@@ -306,6 +343,55 @@ BOOST_AUTO_TEST_CASE(put)
                               "Content-Length: 0\r\n\r\n" ),
                  __LINE__);
     BOOST_CHECK( foo.getNotified( ));
+
+    running = false;
+    thread.join();
+}
+
+BOOST_AUTO_TEST_CASE(put_event)
+{
+    bool running = true;
+    zeroeq::http::Server server;
+
+    bool receivedEmpty = false;
+    server.subscribe( "empty", [&]()
+        { receivedEmpty = true; return true; } );
+    server.subscribe( "foo", [&]( const std::string& received )
+        { return jsonPut == received; } );
+
+    std::thread thread( [&]() { while( running ) server.receive( 100 ); });
+
+    Client client( server.getURI( ));
+    client.test( std::string( "PUT /foo HTTP/1.0\r\n\r\n" ) + jsonPut,
+                 error411, __LINE__ );
+    client.test(
+        std::string( "PUT /foo HTTP/1.0\r\n" + cors_headers +
+                     "Content-Length: 3\r\n\r\nFoo" ),
+                     error400, __LINE__ );
+
+    client.test( std::string( "PUT /test/Bar HTTP/1.0\r\n" +
+                              cors_headers +
+                              "Content-Length: " ) +
+                 std::to_string( jsonPut.length( )) + "\r\n\r\n" + jsonPut,
+                 error404, __LINE__ );
+
+    client.test( std::string( "PUT /foo HTTP/1.0\r\n" +
+                              cors_headers +
+                              "Content-Length: " ) +
+                 std::to_string( jsonPut.length( )) + "\r\n\r\n" + jsonPut,
+                 std::string( "HTTP/1.0 200 OK\r\n" +
+                              cors_headers +
+                              "Content-Length: 0\r\n\r\n" ),
+                 __LINE__);
+
+    client.test( std::string( "PUT /empty HTTP/1.0\r\n" +
+                              cors_headers +
+                              "Content-Length: 0" + "\r\n\r\n"),
+                 std::string( "HTTP/1.0 200 OK\r\n" +
+                              cors_headers +
+                              "Content-Length: 0\r\n\r\n" ),
+                 __LINE__);
+    BOOST_CHECK( receivedEmpty );
 
     running = false;
     thread.join();

@@ -114,8 +114,34 @@ public:
      */
     ZEROEQ_API bool subscribe( servus::Serializable& object );
 
+    /**
+     * Subscribe an event to receive HTTP PUT requests.
+     *
+     * Every receival of the event will call the registered callback function.
+     *
+     * @param event the event name to receive PUT requests for during receive()
+     * @param func the callback function for serving the PUT request
+     * @return true if subscription was successful, false otherwise
+     */
+    ZEROEQ_API bool subscribe( const std::string& event, const PUTFunc& func );
+
+    /**
+     * Subscribe an event to receive HTTP PUT requests with payload.
+     *
+     * Every receival of the event will call the registered callback function.
+     *
+     * @param event the event name to receive PUT requests for during receive()
+     * @param func the callback function for serving the PUT request
+     * @return true if subscription was successful, false otherwise
+     */
+    ZEROEQ_API bool subscribe( const std::string& event,
+                               const PUTPayloadFunc& func );
+
     /** Unsubscribe the given object to stop applying updates. */
     ZEROEQ_API bool unsubscribe( const servus::Serializable& object );
+
+    /** Unsubscribe the given event to stop receiving PUT requests. */
+    ZEROEQ_API bool unsubscribe( const std::string& event );
 
     /**
      * Subscribe a serializable object to serve HTTP GET requests.
@@ -131,8 +157,23 @@ public:
      */
     ZEROEQ_API bool register_( servus::Serializable& object );
 
+    /**
+     * Subscribe an event to serve HTTP GET requests.
+     *
+     * Every request will be directly handled during receive() by calling the
+     * registered GET function.
+     *
+     * @param event the event name to serve during receive()
+     * @param func the callback function for serving the GET request
+     * @return true if subscription was successful, false otherwise
+     */
+    ZEROEQ_API bool register_( const std::string& event, const GETFunc& func );
+
     /** Unsubscribe the given object for GET requests. */
     ZEROEQ_API bool unregister( const servus::Serializable& object );
+
+    /** Unsubscribe the given event name for GET requests. */
+    ZEROEQ_API bool unregister( const std::string& event );
     //@}
 
 private:

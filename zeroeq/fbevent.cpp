@@ -9,7 +9,7 @@
 namespace zeroeq
 {
 
-FBEvent::FBEvent( const uint128_t& type, const EventFunc& func )
+FBEvent::FBEvent( const uint128_t& type, const FBEventFunc& func )
     : _impl( new detail::FBEvent( type, func ))
 {
     if( func )

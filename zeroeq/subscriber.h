@@ -149,6 +149,29 @@ public:
     ZEROEQ_API bool subscribe( servus::Serializable& serializable );
 
     /**
+     * Subscribe to an event from any connected publisher.
+     *
+     * Every receival of the event will call the registered callback function.
+     *
+     * @param event the event identifier to subscribe to
+     * @param func the callback function called upon receival
+     * @return true if subscription was successful, false otherwise
+     */
+    ZEROEQ_API bool subscribe( const uint128_t& event, const EventFunc& func );
+
+    /**
+     * Subscribe to an event with payload from any connected publisher.
+     *
+     * Every receival of the event will call the registered callback function.
+     *
+     * @param event the event identifier to subscribe to
+     * @param func the callback function called upon receival
+     * @return true if subscription was successful, false otherwise
+     */
+    ZEROEQ_API bool subscribe( const uint128_t& event,
+                               const EventPayloadFunc& func );
+
+    /**
      * Unsubscribe a serializable object to stop applying updates from any
      * connected publisher.
      *
@@ -156,6 +179,8 @@ public:
      * @return true if removal of subscription was successful, false otherwise
      */
     ZEROEQ_API bool unsubscribe( const servus::Serializable& serializable );
+
+    ZEROEQ_API bool unsubscribe( const uint128_t& event );
 
     /** @return the session name that is used for filtering. */
     ZEROEQ_API const std::string& getSession() const;
