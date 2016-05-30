@@ -2,6 +2,8 @@
 
 # git master
 
+* [167](https://github.com/HBPVIS/ZeroEQ/pull/167):
+  Move HBP vocabulary to Lexis
 * [166](https://github.com/HBPVIS/ZeroEQ/pull/166):
   Implement event-based communication as per
   [152](https://github.com/HBPVIS/ZeroEQ/pull/152)  

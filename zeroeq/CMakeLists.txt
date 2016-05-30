@@ -55,7 +55,3 @@ if(HTTPXX_FOUND)
 endif()
 
 common_library(ZeroEQ)
-
-if(FLATBUFFERS_FOUND)
-  add_subdirectory(hbp)
-endif()

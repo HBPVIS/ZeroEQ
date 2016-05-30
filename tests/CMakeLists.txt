@@ -15,12 +15,7 @@ if(NOT HTTPXX_FOUND)
 endif()
 
 if(NOT FLATBUFFERS_FOUND)
-  list(APPEND EXCLUDE_FROM_TESTS hbp/serialization.cpp
-                                 newEvent.cpp)
-endif()
-
-if(FLATBUFFERS_FOUND)
-  list(APPEND TEST_LIBRARIES ZeroEQHBP)
+  list(APPEND EXCLUDE_FROM_TESTS newEvent.cpp)
 endif()
 
 include(CommonCTest)

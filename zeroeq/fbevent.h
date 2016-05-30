@@ -23,7 +23,7 @@ namespace detail { class FBEvent; }
  * Events are published via zeroeq::Publisher and received via zeroeq::Subscriber. The
  * format of the serialized data is specific to the serialization backend.
  *
- * Example: @include tests/hbp/serialization.cpp
+ * Example: @include tests/newEvent.cpp
  */
 class FBEvent : public servus::Serializable
 {
