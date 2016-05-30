@@ -75,9 +75,9 @@ BOOST_AUTO_TEST_CASE(subscribe)
     BOOST_CHECK( subscriber.subscribe( echo ));
 
     BOOST_CHECK( subscriber.subscribe( zeroeq::make_uint128( "Empty" ),
-                                       [](){}));
+                                       zeroeq::EventFunc([](){})));
     BOOST_CHECK( subscriber.subscribe( zeroeq::make_uint128( "Echo" ),
-                                       []( const void*, size_t ){} ));
+                       zeroeq::EventPayloadFunc([]( const void*, size_t ){} )));
 }
 
 BOOST_AUTO_TEST_CASE(unsubscribe)
@@ -93,11 +93,11 @@ BOOST_AUTO_TEST_CASE(unsubscribe)
     BOOST_CHECK( subscriber.unsubscribe( echo ));
 
     BOOST_CHECK( subscriber.subscribe( zeroeq::make_uint128( "Empty" ),
-                                       [](){} ));
+                                       zeroeq::EventFunc([](){} )));
     BOOST_CHECK( subscriber.unsubscribe( zeroeq::make_uint128( "Empty" ) ));
 
     BOOST_CHECK( subscriber.subscribe( zeroeq::make_uint128( "Echo" ),
-                                       []( const void*, size_t ){} ));
+                       zeroeq::EventPayloadFunc([]( const void*, size_t ){} )));
     BOOST_CHECK( subscriber.unsubscribe( zeroeq::make_uint128( "Echo" ) ));
 }
 
@@ -117,9 +117,9 @@ BOOST_AUTO_TEST_CASE(invalid_subscribe)
     BOOST_CHECK( !subscriber.subscribe( echo ));
 
     BOOST_CHECK( subscriber.subscribe( zeroeq::make_uint128( "Echo" ),
-                                       []( const void*, size_t ){} ));
+                       zeroeq::EventPayloadFunc([]( const void*, size_t ){} )));
     BOOST_CHECK( !subscriber.subscribe( zeroeq::make_uint128( "Echo" ),
-                                       []( const void*, size_t ){} ));
+                       zeroeq::EventPayloadFunc([]( const void*, size_t ){} )));
 }
 
 BOOST_AUTO_TEST_CASE(test_invalid_unsubscribe)

@@ -71,13 +71,13 @@ BOOST_AUTO_TEST_CASE(publish_receive_event)
     zeroeq::Subscriber subscriber( zeroeq::URI( publisher.getURI( )));
     bool received = false;
     BOOST_CHECK( subscriber.subscribe( zeroeq::make_uint128( "Echo" ),
-        [&]( const void* data , const size_t size )
+        zeroeq::EventPayloadFunc([&]( const void* data , const size_t size )
         {
             BOOST_CHECK_EQUAL( reinterpret_cast< const char* >( data ),
                                echoString );
             BOOST_CHECK_EQUAL( size, echoString.length( ));
             received = true;
-        }));
+        })));
 
     for( size_t i = 0; i < 10; ++i )
     {
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE(publish_receive_empty_event)
     zeroeq::Subscriber subscriber( zeroeq::URI( publisher.getURI( )));
     bool received = false;
     BOOST_CHECK( subscriber.subscribe( zeroeq::make_uint128( "Empty" ),
-        [&]() { received = true; }));
+        zeroeq::EventFunc([&]() { received = true; })));
 
     for( size_t i = 0; i < 10; ++i )
     {
