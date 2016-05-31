@@ -130,7 +130,7 @@ public:
         entries.push_back( entry );
     }
 
-    void process( detail::Socket& )
+    void process( const uint32_t timeout )
     {
         // Read request and body
         httpxx::BufferedRequest request;
@@ -213,25 +213,50 @@ public:
         response.headers()[ "Access-Control-Allow-Methods" ] =
             access_control_allow_methods;
         const std::string& rep = response.to_string();
-        const int more = body.empty() ? 0 : ZMQ_SNDMORE;
-        if( ::zmq_send( socket, id, idSize, ZMQ_SNDMORE ) != idSize ||
-            ::zmq_send( socket, rep.c_str(), rep.length(), more ) !=
-            int( rep.length( )))
+
+        if( !sendResponse( id, idSize, ZMQ_SNDMORE, timeout ))
+            return;
+        if( !sendResponse( rep.c_str(), rep.length(),
+                      body.empty() ? 0 : ZMQ_SNDMORE, timeout ))
         {
-            ZEROEQWARN << "Could not send HTTP response header: "
-                       << zmq_strerror( zmq_errno( )) << std::endl;
             return;
         }
 
         // response body
-        if( !body.empty() &&
-            ( ::zmq_send( socket, id, idSize, ZMQ_SNDMORE ) != idSize ||
-              ::zmq_send( socket, body.c_str(), body.length(), 0 ) !=
-              int( body.length( ))))
+        if( !body.empty( ))
         {
-            ZEROEQWARN << "Could not send HTTP response body: "
-                       << zmq_strerror( zmq_errno( )) << std::endl;
+            if( !sendResponse( id, idSize, ZMQ_SNDMORE, timeout ))
+                return;
+            if( !sendResponse( body.c_str(), body.length(), 0, timeout ))
+                return;
         }
+    }
+
+    bool sendResponse( const void* data, const size_t length, const int flags,
+                       const uint32_t timeout )
+    {
+        while( ::zmq_send( socket, data, length,
+                           flags | ZMQ_NOBLOCK ) != int( length ))
+        {
+            // could be disconnect, send buffer full, ...
+            if( zmq_errno() == EAGAIN )
+            {
+                detail::Socket pollItem;
+                pollItem.socket = socket;
+                pollItem.events = ZMQ_POLLERR;
+                if( ::zmq_poll( &pollItem, 1, timeout == TIMEOUT_INDEFINITE
+                                              ? -1 : timeout ) > 0 )
+                {
+                    // client still alive, send again
+                    continue;
+                }
+            }
+
+            ZEROEQWARN << "HTTP server sendResponse failed: "
+                       << zmq_strerror( zmq_errno( )) << std::endl;
+            return false;
+        }
+        return true;
     }
 
 protected:
@@ -419,9 +444,9 @@ void Server::addSockets( std::vector< detail::Socket >& entries )
     _impl->addSockets( entries );
 }
 
-void Server::process( detail::Socket& socket )
+void Server::process( detail::Socket&, const uint32_t timeout )
 {
-    _impl->process( socket );
+    _impl->process( timeout );
 }
 
 }

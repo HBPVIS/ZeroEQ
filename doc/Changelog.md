@@ -2,11 +2,14 @@
 
 # git master
 
+* [169](https://github.com/HBPVIS/ZeroEQ/pull/169):
+  Fix #157: http server may hang in receive() when remote connection is closed
+  abruptly
 * [167](https://github.com/HBPVIS/ZeroEQ/pull/167):
   Move HBP vocabulary to Lexis
 * [166](https://github.com/HBPVIS/ZeroEQ/pull/166):
   Implement event-based communication as per
-  [152](https://github.com/HBPVIS/ZeroEQ/pull/152)  
+  [152](https://github.com/HBPVIS/ZeroEQ/pull/152)
 * [161](https://github.com/HBPVIS/ZeroEQ/pull/161):
   Move progressMonitor tool to Lexis
 * [145](https://github.com/HBPVIS/ZeroEQ/pull/145):

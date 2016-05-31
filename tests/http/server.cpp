@@ -71,6 +71,10 @@ public:
     {
         if( ::zmq_connect( _socket, std::to_string( uri ).c_str( )) == -1 )
             throw std::runtime_error( "Connect failed" );
+
+        // Get server identity
+        BOOST_CHECK_EQUAL( zmq_getsockopt( _socket, ZMQ_IDENTITY, _id,
+                                           &_idSize ), 0 );
     }
 
     ~Client()
@@ -81,26 +85,25 @@ public:
             ::zmq_ctx_destroy( _ctx );
     }
 
-    void test( const std::string& request, const std::string& expected,
-               const int line )
+    void sendRequest( const std::string& request )
     {
-        // Get server identity
-        uint8_t id[256];
-        size_t idSize = sizeof( id );
-        BOOST_CHECK_EQUAL( zmq_getsockopt( _socket, ZMQ_IDENTITY, id, &idSize ),
-                           0 );
-
-        if( ::zmq_send( _socket, id, idSize, ZMQ_SNDMORE ) != int( idSize ) ||
+        if( ::zmq_send( _socket, _id, _idSize, ZMQ_SNDMORE ) != int(_idSize) ||
             ::zmq_send( _socket, request.c_str(), request.length(), 0 ) !=
             int( request.length( )))
         {
             throw std::runtime_error( "Send failed" );
         }
+    }
+
+    void test( const std::string& request, const std::string& expected,
+               const int line )
+    {
+        sendRequest( request );
 
         std::string response;
         while( response.size() < expected.size( ))
         {
-            if( ::zmq_recv( _socket, id, idSize, 0 ) != int( idSize ))
+            if( ::zmq_recv( _socket, _id, _idSize, 0 ) != int( _idSize ))
                 throw std::runtime_error( "Recv failed" );
 
             char msg[256];
@@ -117,6 +120,9 @@ public:
 private:
     void* _ctx;
     void* _socket;
+
+    uint8_t _id[256];
+    size_t _idSize = sizeof( _id );
 };
 
 }
@@ -434,6 +440,26 @@ BOOST_AUTO_TEST_CASE(largeGet)
                               cors_headers +
                               "Content-Length: 48\r\n\r\n" )+
                  jsonGet, __LINE__ );
+
+    running = false;
+    thread.join();
+}
+
+BOOST_AUTO_TEST_CASE(issue157)
+{
+    bool running = true;
+    zeroeq::http::Server server;
+    Foo foo;
+    server.register_( foo );
+
+    std::thread thread( [&]() { while( running ) server.receive( 100 ); });
+
+    // Close client before receiving request to provoke #157
+    {
+        Client client( server.getURI( ));
+        client.sendRequest( "GET" + std::string( 4096, ' ' ) +
+                     "/test/Foo HTTP/1.0\r\n\r\n" );
+    }
 
     running = false;
     thread.join();

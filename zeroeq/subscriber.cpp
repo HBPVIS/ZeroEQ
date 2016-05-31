@@ -154,7 +154,8 @@ public:
 
         EventFuncMap::const_iterator i = _eventFuncs.find( type );
         if( i == _eventFuncs.cend( ))
-            ZEROEQTHROW( std::runtime_error( "Got unsubscribed event " + type.getString( )));
+            ZEROEQTHROW( std::runtime_error( "Got unsubscribed event " +
+                                             type.getString( )));
 
         if( payload )
         {
@@ -381,7 +382,7 @@ void Subscriber::addSockets( std::vector< detail::Socket >& entries )
     _impl->addSockets( entries );
 }
 
-void Subscriber::process( detail::Socket& socket )
+void Subscriber::process( detail::Socket& socket, const uint32_t )
 {
     _impl->process( socket );
 }
