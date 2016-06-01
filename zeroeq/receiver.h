@@ -71,8 +71,9 @@ protected:
      * Process data on a signalled socket.
      *
      * @param socket the socket provided from addSockets().
+     * @param timeout user provided timeout from receive().
      */
-    virtual void process( detail::Socket& socket ) = 0;
+    virtual void process( detail::Socket& socket, uint32_t timeout ) = 0;
 
     /**
      * Update the internal connection list.

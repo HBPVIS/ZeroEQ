@@ -5,7 +5,6 @@
  */
 
 #include "publisher.h"
-#include "fbevent.h"
 #include "log.h"
 #include "detail/broker.h"
 #include "detail/byteswap.h"

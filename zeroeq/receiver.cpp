@@ -136,7 +136,7 @@ private:
                 }
 
                 if( socket.revents & ZMQ_POLLIN )
-                    (*i)->process( socket );
+                    (*i)->process( socket, timeout );
             }
             return true;
         }

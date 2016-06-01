@@ -122,7 +122,7 @@ void Broker::addSockets( std::vector< zeroeq::detail::Socket >& entries )
     _impl->addSockets( entries );
 }
 
-void Broker::process( zeroeq::detail::Socket& socket )
+void Broker::process( zeroeq::detail::Socket& socket, const uint32_t )
 {
     _impl->process( socket );
 }
