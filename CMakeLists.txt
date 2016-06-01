@@ -20,7 +20,6 @@ set(ZEROEQ_LICENSE LGPL)
 set(ZEROEQ_DEPENDENT_LIBRARIES Servus)
 
 common_find_package(Boost COMPONENTS unit_test_framework)
-common_find_package(FlatBuffers)
 common_find_package(httpxx)
 common_find_package(libzmq REQUIRED)
 common_find_package(Servus REQUIRED)

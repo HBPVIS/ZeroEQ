@@ -1,7 +1,0 @@
-
-namespace zeroeqtest;
-
-table EmptyEvent {
-}
-
-root_type EmptyEvent;

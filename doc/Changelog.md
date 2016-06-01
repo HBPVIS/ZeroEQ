@@ -2,6 +2,8 @@
 
 # git master
 
+* [170](https://github.com/HBPVIS/ZeroEQ/pull/170):
+  Remove FlatBuffers dependency and support
 * [169](https://github.com/HBPVIS/ZeroEQ/pull/169):
   Fix #157: http server may hang in receive() when remote connection is closed
   abruptly

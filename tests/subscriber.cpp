@@ -10,10 +10,6 @@
 
 #include <servus/servus.h>
 
-#ifdef ZEROEQ_USE_FLATBUFFERS
-using namespace zeroeq::vocabulary;
-#endif
-
 BOOST_AUTO_TEST_CASE(construction)
 {
     BOOST_CHECK_NO_THROW( zeroeq::Subscriber( ));
@@ -65,13 +61,8 @@ BOOST_AUTO_TEST_CASE(invalid_construction)
 BOOST_AUTO_TEST_CASE(subscribe)
 {
     zeroeq::Subscriber subscriber;
-#ifdef ZEROEQ_USE_FLATBUFFERS
-    ::test::SerializablePtr echoEvent = ::test::getFBEchoInEvent(
-                    std::bind( &test::onEchoEvent, std::placeholders::_1 ));
-    BOOST_CHECK( subscriber.subscribe( *echoEvent ));
-#endif
-
     test::Echo echo;
+
     BOOST_CHECK( subscriber.subscribe( echo ));
 
     BOOST_CHECK( subscriber.subscribe( zeroeq::make_uint128( "Empty" ),
@@ -83,10 +74,6 @@ BOOST_AUTO_TEST_CASE(subscribe)
 BOOST_AUTO_TEST_CASE(unsubscribe)
 {
     zeroeq::Subscriber subscriber;
-    ::test::SerializablePtr echoEvent = ::test::getFBEchoInEvent(
-                    std::bind( &test::onEchoEvent, std::placeholders::_1 ));
-    BOOST_CHECK( subscriber.subscribe( *echoEvent ));
-    BOOST_CHECK( subscriber.unsubscribe( *echoEvent ));
 
     test::Echo echo;
     BOOST_CHECK( subscriber.subscribe( echo ));
@@ -104,13 +91,6 @@ BOOST_AUTO_TEST_CASE(unsubscribe)
 BOOST_AUTO_TEST_CASE(invalid_subscribe)
 {
     zeroeq::Subscriber subscriber;
-
-#ifdef ZEROEQ_USE_FLATBUFFERS
-    ::test::SerializablePtr echoEvent =
-            ::test::getFBEchoInEvent( ::zeroeq::FBEventFunc( ));
-    BOOST_CHECK( subscriber.subscribe( *echoEvent ));
-    BOOST_CHECK( !subscriber.subscribe( *echoEvent ));
-#endif
 
     test::Echo echo;
     BOOST_CHECK( subscriber.subscribe( echo ));
@@ -132,20 +112,15 @@ BOOST_AUTO_TEST_CASE(test_invalid_unsubscribe)
     BOOST_CHECK( !subscriber.unsubscribe( echo ));
 }
 
-
 BOOST_AUTO_TEST_CASE(test_invalid_unsubscribe_different_event_objects)
 {
     zeroeq::Subscriber subscriber;
-    ::test::SerializablePtr echoEvent =
-            ::test::getFBEchoInEvent( ::zeroeq::FBEventFunc( ));
 
-    ::test::SerializablePtr emptyEvent =
-            ::test::getFBEmptyInEvent( ::zeroeq::FBEventFunc( ));
-
-    BOOST_CHECK( subscriber.subscribe( *echoEvent ));
-    BOOST_CHECK( !subscriber.unsubscribe( *emptyEvent ));
+    test::Echo echo;
+    test::Empty empty;
+    BOOST_CHECK( subscriber.subscribe( echo ));
+    BOOST_CHECK( !subscriber.unsubscribe( empty ));
 }
-
 
 BOOST_AUTO_TEST_CASE(not_implemented_servus)
 {
@@ -153,5 +128,6 @@ BOOST_AUTO_TEST_CASE(not_implemented_servus)
         return;
 
     const zeroeq::URI uri( test::buildUniqueSession( ));
-    BOOST_CHECK_THROW( zeroeq::Subscriber subscriber( uri ), std::runtime_error );
+    BOOST_CHECK_THROW( zeroeq::Subscriber subscriber( uri ),
+                       std::runtime_error );
 }

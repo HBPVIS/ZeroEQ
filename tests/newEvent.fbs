@@ -1,8 +1,0 @@
-
-namespace zeroeqtest;
-
-table NewEvent {
-  message:string;
-}
-
-root_type NewEvent;

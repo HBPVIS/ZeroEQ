@@ -14,16 +14,4 @@ if(NOT HTTPXX_FOUND)
   list(APPEND EXCLUDE_FROM_TESTS http/server.cpp)
 endif()
 
-if(NOT FLATBUFFERS_FOUND)
-  list(APPEND EXCLUDE_FROM_TESTS newEvent.cpp)
-endif()
-
 include(CommonCTest)
-
-# The compilation order may change according to platforms, so
-# all files are dependent on the generated headers
-if(FLATBUFFERS_FOUND)
-  flatbuffers_generate_c_headers(FBS_EVENTS emptyEvent.fbs newEvent.fbs)
-  set_property(SOURCE ${TEST_FILES}
-      APPEND PROPERTY OBJECT_DEPENDS ${FBS_EVENTS_OUTPUTS})
-endif()

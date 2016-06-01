@@ -50,8 +50,6 @@ BOOST_AUTO_TEST_CASE(publish)
     BOOST_CHECK( publisher.publish( echo.getTypeIdentifier(),
                                     echo.toBinary().ptr.get(),
                                     echo.toBinary().size ));
-    BOOST_CHECK( publisher.publish(
-                     *::test::getFBEchoOutEvent( ::test::echoMessage )));
 }
 
 BOOST_AUTO_TEST_CASE(publish_update_uri)
@@ -61,8 +59,6 @@ BOOST_AUTO_TEST_CASE(publish_update_uri)
     BOOST_CHECK_MESSAGE( uri.getPort() != 0, uri );
     BOOST_CHECK_MESSAGE( !uri.getHost().empty(), uri );
     BOOST_CHECK( publisher.publish( test::Echo( test::echoMessage )));
-    BOOST_CHECK( publisher.publish(
-                     *::test::getFBEchoOutEvent( ::test::echoMessage )));
 }
 
 BOOST_AUTO_TEST_CASE(publish_empty_event)
@@ -70,8 +66,6 @@ BOOST_AUTO_TEST_CASE(publish_empty_event)
     zeroeq::Publisher publisher( zeroeq::NULL_SESSION );
     BOOST_CHECK( publisher.publish( test::Empty( )));
     BOOST_CHECK( publisher.publish( zeroeq::make_uint128( "Empty" )));
-    BOOST_CHECK( publisher.publish(
-                      *::test::getFBEchoInEvent( ::zeroeq::FBEventFunc( ))));
 }
 
 BOOST_AUTO_TEST_CASE(multiple_publisher_on_same_host)

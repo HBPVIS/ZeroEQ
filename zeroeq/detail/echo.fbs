@@ -1,7 +1,0 @@
-namespace zeroeq.vocabulary;
-
-table Echo {
-  message: string;
-}
-
-root_type Echo;
