@@ -222,10 +222,10 @@ BOOST_AUTO_TEST_CASE(registration)
     BOOST_CHECK( server.unsubscribe( foo ));
     BOOST_CHECK( !server.unsubscribe( foo ));
 
-    BOOST_CHECK( server.subscribe( "foo",
-                                   []( const std::string& ) { return true; }));
-    BOOST_CHECK( !server.subscribe( "foo",
-                                    []( const std::string& ) { return true; }));
+    BOOST_CHECK( server.subscribe( "foo", zeroeq::PUTPayloadFunc
+                                  ([]( const std::string& ) { return true; })));
+    BOOST_CHECK( !server.subscribe( "foo", zeroeq::PUTPayloadFunc
+                                  ([]( const std::string& ) { return true; })));
     BOOST_CHECK( server.unsubscribe( "foo" ));
     BOOST_CHECK( !server.unsubscribe( "foo" ));
 
@@ -354,10 +354,11 @@ BOOST_AUTO_TEST_CASE(put_event)
     zeroeq::http::Server server;
 
     bool receivedEmpty = false;
-    server.subscribe( "empty", [&]()
-        { receivedEmpty = true; return true; } );
-    server.subscribe( "foo", [&]( const std::string& received )
-        { return jsonPut == received; } );
+    server.subscribe( "empty", zeroeq::PUTFunc 
+                               ([&]() { receivedEmpty = true; return true; } ));
+    server.subscribe( "foo", zeroeq::PUTPayloadFunc 
+                             ([&]( const std::string& received )
+                             { return jsonPut == received; } ));
 
     std::thread thread( [&]() { while( running ) server.receive( 100 ); });
 
