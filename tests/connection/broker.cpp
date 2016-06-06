@@ -33,12 +33,10 @@ public:
     void run()
     {
         zeroeq::Subscriber subscriber( test::buildURI( "127.0.0.1", *_publisher ));
-        ::test::SerializablePtr echoEvent = ::test::getFBEchoInEvent(
-                    [this]( const zeroeq::FBEvent& event )
-                    { test::onEchoEvent( event );
-                      received = true; });
 
-        BOOST_CHECK( subscriber.subscribe( *echoEvent ));
+        BOOST_CHECK( subscriber.subscribe( test::Echo::IDENTIFIER(),
+             zeroeq::EventPayloadFunc([&]( const void* data, const size_t size )
+             { test::onEchoEvent( data, size ); received = true; }) ));
 
         // Using the connection broker in place of zeroconf
         BrokerPtr broker = createBroker( subscriber );
@@ -111,15 +109,12 @@ BOOST_AUTO_TEST_CASE( broker )
     BOOST_CHECK( zeroeq::connection::Service::subscribe( _broker, publisher ));
     for( size_t i = 0; i < 100 && !subscriber.received; ++i )
     {
-        BOOST_CHECK( publisher.publish(
-                         *::test::getFBEchoOutEvent( ::test::echoMessage )));
+        BOOST_CHECK( publisher.publish( test::Echo( test::echoMessage )));
         std::this_thread::sleep_for( std::chrono::milliseconds( 100 ));
     }
 
     thread.join();
-#ifdef ZEROEQ_USE_FLATBUFFERS
     BOOST_CHECK( subscriber.received );
-#endif
     _publisher = 0;
 }
 
@@ -174,16 +169,13 @@ BOOST_AUTO_TEST_CASE( named_broker )
 
     for( size_t i = 0; i < 100 && !subscriber1.received; ++i )
     {
-        BOOST_CHECK( publisher.publish(
-                         *::test::getFBEchoOutEvent( ::test::echoMessage )));
+        BOOST_CHECK( publisher.publish( test::Echo( test::echoMessage )));
         std::this_thread::sleep_for( std::chrono::milliseconds( 100 ));
     }
 
     thread2.join();
     thread1.join();
-#ifdef ZEROEQ_USE_FLATBUFFERS
     BOOST_CHECK( subscriber1.received );
-#endif
     _publisher = 0;
 }
 

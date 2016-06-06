@@ -38,12 +38,9 @@ namespace zeroeq
 {
 
 using servus::uint128_t;
-class FBEvent;
 class Publisher;
 class Subscriber;
 class URI;
-
-typedef std::function< void( const FBEvent& ) > FBEventFunc;
 
 /** Callback for receival of subscribed event w/o payload. */
 typedef std::function< void() > EventFunc;

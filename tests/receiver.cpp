@@ -12,8 +12,8 @@
 bool gotOne = false;
 bool gotTwo = false;
 
-void onEvent1( const zeroeq::FBEvent& ) { gotOne = true; }
-void onEvent2( const zeroeq::FBEvent& ) { gotTwo = true; }
+void onEvent1() { gotOne = true; }
+void onEvent2() { gotTwo = true; }
 
 void testReceive( zeroeq::Publisher& publisher, zeroeq::Receiver& receiver,
                   bool& var1, bool& var2, const int line )
@@ -24,8 +24,7 @@ void testReceive( zeroeq::Publisher& publisher, zeroeq::Receiver& receiver,
     const auto startTime = std::chrono::high_resolution_clock::now();
     for( ;; )
     {
-        BOOST_CHECK( publisher.publish(
-                         *::test::getFBEchoOutEvent( ::test::echoMessage )));
+        BOOST_CHECK( publisher.publish( test::Echo( test::echoMessage )));
         while( receiver.receive( 100 )) {}
 
         if( var1 && var2 )
@@ -54,23 +53,13 @@ BOOST_AUTO_TEST_CASE(test_two_subscribers)
     zeroeq::Publisher publisher( zeroeq::NULL_SESSION );
     zeroeq::Subscriber subscriber1( test::buildURI( "localhost", publisher ));
     zeroeq::Subscriber subscriber2( test::buildURI( "localhost", publisher ),
-                                 subscriber1 );
+                                    subscriber1 );
 
-    ::test::SerializablePtr echoEvent1 = ::test::getFBEchoInEvent(
-                    std::bind( &onEvent1, std::placeholders::_1 ));
+    BOOST_CHECK( subscriber1.subscribe( test::Echo::IDENTIFIER(), &onEvent1 ));
+    BOOST_CHECK( subscriber2.subscribe( test::Echo::IDENTIFIER(), &onEvent2 ));
 
-    BOOST_CHECK( subscriber1.subscribe( *echoEvent1 ));
-
-    ::test::SerializablePtr echoEvent2 = ::test::getFBEchoInEvent(
-                    std::bind( &onEvent2, std::placeholders::_1 ));
-
-    BOOST_CHECK( subscriber2.subscribe( *echoEvent2 ));
-
-#ifdef ZEROEQ_USE_FLATBUFFERS
     testReceive( publisher, subscriber1, gotOne, gotTwo, __LINE__ );
     testReceive( publisher, subscriber2, gotOne, gotTwo, __LINE__ );
-#endif
-
 }
 
 BOOST_AUTO_TEST_CASE(test_publisher_routing)
@@ -82,28 +71,17 @@ BOOST_AUTO_TEST_CASE(test_publisher_routing)
     zeroeq::Subscriber subscriber2( test::buildURI( "localhost", publisher ),
                                  *subscriber1 );
 
-    ::test::SerializablePtr echoEvent1 = ::test::getFBEchoInEvent(
-                    std::bind( &onEvent1, std::placeholders::_1 ));
+    BOOST_CHECK( subscriber1->subscribe( test::Echo::IDENTIFIER(), &onEvent1 ));
+    BOOST_CHECK( subscriber2.subscribe( test::Echo::IDENTIFIER(), &onEvent2 ));
 
-    BOOST_CHECK( subscriber1->subscribe( *echoEvent1 ));
-
-    ::test::SerializablePtr echoEvent2 = ::test::getFBEchoInEvent(
-                    std::bind( &onEvent2, std::placeholders::_1 ));
-
-    BOOST_CHECK( subscriber2.subscribe( *echoEvent2 ));
-
-#ifdef ZEROEQ_USE_FLATBUFFERS
     testReceive( publisher, *subscriber1, gotTwo, __LINE__ );
     BOOST_CHECK( !gotOne );
 
     testReceive( publisher, subscriber2, gotTwo, __LINE__ );
     BOOST_CHECK( !gotOne );
-#endif
 
     delete subscriber1;
 
-#ifdef ZEROEQ_USE_FLATBUFFERS
     testReceive( publisher, subscriber2, gotTwo, __LINE__ );
     BOOST_CHECK( !gotOne );
-#endif
 }

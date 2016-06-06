@@ -35,16 +35,6 @@ set(ZEROEQ_SOURCES
 set(ZEROEQ_LINK_LIBRARIES PUBLIC Servus
                           PRIVATE ${CMAKE_THREAD_LIBS_INIT} ${LIBZMQ_LIBRARIES})
 
-if(FLATBUFFERS_FOUND)
-  flatbuffers_generate_c_headers(ZEROEQ_FBS
-                                 detail/echo.fbs)
-  list(APPEND ZEROEQ_PUBLIC_HEADERS fbevent.h vocabulary.h
-                                    ${ZEROEQ_FBS_ZEROEQ_OUTPUTS})
-  list(APPEND ZEROEQ_HEADERS detail/fbevent.h detail/vocabulary.h)
-  list(APPEND ZEROEQ_SOURCES fbevent.cpp detail/vocabulary.cpp vocabulary.cpp)
-  list(APPEND ZEROEQ_LINK_LIBRARIES flatbuffers)
-endif()
-
 if(MSVC)
   list(APPEND ZEROEQ_LINK_LIBRARIES Ws2_32)
 endif()
