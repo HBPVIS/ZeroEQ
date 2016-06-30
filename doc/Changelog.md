@@ -2,6 +2,8 @@
 
 # git master
 
+# Release 0.6 (30-06-2016)
+
 * [170](https://github.com/HBPVIS/ZeroEQ/pull/170):
   Remove FlatBuffers dependency and support
 * [169](https://github.com/HBPVIS/ZeroEQ/pull/169):
