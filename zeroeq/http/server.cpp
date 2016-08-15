@@ -157,8 +157,9 @@ public:
 
             if( msgSize == 0 )
             {
-                ZEROEQWARN << "HTTP server receive failed: "
-                           << zmq_strerror( zmq_errno( )) << std::endl;
+                if( zmq_errno() != EAGAIN )
+                    ZEROEQWARN << "HTTP server receive failed: "
+                               << zmq_strerror( zmq_errno( )) << std::endl;
                 return;
             }
 
@@ -174,6 +175,10 @@ public:
                 zmq_msg_close( &msg );
                 return; // garbage from client, ignore
             }
+            if( msgSize > consumed )
+                ZEROEQWARN << "Unconsumed request data: " << data + consumed
+                           << std::endl;
+
             zmq_msg_close( &msg );
         }
 
@@ -250,10 +255,13 @@ public:
                     // client still alive, send again
                     continue;
                 }
+                else if( zmq_errno() != EAGAIN )
+                    ZEROEQWARN << "HTTP server poll failed: "
+                               << zmq_strerror( zmq_errno( )) << std::endl;
             }
-
-            ZEROEQWARN << "HTTP server sendResponse failed: "
-                       << zmq_strerror( zmq_errno( )) << std::endl;
+            else
+                ZEROEQWARN << "HTTP server send failed: "
+                           << zmq_strerror( zmq_errno( )) << std::endl;
             return false;
         }
         return true;

@@ -327,7 +327,7 @@ BOOST_AUTO_TEST_CASE(put_serializable)
     std::thread thread( [&]() { while( running ) server.receive( 100 ); });
 
     Client client( server.getURI( ));
-    client.test( std::string( "PUT /test/Foo HTTP/1.0\r\n\r\n" ) + jsonPut,
+    client.test( std::string( "PUT /test/Foo HTTP/1.0\r\n\r\n" ),
                  error411, __LINE__ );
     client.test(
         std::string( "PUT /test/Foo HTTP/1.0\r\n" + cors_headers +
@@ -369,7 +369,7 @@ BOOST_AUTO_TEST_CASE(put_event)
     std::thread thread( [&]() { while( running ) server.receive( 100 ); });
 
     Client client( server.getURI( ));
-    client.test( std::string( "PUT /foo HTTP/1.0\r\n\r\n" ) + jsonPut,
+    client.test( std::string( "PUT /foo HTTP/1.0\r\n\r\n" ),
                  error411, __LINE__ );
     client.test(
         std::string( "PUT /foo HTTP/1.0\r\n" + cors_headers +
