@@ -48,19 +48,26 @@ tracks the implementation.
         virtual std::string toJSON() const;
 
         /**
-         * Set a new function called after the object has been updated.
+         * Register a function called after the object has been updated remotely
+         * (via a subscriber, a http server, loading from file...).
+         * Only one callback is supported at the moment, to deregister the callback,
+         * call this function with a 'nullptr' (or 0) parameter.
          *
-         * @return the previously set function.
+         * @throw if a DeserializedCallback is already registered and the specified
+         * callback is not 'nullptr' (or 0)
          */
-        ChangeFunc setUpdatedFunction( const ChangeFunc& func );
+        SERVUS_API void registerDeserializedCallback( const DeserializedCallback& );
 
         /**
-         * Set a new function called when a request has been received.
+         * Register a function to be called when the serializable object is about
+         * to be serialized.
+         * Only one callback is supported at the moment, to deregister the callback,
+         * call this function with a 'nullptr' (or 0) parameter.
          *
-         * Invoked before the object is published.
-         * @return the previously set function.
+         * @throw if a SerializedCallback is already registered and the specified
+         * callback is not 'nullptr' (or 0)
          */
-        ChangeFunc setRequestedFunction( const ChangeFunc& func );
+        SERVUS_API void registerSerializeCallback( const SerializeCallback& );
     };
     }
 
@@ -86,13 +93,16 @@ tracks the implementation.
         static std::unique_ptr< Server > parse( argc, argv );
         static std::unique_ptr< Server > parse( argc, argv, Receiver& shared );
 
-        // For PUT requests:
-        bool subscribe( servus::Serializable& object );
-        bool unsubscribe( const servus::Serializable& object );
+        bool handle( servus::Serializable& object );
+        bool remove( const servus::Serializable& object );
 
-        // For GET requests:
-        bool register_( servus::Serializable& object );
-        bool unregister( const servus::Serializable& object );
+        bool handlePUT( servus::Serializable& object );
+        bool removePUT( const servus::Serializable& object );
+
+        bool handleGET( servus::Serializable& object );
+        bool removeGET( const servus::Serializable& object );
+
+        // + 8 overloads with PUTFunc, PUTPayloadFunc, GETFunc
     };
     }
     }
@@ -106,8 +116,8 @@ tracks the implementation.
             return;
 
         subscribers.push_back( _httpServer );
-        _httpServer.subscribe( camera, LUT, vrParams );
-        _httpServer.register( camera, LUT, vrParams, frame );
+        _httpServer.handle( camera, LUT, vrParams );
+        _httpServer.handleGET( frame );
     }
 
     class livre::ImageJPEG : public zeroeq::hbp::ImageJPEG
