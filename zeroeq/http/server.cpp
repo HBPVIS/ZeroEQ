@@ -132,21 +132,23 @@ public:
 
     void process( const uint32_t timeout )
     {
-        // Read request and body
+        // Read http request
         httpxx::BufferedRequest request;
-        std::string body;
         uint8_t id[256];
         int idSize = 0;
+        int flags = 0;
         while( !request.complete( ))
         {
             // id of client (used for reply)
-            idSize = ::zmq_recv( socket, id, sizeof( id ), 0 );
+            idSize = ::zmq_recv( socket, id, sizeof( id ), flags );
             if( idSize <= 0 )
             {
-                ZEROEQWARN << "HTTP server receive failed: "
-                           << zmq_strerror( zmq_errno( )) << std::endl;
+                if( flags == 0 || zmq_errno() != EAGAIN )
+                    ZEROEQWARN << "HTTP server receive failed: "
+                               << zmq_strerror( zmq_errno( )) << std::endl;
                 return;
             }
+            flags = 0;
 
             // msg body
             zmq_msg_t msg;
@@ -157,6 +159,18 @@ public:
 
             if( msgSize == 0 )
             {
+                if( data )
+                {
+                    // Skip zero-sized "Peer-Address" or empty string messages
+                    // interleaved in the communication with libzmq 4.1.4.
+                    // Those may or may not be followed by a "real" message, so
+                    // try receiving again and return if there is nothing (to
+                    // avoid blocking the receiving thread).
+                    flags = ZMQ_NOBLOCK;
+                    zmq_msg_close( &msg );
+                    continue;
+                }
+
                 if( zmq_errno() != EAGAIN )
                     ZEROEQWARN << "HTTP server receive failed: "
                                << zmq_strerror( zmq_errno( )) << std::endl;
@@ -182,8 +196,9 @@ public:
             zmq_msg_close( &msg );
         }
 
-        // Handle
+        // Respond to request
         httpxx::ResponseBuilder response;
+        std::string body;
         if( request.method() == httpxx::Method::get( ))
             body = _processGet( request, response );
         else if( request.method() == httpxx::Method::put( ))
