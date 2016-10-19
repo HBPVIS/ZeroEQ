@@ -26,6 +26,8 @@ ZeroEQ provides the following major features:
 * [Event-based communication](@ref eventbased)
 * [HTTP GET and PUT server](@ref httpserver)
 * [Session filtering and management port](@ref Sessions)
+* [Landing page for HTTP Server](@ref landingpage)
+* [Publishing the REST API exposed by the HTTP Server](@ref restapi)
 
 # Building
 
