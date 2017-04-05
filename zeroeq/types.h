@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2014-2016, Human Brain Project
+/* Copyright (c) 2014-2017, Human Brain Project
  *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *                          Juan Hernando <jhernando@fi.upm.es>
  */
@@ -47,15 +47,6 @@ typedef std::function< void() > EventFunc;
 
 /** Callback for receival of subscribed event w/ payload. */
 typedef std::function< void( const void*, size_t ) > EventPayloadFunc;
-
-/** HTTP PUT callback w/o payload, return reply success. */
-typedef std::function< bool() > PUTFunc;
-
-/** HTTP PUT callback w/ JSON payload, return reply success. */
-typedef std::function< bool( const std::string& ) > PUTPayloadFunc;
-
-/** HTTP GET callback to return JSON reply. */
-typedef std::function< std::string() > GETFunc;
 
 #ifdef WIN32
 typedef SOCKET SocketDescriptor;

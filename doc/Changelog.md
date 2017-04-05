@@ -2,6 +2,15 @@
 
 # git master
 
+* [203](https://github.com/HBPVIS/ZeroEQ/pull/203):
+  HTTP server extension for generic REST interfaces.
+  Users can now:
+    * use all standard HTTP verbs: GET, POST, PUT, PATCH, DELETE
+    * set a response header, including content type
+    * set a custom response payload for all action verbs
+    * use a std::future to avoid blocking the main thread
+    * register a single endpoint for collections
+    * filter collections using a query string with GET requests
 * [192](https://github.com/HBPVIS/ZeroEQ/pull/192):
   Fix HTTP server segfault when registering an empty endpoint, throw an
   exception instead.

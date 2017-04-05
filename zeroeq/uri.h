@@ -58,6 +58,7 @@ public:
     using servus::URI::getHost;
     using servus::URI::getPort;
     using servus::URI::getPath;
+    using servus::URI::getQuery;
     using servus::URI::setHost;
     using servus::URI::setPort;
     //@}

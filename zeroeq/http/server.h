@@ -1,20 +1,39 @@
 
-/* Copyright (c) 2016, Human Brain Project
- *                     Stefan.Eilemann@epfl.ch
+/* Copyright (c) 2016-2017, Human Brain Project
+ *                          Stefan.Eilemann@epfl.ch
+ *                          Raphael.Dumusc@epfl.ch
  */
 
 #ifndef ZEROEQ_HTTP_SERVER_H
 #define ZEROEQ_HTTP_SERVER_H
 
 #include <zeroeq/http/api.h>
+#include <zeroeq/http/request.h>
+#include <zeroeq/http/response.h> // used inline
+
 #include <zeroeq/receiver.h> // base class
 #include <zeroeq/log.h>
+
+#include <future>
 
 namespace zeroeq
 {
 /** HTTP protocol support. */
 namespace http
 {
+
+/** HTTP PUT callback w/o payload, return reply success. */
+using PUTFunc = std::function< bool() >;
+
+/** HTTP PUT callback w/ JSON payload, return reply success. */
+using PUTPayloadFunc = std::function< bool( const std::string& ) >;
+
+/** HTTP GET callback to return JSON reply. */
+using GETFunc = std::function< std::string() >;
+
+/** HTTP REST callback with Request parameter returning a Response future. */
+using RESTFunc = std::function< std::future< Response >( const Request& ) >;
+
 /**
  * Serves HTTP GET and PUT requests for servus::Serializable objects.
  *
@@ -92,6 +111,17 @@ public:
     ZEROEQHTTP_API SocketDescriptor getSocketDescriptor() const;
     //@}
 
+    /**
+     * Handle a single method on a given endpoint.
+     *
+     * @param method to handle
+     * @param endpoint the endpoint to receive requests for during receive()
+     * @param func the callback function for serving the request
+     * @return true if subscription was successful, false otherwise
+     * @sa Request
+     */
+    bool handle( Method method, const std::string& endpoint, RESTFunc func );
+
     /** @name Object registration for PUT and GET requests */
     //@{
     /**
@@ -115,7 +145,7 @@ public:
     /** Remove PUT and GET handling for given object. */
     ZEROEQHTTP_API bool remove( const servus::Serializable& object );
 
-    /** Remove PUT and GET handling for given endpoint. */
+    /** Remove all handling for given endpoint. */
     ZEROEQHTTP_API bool remove( const std::string& endpoint );
 
     /**
@@ -126,7 +156,7 @@ public:
      * using fromJSON(). To track updates on the object, the serializable's
      * updated function is called accordingly.
      *
-     * The subscribed object instance has to be valid until removePUT().
+     * The subscribed object instance has to be valid until remove().
      *
      * @param object the object to update on receive()
      * @return true if subscription was successful, false otherwise
@@ -192,7 +222,7 @@ public:
      * toJSON(). To track updates on the object, the serializable's received
      * function is called accordingly.
      *
-     * The subscribed object instance has to be valid until removeGET().
+     * The subscribed object instance has to be valid until remove().
      *
      * @param object the object to serve during receive()
      * @return true if subscription was successful, false otherwise

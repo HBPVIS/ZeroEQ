@@ -1,6 +1,9 @@
 # Copyright (c) HBP 2014-2017 Daniel.Nachbaur@epfl.ch
 
 set(ZEROEQHTTP_PUBLIC_HEADERS
+  helpers.h
+  request.h
+  response.h
   server.h
 )
 set(ZEROEQHTTP_HEADERS

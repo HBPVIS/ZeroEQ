@@ -9,7 +9,9 @@
 #include <zeroeq/log.h>
 #include <zeroeq/uri.h>
 
+#include <future>
 #include <memory> // shared_from_this
+#include <stdexcept>
 #include <zmq.h>
 
 namespace zeroeq
@@ -18,6 +20,50 @@ namespace http
 {
 namespace
 {
+
+int _getContentLength( const HTTPServer::request& request )
+{
+    for( const auto& i : request.headers )
+    {
+        if( i.name == "Content-Length" )
+            return std::stoi( i.value );
+    }
+    return 0;
+}
+
+Method _getMethodType( const std::string& methodName )
+{
+    if( methodName == "GET" )
+        return Method::GET;
+    if( methodName == "POST" )
+        return Method::POST;
+    if( methodName == "PUT" )
+        return Method::PUT;
+    if( methodName == "PATCH" )
+        return Method::PATCH;
+    if( methodName == "DELETE" )
+        return Method::DELETE;
+    throw std::invalid_argument( "Method not supported" );
+}
+
+std::string _headerEnumToString( const Header header )
+{
+    switch( header )
+    {
+    case Header::ALLOW:
+        return "Allow";
+    case Header::CONTENT_TYPE:
+        return "Content-Type";
+    case Header::LAST_MODIFIED:
+        return "Last-Modified";
+    case Header::LOCATION:
+        return "Location";
+    case Header::RETRY_AFTER:
+        return "Retry-After";
+    default:
+        throw std::logic_error( "no such header" );
+    }
+}
 
 // The actual handler for each incoming request where the data is read from
 // a dedicated connection to the client.
@@ -30,29 +76,23 @@ struct ConnectionHandler : std::enable_shared_from_this< ConnectionHandler >
 
     void operator()( HTTPServer::connection_ptr connection )
     {
-        if( _request.method == "PUT" )
+        try
         {
-            for( const auto& i : _request.headers )
+            const auto method = _getMethodType( _request.method );
+            if( method != Method::GET )
             {
-                if( i.name == "Content-Length" )
+                _size = _getContentLength( _request );
+                // if we have payload, schedule an (async) read of all chunks.
+                // Will call _handleRequest() after all data has been read.
+                if( _size > 0 )
                 {
-                    _size = std::stoi( i.value );
-                    break;
+                    _readChunk( connection, method );
+                    return;
                 }
             }
-
-            // if we have payload, schedule an (async) read of all chunks. Will
-            // call _handleRequest() after all data has been read.
-            if( _size > 0 )
-            {
-                _readChunk( connection );
-                return;
-            }
-            _handleRequest( HTTPRequest::Method::PUT, connection );
+            _handleRequest( method, connection );
         }
-        else if( _request.method == "GET" )
-            _handleRequest( HTTPRequest::Method::GET, connection );
-        else
+        catch( const std::invalid_argument& )
         {
             std::vector< HTTPServer::response_header > headers;
             _addCorsHeaders( headers );
@@ -62,17 +102,20 @@ struct ConnectionHandler : std::enable_shared_from_this< ConnectionHandler >
     }
 
 private:
-    void _readChunk( HTTPServer::connection_ptr connection )
+    void _readChunk( HTTPServer::connection_ptr connection,
+                     const Method method )
     {
         namespace pl = std::placeholders;
         connection->read( std::bind( &ConnectionHandler::_handleChunk,
                                      ConnectionHandler::shared_from_this(),
-                                     pl::_1, pl::_2, pl::_3, connection ));
+                                     pl::_1, pl::_2, pl::_3, connection,
+                                     method ));
     }
 
     void _handleChunk( HTTPServer::connection::input_range range,
                        const boost::system::error_code error, const size_t size,
-                       HTTPServer::connection_ptr connection )
+                       HTTPServer::connection_ptr connection,
+                       const Method method )
     {
         if( error )
         {
@@ -84,42 +127,58 @@ private:
         _body.append( std::begin( range ), size );
         _size -= size;
         if( _size > 0 )
-            _readChunk( connection );
+            _readChunk( connection, method );
         else
-            _handleRequest( HTTPRequest::Method::PUT, connection );
+            _handleRequest( method, connection );
     }
 
-    void _handleRequest( const HTTPRequest::Method& method,
+    void _handleRequest( const Method method,
                          HTTPServer::connection_ptr connection )
     {
-        std::vector< HTTPServer::response_header > headers;
-        _addCorsHeaders( headers );
+        Message message;
+        message.request.method = method;
+        const auto uri = URI( _request.destination );
+        message.request.path = uri.getPath();
+        message.request.query = uri.getQuery();
+        message.request.body.swap( _body );
 
-        HTTPRequest httpRequest;
-        httpRequest.method = method;
-        httpRequest.request = _body;
-        httpRequest.url = URI( _request.destination ).getPath();
-        void* httpRequestPtr = &httpRequest;
-        zmq_send( _socket, &httpRequestPtr, sizeof(void*), 0 );
+        void* messagePtr = &message;
+        zmq_send( _socket, &messagePtr, sizeof( void* ), 0 );
         bool done;
         zmq_recv( _socket, &done, sizeof( done ), 0 );
 
-        connection->set_status( httpRequest.status );
-
-        const bool haveReply = !httpRequest.reply.empty();
-        if( !haveReply )
+        Response response;
+        try
         {
-            connection->set_headers( headers );
-            return;
+            response = message.response.get();
         }
+        catch( std::future_error& error )
+        {
+            response.code = http::Code::INTERNAL_SERVER_ERROR;
+            ZEROEQINFO << "Error during ConnectionHandler::_handleRequest: "
+                       << error.what() << std::endl;
+        }
+
+        std::vector< HTTPServer::response_header > headers;
+        _addCorsHeaders( headers );
 
         HTTPServer::response_header contentLength;
         contentLength.name = "Content-Length";
-        contentLength.value = std::to_string( httpRequest.reply.length( ));
+        contentLength.value = std::to_string( response.body.length( ));
         headers.push_back( contentLength );
 
+        for( auto it = response.headers.begin(); it != response.headers.end();
+             ++it )
+        {
+            HTTPServer::response_header header;
+            header.name = _headerEnumToString( it->first );
+            header.value = it->second ;
+            headers.push_back( header );
+        }
+        const auto status = HTTPServer::connection::status_t( response.code );
+        connection->set_status( status );
         connection->set_headers( headers );
-        connection->write( httpRequest.reply );
+        connection->write( response.body );
     }
 
     void _addCorsHeaders( std::vector< HTTPServer::response_header >& headers )
@@ -138,7 +197,7 @@ private:
 
         HTTPServer::response_header allowMethods;
         allowMethods.name = "Access-Control-Allow-Methods";
-        allowMethods.value = "GET,PUT,OPTIONS";
+        allowMethods.value = "GET,POST,PUT,PATCH,DELETE,OPTIONS";
 
         HTTPServer::response_header allowOrigin;
         allowOrigin.name = "Access-Control-Allow-Origin";
