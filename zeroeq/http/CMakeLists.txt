@@ -5,6 +5,7 @@ set(ZEROEQHTTP_PUBLIC_HEADERS
   request.h
   response.h
   server.h
+  types.h
 )
 set(ZEROEQHTTP_HEADERS
   requestHandler.h

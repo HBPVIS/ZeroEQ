@@ -9,30 +9,15 @@
 
 #include <zeroeq/http/api.h>
 #include <zeroeq/http/request.h>
-#include <zeroeq/http/response.h> // used inline
+#include <zeroeq/http/types.h>
 
 #include <zeroeq/log.h>
 #include <zeroeq/receiver.h> // base class
 
-#include <future>
-
 namespace zeroeq
 {
-/** HTTP protocol support. */
 namespace http
 {
-/** HTTP PUT callback w/o payload, return reply success. */
-using PUTFunc = std::function<bool()>;
-
-/** HTTP PUT callback w/ JSON payload, return reply success. */
-using PUTPayloadFunc = std::function<bool(const std::string&)>;
-
-/** HTTP GET callback to return JSON reply. */
-using GETFunc = std::function<std::string()>;
-
-/** HTTP REST callback with Request parameter returning a Response future. */
-using RESTFunc = std::function<std::future<Response>(const Request&)>;
-
 /**
  * Serves HTTP GET and PUT requests for servus::Serializable objects.
  *
@@ -55,10 +40,11 @@ public:
     /**
      * Construct a new HTTP server.
      *
-     * To process requests on the incoming port, call receive(). If no hostname
-     * is given, the server listens on all interfaces (INADDR_ANY). If no port
-     * is given, the server selects a random port. Use getURI() to retrieve the
-     * chosen parameters.
+     * To process requests on the incoming port, call receive().
+     *
+     * If no hostname is given, the server listens on all interfaces
+     * (INADDR_ANY). If no port is given, the server selects a random port. Use
+     * getURI() to retrieve the chosen parameters.
      *
      * @param uri The server address in the form "[tcp://][hostname][:port]"
      * @param shared a shared receiver, see Receiver constructor.
@@ -67,11 +53,13 @@ public:
     ZEROEQHTTP_API Server(const URI& uri, Receiver& shared);
     ZEROEQHTTP_API explicit Server(const URI& uri);
     ZEROEQHTTP_API explicit Server(Receiver& shared);
-    ZEROEQHTTP_API Server();
-    ZEROEQHTTP_API explicit Server(Server& shared)
+    explicit Server(Server& shared)
         : Server(static_cast<Receiver&>(shared))
     {
     }
+    ZEROEQHTTP_API Server();
+
+    /** Destruct this http server. */
     ZEROEQHTTP_API ~Server();
 
     /**
