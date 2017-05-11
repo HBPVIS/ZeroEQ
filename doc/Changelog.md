@@ -2,6 +2,8 @@
 
 # git master
 
+* [207](https://github.com/HBPVIS/ZeroEQ/pull/207):
+  Unify name resolution between Publisher and http::Server
 * [203](https://github.com/HBPVIS/ZeroEQ/pull/203):
   HTTP server extension for generic REST interfaces.
   Users can now:

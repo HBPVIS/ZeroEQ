@@ -20,6 +20,14 @@
 
 #include <servus/serializable.h>
 
+// for NI_MAXHOST
+#ifdef _WIN32
+#include <Ws2tcpip.h>
+#else
+#include <netdb.h>
+#include <unistd.h>
+#endif
+
 #include <algorithm>
 #include <array>
 #include <future>
@@ -98,6 +106,13 @@ std::string _removeEndpointFromPath(const std::string& endpoint,
     return path.substr(endpoint.size());
 }
 
+std::string _getHost(const zeroeq::URI& uri)
+{
+    // INADDR_ANY translation: zmq -> boost.asio
+    if (uri.getHost().empty() || uri.getHost() == "*")
+        return "0.0.0.0";
+    return uri.getHost();
+}
 } // unnamed namespace
 
 namespace zeroeq
@@ -116,14 +131,10 @@ public:
         : detail::Sender(URI(_getInprocURI()), 0, ZMQ_PAIR)
         , _requestHandler(_getInprocURI(), getContext())
         , _httpOptions(_requestHandler)
-        , _httpServer(
-              _httpOptions
-                  .
-              // INADDR_ANY translation: zmq -> boost.asio
-              address(uri_.getHost() == "*" ? "0.0.0.0" : uri_.getHost())
-                  .port(std::to_string(int(uri_.getPort())))
-                  .protocol_family(HTTPServer::options::ipv4)
-                  .reuse_address(true))
+        , _httpServer(_httpOptions.address(_getHost(uri_))
+                          .port(std::to_string(int(uri_.getPort())))
+                          .protocol_family(HTTPServer::options::ipv4)
+                          .reuse_address(true))
     {
         if (::zmq_bind(socket, _getInprocURI().c_str()) == -1)
         {
@@ -156,6 +167,18 @@ public:
         uri = URI();
         uri.setHost(_httpServer.address());
         uri.setPort(std::stoi(_httpServer.port()));
+
+        if (uri.getHost() == "0.0.0.0")
+        {
+            char hostname[NI_MAXHOST + 1] = {0};
+            gethostname(hostname, NI_MAXHOST);
+            hostname[NI_MAXHOST] = '\0';
+            uri.setHost(hostname);
+        }
+
+        if (uri_.getHost() != uri.getHost() || uri_.getPort() == 0)
+            ZEROEQINFO << "HTTP server bound to " << uri.getHost() << ":"
+                       << uri.getPort() << std::endl;
     }
 
     ~Impl()

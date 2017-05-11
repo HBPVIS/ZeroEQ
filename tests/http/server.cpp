@@ -278,8 +278,6 @@ BOOST_AUTO_TEST_CASE(construction)
     BOOST_CHECK_NE(server2.getURI(), server3.getURI());
     BOOST_CHECK_NE(server2.getURI().getPort(), 0);
 
-    BOOST_CHECK_THROW(zeroeq::http::Server(server2.getURI()),
-                      std::runtime_error);
     BOOST_CHECK_NO_THROW(server2.getSocketDescriptor());
     BOOST_CHECK_GT(server1.getSocketDescriptor(), 0);
 }
