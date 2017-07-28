@@ -53,7 +53,9 @@ BOOST_AUTO_TEST_CASE(publish_receive_serializable)
 BOOST_AUTO_TEST_CASE(publish_receive_event)
 {
     const std::string echoString("The quick brown fox");
-    zeroeq::Publisher publisher(zeroeq::NULL_SESSION);
+    zeroeq::Publisher publisher(
+        zeroeq::URI("inproc://zeroeq.test.publish_receive_event"),
+        zeroeq::NULL_SESSION);
     zeroeq::Subscriber subscriber(publisher.getURI());
     test::Monitor monitor(publisher, subscriber);
 

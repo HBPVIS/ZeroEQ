@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <zeroeq/types.h>
+
 namespace zeroeq
 {
 /** Interface for entities sending data. */
@@ -12,6 +14,6 @@ class Sender
 {
 public:
     virtual ~Sender() {}
-    virtual void* getSocket() = 0; //!< @return the underlying ZMQ socket
+    virtual zmq::SocketPtr getSocket() = 0; //!< @return the ZMQ socket
 };
 }

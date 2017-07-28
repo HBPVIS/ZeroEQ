@@ -33,7 +33,7 @@ public:
      * - bound to all network interfaces
      * - runs on a random port
      * - announces itself on the _zeroeq_pub._tcp ZeroConf service as host:port
-     * - announces session \<username\> or ZEROEQ_SESSION from environment
+     * - announces session \<username\> or ZEROEQ_PUB_SESSION from environment
      *
      * @throw std::runtime_error if session is empty or socket setup fails
      */
@@ -59,7 +59,7 @@ public:
      * Postconditions:
      * - bound to the host and/or port from the given URI
      * - announces itself on the _zeroeq_pub._tcp ZeroConf service as host:port
-     * - announces session \<username\> or ZEROEQ_SESSION from environment
+     * - announces session \<username\> or ZEROEQ_PUB_SESSION from environment
      *
      * @param uri publishing URI in the format [scheme://][*|host|IP|IF][:port]
      * @throw std::runtime_error if session is empty or socket setup fails
@@ -138,7 +138,7 @@ private:
     Publisher(const Publisher&) = delete;
     Publisher& operator=(const Publisher&) = delete;
 
-    ZEROEQ_API void* getSocket() final;
+    ZEROEQ_API zmq::SocketPtr getSocket() final;
 };
 }
 

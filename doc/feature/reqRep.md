@@ -10,15 +10,16 @@ describes a client-server API based on zmq req-rep (dealer/router) sockets.
 
 ## API
 
-    using ReplyFunc = std::function<void(const uint128_t, const void*, size_t)>;
+    using ReplyFunc = std::function<void(const uint128_t&, const void*, size_t)>;
 
     class Client : public Receiver
     {
         // ctors same as Subscriber
-        void request(const Serializable& request, ReplyFunc& func);
+        /** @return false on send error */
+        bool request(const Serializable& request, ReplyFunc& func);
     };
 
-    using std::pair< uint128_t, servus::Serializable::Data > ReplyData
+    using ReplyData = std::pair< uint128_t, servus::Serializable::Data >;
     using HandleFunc = std::function<ReplyData(const void*, size_t)>;
 
     class Server : public Receiver
@@ -35,7 +36,7 @@ describes a client-server API based on zmq req-rep (dealer/router) sockets.
   * Server::receive() uses a rep socket
     * Single-threaded, synchronous for now
     * Can be extended to async model later
-    * does recv()-send()
+    * does recv()->send()
 * Client::request is fully asynchronous
 * ReplyFunc will get ```0, nullptr, 0``` if server has no handle func
 

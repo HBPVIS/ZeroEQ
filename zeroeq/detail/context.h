@@ -5,17 +5,17 @@
 
 #pragma once
 
+#include <zeroeq/types.h>
+
 #include <memory>
 
 namespace zeroeq
 {
 namespace detail
 {
-using ContextPtr = std::shared_ptr<void>;
-
 /** @return the current ZeroMQ context. Users need to hold onto this context to
  *          extend its lifetime to all sockets created from the context.
  */
-ContextPtr getContext();
+zmq::ContextPtr getContext();
 }
 }

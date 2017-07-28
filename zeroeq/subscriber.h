@@ -39,7 +39,7 @@ public:
      *
      * Postconditions:
      * - discovers publishers on _zeroeq_pub._tcp ZeroConf service
-     * - filters session \<username\> or ZEROEQ_SESSION from environment
+     * - filters session \<username\> or ZEROEQ_PUB_SESSION from environment
      *
      * @throw std::runtime_error if ZeroConf is not available
      */

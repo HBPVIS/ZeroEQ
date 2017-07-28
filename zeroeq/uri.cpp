@@ -96,4 +96,10 @@ bool URI::operator!=(const servus::URI& rhs) const
 {
     return servus::URI::operator!=(rhs);
 }
+
+bool URI::isFullyQualified() const
+{
+    return getScheme() != DEFAULT_SCHEMA ||
+           (!getHost().empty() && getPort() != 0);
+}
 }

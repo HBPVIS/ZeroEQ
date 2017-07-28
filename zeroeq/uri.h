@@ -50,6 +50,10 @@ public:
 
     /** Convert this URI to a servus::URI */
     const servus::URI& toServusURI() const { return *this; }
+
+    /** @return true if the host and port are given for a tcp URI. */
+    ZEROEQ_API bool isFullyQualified() const;
+
     /** @name servus::URI API */
     //@{
     using servus::URI::getScheme;

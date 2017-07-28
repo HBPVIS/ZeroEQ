@@ -13,13 +13,13 @@ namespace zeroeq
 {
 namespace detail
 {
-ContextPtr getContext()
+zmq::ContextPtr getContext()
 {
     static std::weak_ptr<void> context;
     static std::mutex mutex;
     std::lock_guard<std::mutex> lock(mutex);
 
-    ContextPtr sharedContext = context.lock();
+    zmq::ContextPtr sharedContext = context.lock();
     if (!sharedContext)
     {
         sharedContext.reset(zmq_ctx_new(),

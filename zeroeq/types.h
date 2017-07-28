@@ -9,6 +9,7 @@
 
 #include <functional>
 #include <memory>
+#include <servus/serializable.h>
 #include <servus/types.h>
 #include <servus/uint128_t.h>
 #include <zeroeq/defines.h>
@@ -51,6 +52,15 @@ using EventFunc = std::function<void()>;
 /** Callback for receival of subscribed event w/ payload. */
 using EventPayloadFunc = std::function<void(const void*, size_t)>;
 
+/** Callback for the reply of a Client::request(). */
+using ReplyFunc = std::function<void(const uint128_t&, const void*, size_t)>;
+
+/** Return value of HandleFunc */
+using ReplyData = std::pair<uint128_t, servus::Serializable::Data>;
+
+/** Callback for serving a Client::request() in Server::handle(). */
+using HandleFunc = std::function<ReplyData(const void*, size_t)>;
+
 #ifdef WIN32
 typedef SOCKET SocketDescriptor;
 #else
@@ -69,6 +79,11 @@ static const std::string NULL_SESSION = "__null_session";
 namespace detail
 {
 struct Socket;
+}
+namespace zmq
+{
+using ContextPtr = std::shared_ptr<void>;
+using SocketPtr = std::shared_ptr<void>;
 }
 }
 

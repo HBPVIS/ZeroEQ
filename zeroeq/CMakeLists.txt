@@ -4,6 +4,7 @@ list(APPEND CPPCHECK_EXTRA_ARGS
   --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/*_generated.h)
 
 set(ZEROEQ_PUBLIC_HEADERS
+  client.h
   connection/broker.h
   connection/service.h
   log.h
@@ -11,20 +12,22 @@ set(ZEROEQ_PUBLIC_HEADERS
   publisher.h
   receiver.h
   sender.h
+  server.h
   subscriber.h
   types.h
   uri.h)
 
 set(ZEROEQ_HEADERS
-  detail/application.h
-  detail/broker.h
+  detail/common.h
   detail/constants.h
   detail/context.h
   detail/port.h
+  detail/receiver.h
   detail/sender.h
   detail/socket.h)
 
 set(ZEROEQ_SOURCES
+  client.cpp
   connection/broker.cpp
   connection/service.cpp
   detail/context.cpp
@@ -33,6 +36,7 @@ set(ZEROEQ_SOURCES
   monitor.cpp
   publisher.cpp
   receiver.cpp
+  server.cpp
   subscriber.cpp
   uri.cpp)
 

@@ -22,7 +22,7 @@ user and for the system to perform filtering.
 * Introduction of Session: only publishers of the same session and compatible
   events are automatically subscribed in the subscriber. The default session
   name is the current username. It can be set to a different value at runtime
-  with the ZEROEQ_SESSION environment variable. If the session name is
+  with the ZEROEQ_PUB_SESSION environment variable. If the session name is
   empty/non-existant, no filtering is performed and automatic subscription to
   all discovered publishers happens.
 * Schemas in URIs are superseded by the session; user-specified schemas are
@@ -47,7 +47,7 @@ user and for the system to perform filtering.
   * txt record:
     * vocabulary_request = zmq connection string
     * vocabulary = semi-colon separated list of published event UUIDs
-    * session = <user-name> by default, env ZEROEQ_SESSION if specified
+    * session = <user-name> by default, env ZEROEQ_PUB_SESSION if specified
     * user = <user-name>
     * application = <application-name>
 * Published events must be registered in the publisher. Non-registered events
@@ -66,7 +66,7 @@ user and for the system to perform filtering.
   * txt record:
     * vocabulary_request = zmq connection string
     * vocabulary = semi-colon separated list of published event UUIDs
-    * session = <user-name> by default, env ZEROEQ_SESSION if specified
+    * session = <user-name> by default, env ZEROEQ_PUB_SESSION if specified
     * user = <user-name>
     * application = <application-name>
 * Event registration for vocabulary happens in

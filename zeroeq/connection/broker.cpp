@@ -54,7 +54,7 @@ public:
             return;
 
         zeroeq::detail::Socket entry;
-        entry.socket = socket;
+        entry.socket = socket.get();
         entry.events = ZMQ_POLLIN;
         entries.push_back(entry);
     }
@@ -80,16 +80,13 @@ private:
     {
         const std::string address =
             std::to_string(uri) + (uri.getPort() ? "" : ":0");
-        if (zmq_bind(socket, address.c_str()) == -1)
+        if (zmq_bind(socket.get(), address.c_str()) == -1)
         {
             if (mode == connection::Broker::PORT_FIXED)
-            {
-                zmq_close(socket);
-                socket = 0;
                 ZEROEQTHROW(std::runtime_error("Cannot connect broker to " +
                                                address + ": " +
                                                zmq_strerror(zmq_errno())));
-            }
+
             return false;
         }
 

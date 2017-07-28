@@ -67,7 +67,7 @@ public:
                     HTTPServer::connection_ptr connection);
 
 private:
-    detail::ContextPtr _context;
+    zmq::ContextPtr _context;
     void* _socket;
 };
 }

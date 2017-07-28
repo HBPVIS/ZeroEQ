@@ -19,7 +19,7 @@ namespace connection
 {
 bool Service::subscribe(const std::string& address, const Publisher& publisher)
 {
-    detail::ContextPtr context = detail::getContext();
+    zmq::ContextPtr context = detail::getContext();
     void* socket = zmq_socket(context.get(), ZMQ_REQ);
     if (!socket)
     {

@@ -11,8 +11,7 @@
 #include "helpers.h"
 #include "requestHandler.h"
 
-#include "../detail/application.h"
-#include "../detail/broker.h"
+#include "../detail/common.h"
 #include "../detail/sender.h"
 #include "../detail/socket.h"
 #include "../log.h"
@@ -20,7 +19,6 @@
 #include "jsoncpp/json/json.h"
 
 #include <servus/serializable.h>
-#include <servus/servus.h>
 
 // for NI_MAXHOST
 #ifdef _WIN32
@@ -138,17 +136,17 @@ class Server::Impl : public detail::Sender
 {
 public:
     Impl(const URI& uri_, const std::string& session)
-        : detail::Sender(URI(_getInprocURI()), ZMQ_PAIR)
+        : detail::Sender(URI(_getInprocURI()), ZMQ_PAIR, HTTP_SERVER_SERVICE,
+                         session == DEFAULT_SESSION ? getDefaultPubSession()
+                                                    : session)
         , _requestHandler(_getInprocURI())
         , _httpOptions(_requestHandler)
         , _httpServer(_httpOptions.address(_getHost(uri_))
                           .port(std::to_string(int(uri_.getPort())))
                           .protocol_family(HTTPServer::options::ipv4)
                           .reuse_address(true))
-        , _service(HTTP_SERVER_SERVICE)
-        , _session(session == DEFAULT_SESSION ? getDefaultSession() : session)
     {
-        if (::zmq_bind(socket, _getInprocURI().c_str()) == -1)
+        if (::zmq_bind(socket.get(), _getInprocURI().c_str()) == -1)
         {
             ZEROEQTHROW(
                 std::runtime_error("Cannot bind HTTPServer to inproc socket"));
@@ -195,21 +193,7 @@ public:
         if (!servus::Servus::isAvailable())
             return;
 
-        _service.set(KEY_INSTANCE, detail::Sender::getUUID().getString());
-        _service.set(KEY_USER, getUserName());
-        _service.set(KEY_APPLICATION, detail::getApplicationName());
-        _service.set("Type", "ZeroEQ");
-        if (!_session.empty())
-            _service.set(KEY_SESSION, _session);
-
-        const servus::Servus::Result& result =
-            _service.announce(uri.getPort(), getAddress());
-
-        if (!result)
-        {
-            ZEROEQTHROW(std::runtime_error("Zeroconf announce failed: " +
-                                           result.getString()));
-        }
+        announce();
     }
 
     ~Impl()
@@ -320,7 +304,7 @@ public:
     void addSockets(std::vector<detail::Socket>& entries)
     {
         detail::Socket entry;
-        entry.socket = socket;
+        entry.socket = socket.get();
         entry.events = ZMQ_POLLIN;
         entries.push_back(entry);
     }
@@ -460,9 +444,6 @@ private:
     HTTPServer _httpServer;
     std::unique_ptr<std::thread> _httpThread;
 
-    servus::Servus _service;
-    const std::string _session;
-
     std::string _getInprocURI() const
     {
         std::ostringstream inprocURI;
@@ -556,7 +537,7 @@ SocketDescriptor Server::getSocketDescriptor() const
 #else
     SocketDescriptor fd = 0;
     size_t fdLength = sizeof(fd);
-    if (::zmq_getsockopt(_impl->socket, ZMQ_FD, &fd, &fdLength) == -1)
+    if (::zmq_getsockopt(_impl->socket.get(), ZMQ_FD, &fd, &fdLength) == -1)
     {
         ZEROEQTHROW(
             std::runtime_error(std::string("Could not get socket descriptor")));
@@ -667,7 +648,7 @@ void Server::addSockets(std::vector<detail::Socket>& entries)
 bool Server::process(detail::Socket&)
 {
     Message* message = nullptr;
-    ::zmq_recv(_impl->socket, &message, sizeof(message), 0);
+    ::zmq_recv(_impl->socket.get(), &message, sizeof(message), 0);
     if (!message)
         ZEROEQTHROW(std::runtime_error(
             "Could not receive HTTP request from HTTP server"));
@@ -692,7 +673,7 @@ bool Server::process(detail::Socket&)
     }
 
     bool done = true;
-    ::zmq_send(_impl->socket, &done, sizeof(done), 0);
+    ::zmq_send(_impl->socket.get(), &done, sizeof(done), 0);
     return true;
 }
 }
