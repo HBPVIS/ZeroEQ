@@ -77,22 +77,27 @@ public:
         }
         else
         {
-            auto reply = payload
-                             ? i->second(zmq_msg_data(&msg), zmq_msg_size(&msg))
-                             : i->second(nullptr, 0);
-            const bool hasReplyData = reply.second.ptr && reply.second.size;
-#ifdef ZEROEQ_BIGENDIAN
-            detail::byteswap(reply.first); // convert to little endian
-#endif
-            if (!_send(&reply.first, sizeof(reply.first),
-                       hasReplyData ? ZMQ_SNDMORE : 0))
+            try
             {
-                if (payload)
-                    zmq_msg_close(&msg);
-                return true;
+                auto reply =
+                    payload ? i->second(zmq_msg_data(&msg), zmq_msg_size(&msg))
+                            : i->second(nullptr, 0);
+                const bool hasReplyData = reply.second.ptr && reply.second.size;
+#ifdef ZEROEQ_BIGENDIAN
+                detail::byteswap(reply.first); // convert to little endian
+#endif
+                if (_send(&reply.first, sizeof(reply.first),
+                          hasReplyData ? ZMQ_SNDMORE : 0) &&
+                    hasReplyData)
+                {
+                    _send(reply.second.ptr.get(), reply.second.size, 0);
+                }
             }
-            if (hasReplyData)
-                _send(reply.second.ptr.get(), reply.second.size, 0);
+            catch (...) // handler had exception
+            {
+                const uint128_t zero;
+                _send(&zero, sizeof(zero), 0); // request and reply, no playload
+            }
         }
 
         if (payload)

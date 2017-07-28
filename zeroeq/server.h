@@ -151,6 +151,9 @@ public:
     /**
      * Register a request handler.
      *
+     * Exceptions in a request handler are considered an error (0 is returned to
+     * client).
+     *
      * @param request the request to handle
      * @param func the function to call on receive() of a Client::request()
      * @return true if subscription was successful, false otherwise

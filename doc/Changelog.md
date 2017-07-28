@@ -2,6 +2,8 @@
 
 # git master
 
+* [225](https://github.com/HBPVIS/ZeroEQ/pull/225):
+  Fix #224: Handle exceptions in server handlers
 * [219](https://github.com/HBPVIS/ZeroEQ/pull/219):
   Implement Client-Server req-rep support
   * The environment variables ZEROEQ_PUB_SESSION and ZEROEQ_SERVER_SESSION

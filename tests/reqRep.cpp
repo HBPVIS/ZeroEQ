@@ -63,6 +63,22 @@ bool runOnce(zeroeq::Server& server, const test::Echo& request, const R& reply)
 
     return handled;
 }
+
+class EchoThrows : public test::Echo
+{
+public:
+    explicit EchoThrows(const std::string& message)
+        : Echo(message)
+    {
+    }
+
+private:
+    Data _toBinary() const final
+    {
+        throw std::runtime_error("I've had enough!");
+        return Data();
+    }
+};
 }
 
 BOOST_AUTO_TEST_CASE(serializable)
@@ -135,6 +151,36 @@ BOOST_AUTO_TEST_CASE(empty_request_raw)
         BOOST_CHECK(client.receive(TIMEOUT));
     }
     BOOST_CHECK_EQUAL(monitor.connections, 1);
+    BOOST_CHECK(handled);
+
+    thread.join();
+    BOOST_CHECK(serverHandled);
+}
+
+BOOST_AUTO_TEST_CASE(issue224)
+{
+    test::Echo echo("The quick brown fox");
+    const EchoThrows reply("Jumped over the lazy dog");
+
+    zeroeq::Server server(zeroeq::NULL_SESSION);
+    zeroeq::Client client({server.getURI()});
+
+    bool serverHandled = false;
+    std::thread thread([&] { serverHandled = runOnce(server, echo, reply); });
+
+    bool handled = false;
+    client.request(echo, [&](const zeroeq::uint128_t& type, const void* data,
+                             const size_t size) {
+        BOOST_CHECK_EQUAL(type, 0);
+        BOOST_CHECK(!data);
+        BOOST_CHECK_EQUAL(size, 0);
+        BOOST_CHECK(!handled);
+
+        handled = true;
+    });
+
+    BOOST_CHECK(!handled);
+    BOOST_CHECK(client.receive(TIMEOUT));
     BOOST_CHECK(handled);
 
     thread.join();

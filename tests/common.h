@@ -67,7 +67,7 @@ private:
         return true;
     }
 
-    Data _toBinary() const final
+    Data _toBinary() const override
     {
         Data data;
         data.ptr =

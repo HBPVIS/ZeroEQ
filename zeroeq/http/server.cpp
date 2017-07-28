@@ -659,7 +659,23 @@ bool Server::process(detail::Socket&)
     }
     else
     {
-        message->response = respondTo(message->request);
+        try
+        {
+            message->response = respondTo(message->request);
+        }
+        catch (const std::exception& e)
+        {
+            message->response =
+                make_ready_response(Code::INTERNAL_SERVER_ERROR,
+                                    std::string("Request handler exception: ") +
+                                        e.what());
+        }
+        catch (...)
+        {
+            message->response =
+                make_ready_response(Code::INTERNAL_SERVER_ERROR,
+                                    "An unknown exception occured");
+        }
 
         // When a client makes a CORS request (by setting an 'Origin' header) it
         // expects an 'Access-Control-Allow-Origin' response header. See:

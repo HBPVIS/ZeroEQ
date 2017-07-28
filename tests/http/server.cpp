@@ -79,6 +79,10 @@ const Response response204{ServerReponse::no_content, ""};
 const Response error400{ServerReponse::bad_request, ""};
 const Response error404{ServerReponse::not_found, ""};
 const Response error405{ServerReponse::method_not_allowed, ""};
+Response error500(const std::string& body)
+{
+    return Response(ServerReponse::internal_server_error, body);
+}
 
 const std::string jsonGet("Not JSON, just want to see that the is data a-ok");
 const std::string jsonPut("See what my stepbrother jsonGet says");
@@ -972,6 +976,30 @@ BOOST_AUTO_TEST_CASE(issue157)
         const auto request = std::string("/test/foo?") + std::string(4096, 'o');
         client.sendGET(request);
     }
+
+    running = false;
+    thread.join();
+}
+
+BOOST_AUTO_TEST_CASE(issue224) // robustness when handlers throw
+{
+    bool running = true;
+    zeroeq::http::Server server;
+
+    server.handleGET("test/foo", [&]() {
+        throw std::runtime_error("I've had enough!");
+        return jsonGet;
+    });
+
+    std::thread thread([&]() {
+        while (running)
+            server.receive(TIMEOUT);
+    });
+
+    Client client(server.getURI());
+    client.checkGET("/test/foo",
+                    error500("Request handler exception: I've had enough!"),
+                    __LINE__);
 
     running = false;
     thread.join();

@@ -106,6 +106,10 @@ public:
      * The reply function will be executed during receive(). May block when
      * all servers are overloaded or no server is connected.
      *
+     * The reply function will get called with (0, nullptr, 0) if the server
+     * does not have a handler for the request or if the handler had an
+     * exception.
+     *
      * @param request the request identifier and payload
      * @param func the function to execute for the reply
      * @return true if the request was sent, false on error
@@ -116,8 +120,7 @@ public:
     /**
      * Request the execution of the given data on a connected Server.
      *
-     * The reply function will be executed during receive(). May block of when
-     * all servers are overloaded or no server is connected.
+     * See request() overload above for details.
      *
      * @param request the request identifier
      * @param data the payload data of the request, may be nullptr
