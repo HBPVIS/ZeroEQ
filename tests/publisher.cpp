@@ -98,12 +98,9 @@ BOOST_AUTO_TEST_CASE(zeroconf_record)
 
 BOOST_AUTO_TEST_CASE(custom_session)
 {
-    if (!servus::Servus::isAvailable() || getenv("TRAVIS"))
-        return;
+    const zeroeq::Publisher publisher(zeroeq::TEST_SESSION);
 
-    const zeroeq::Publisher publisher(test::buildUniqueSession());
-
-    servus::Servus service(PUBLISHER_SERVICE);
+    servus::Servus service(zeroeq::TEST_SESSION);
     const servus::Strings& instances =
         service.discover(servus::Servus::IF_LOCAL, 1000);
     BOOST_REQUIRE_EQUAL(instances.size(), 1);
@@ -149,12 +146,9 @@ BOOST_AUTO_TEST_CASE(empty_session_from_environment)
 
 BOOST_AUTO_TEST_CASE(fixed_uri_and_session)
 {
-    if (!servus::Servus::isAvailable() || getenv("TRAVIS"))
-        return;
-
     const zeroeq::Publisher publisher(zeroeq::URI("127.0.0.1"),
-                                      test::buildUniqueSession());
-    servus::Servus service(PUBLISHER_SERVICE);
+                                      zeroeq::TEST_SESSION);
+    servus::Servus service(zeroeq::TEST_SESSION);
     const servus::Strings& instances =
         service.discover(servus::Servus::IF_LOCAL, 1000);
     BOOST_REQUIRE_EQUAL(instances.size(), 1);

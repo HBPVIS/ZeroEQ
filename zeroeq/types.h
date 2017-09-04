@@ -4,12 +4,12 @@
  *                          Juan Hernando <jhernando@fi.upm.es>
  */
 
-#ifndef ZEROEQ_TYPES_H
-#define ZEROEQ_TYPES_H
+#pragma once
 
 #include <functional>
 #include <memory>
 #include <servus/serializable.h>
+#include <servus/servus.h>
 #include <servus/types.h>
 #include <servus/uint128_t.h>
 #include <zeroeq/defines.h>
@@ -32,11 +32,11 @@
  * A Server serves requests from a Client. Like publish-subscribe, clients
  * connect to servers using zeroconf discovery or explicit addressing.
  *
+ * A Monitor can be used on any Sender to receive notification on incoming
+ * connections.
+ *
  * The connection::Broker and connection::Service may be used to introduce a
  * subscriber to a remote, not zeroconf visible, publisher.
- *
- * An Event contains a strongly type, semantically defined message. Applications
- * or groups of applications can define their own vocabulary.
  */
 namespace zeroeq
 {
@@ -78,6 +78,7 @@ using servus::make_uint128;
 
 static const std::string DEFAULT_SESSION("__zeroeq");
 static const std::string NULL_SESSION("__null_session");
+static const std::string TEST_SESSION(servus::TEST_DRIVER);
 static const std::string ENV_PUB_SESSION("ZEROEQ_PUB_SESSION");
 static const std::string ENV_REP_SESSION("ZEROEQ_SERVER_SESSION");
 
@@ -91,5 +92,3 @@ using ContextPtr = std::shared_ptr<void>;
 using SocketPtr = std::shared_ptr<void>;
 }
 }
-
-#endif
