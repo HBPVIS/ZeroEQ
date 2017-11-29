@@ -44,10 +44,14 @@ if(Boost_VERSION GREATER 105799)
   add_subproject(cppnetlib ${PROJECT_SOURCE_DIR}/cppnetlib) # from .gitmodules
   common_find_package(cppnetlib SYSTEM NO_DEFAULT_PATH)
 endif()
-common_find_package(ZeroMQ) # new-ish CMake-based build
-if(NOT ZeroMQ_FOUND)
-  common_find_package(libzmq 4 REQUIRED) # old-ish autopain/pkgconfig build
-  set(ZeroMQ_LIBRARY ${libzmq_LIBRARIES})
+if(TARGET libzmq)
+  set(ZeroMQ_LIBRARY libzmq)
+else()
+  common_find_package(ZeroMQ) # new-ish CMake-based build
+  if(NOT ZeroMQ_FOUND)
+    common_find_package(libzmq 4 REQUIRED) # old-ish autopain/pkgconfig build
+    set(ZeroMQ_LIBRARY ${libzmq_LIBRARIES})
+  endif()
 endif()
 common_find_package(Servus REQUIRED)
 common_find_package(Threads REQUIRED)

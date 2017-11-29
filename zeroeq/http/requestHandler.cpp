@@ -10,10 +10,11 @@
 #include <zeroeq/log.h>
 #include <zeroeq/uri.h>
 
+#include <zmq.h>
+
 #include <future>
 #include <memory> // shared_from_this
 #include <stdexcept>
-#include <zmq.h>
 
 namespace zeroeq
 {
@@ -137,7 +138,7 @@ private:
             return;
         }
 
-        _body.append(std::begin(range), size);
+        _body.append(&range[0], size);
         _size -= size;
         if (_size > 0)
             _readChunk(connection, method_);

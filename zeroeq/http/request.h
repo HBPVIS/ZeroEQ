@@ -3,10 +3,11 @@
  *                     Raphael.Dumusc@epfl.ch
  */
 
-#ifndef ZEROEQ_HTTP_REQUEST_H
-#define ZEROEQ_HTTP_REQUEST_H
+#pragma once
 
-#include <string>
+#include <zeroeq/types.h>
+
+#include <string> // member
 
 namespace zeroeq
 {
@@ -56,5 +57,3 @@ struct Request
 };
 }
 }
-
-#endif

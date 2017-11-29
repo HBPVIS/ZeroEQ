@@ -17,6 +17,9 @@
 #ifdef _WIN32
 #define NOMINMAX
 #include <winsock2.h> // SOCKET
+#ifdef DELETE
+#undef DELETE
+#endif
 #endif
 
 /**

@@ -20,15 +20,15 @@ class Sender
     zmq::ContextPtr _context; // must be private before socket
 
 public:
-    Sender(const URI& uri_, const int type);
-    Sender(const URI& uri_, const int type, const std::string service,
-           const std::string& session);
-    ~Sender();
+    ZEROEQ_API Sender(const URI& uri_, const int type);
+    ZEROEQ_API Sender(const URI& uri_, const int type,
+                      const std::string service, const std::string& session);
+    ZEROEQ_API ~Sender();
 
     std::string getAddress() const;
 
     void initURI();
-    void announce();
+    ZEROEQ_API void announce();
     void addSockets(std::vector<zeroeq::detail::Socket>& entries);
 
     const std::string& getSession() const { return _session; }
